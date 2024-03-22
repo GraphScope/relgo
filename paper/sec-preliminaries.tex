@@ -2,6 +2,7 @@
 \label{sec:preliminaries}
 
 \subsection{Data Model}
+\label{sec:data-model}
 Let $L$ be a finite set of labels, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
 \begin{itemize}
     \item $V$ is a finite set of vertices,
@@ -17,7 +18,7 @@ Let $L$ be a finite set of labels, $D = \bigcup_i D_i$ be the union of atomic do
 
 Let $U = \{a_1, a_2, \ldots, a_n\}$ be a finite set of attributes, then $S = (a_1, a_2, \ldots, a_n)$ is called a schema over $U$. 
 The attributes of $S$ is denoted as $\attr(R) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
-Let $\mathcal{J} = 2^{V \times E \times D}$ be the domain of the sets of records, $\mathcal{J}_D = 2^{D}$ be the domain of the sets of records whose attributes are not vertices or edges. 
+Let $\mathcal{J} = 2^{2^{V \cup E \cup D}}$ be the domain of the sets of records, $\mathcal{J}_D = 2^{2^{D}}$ be the domain of the sets of records whose attributes are not vertices or edges. 
 
 Given a property graph $G$, a graph schema is such a schema $S$ that $\forall a \in \attr(S)$, $\Dom(a) \subseteq V \cup E \cup D$. 
 In other words, each attribute of a graph schema is either a vertex, or an edge, or data from arbitrary domain. 
@@ -30,15 +31,35 @@ Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties 
 To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation, while the term ``property'' always refers to the property of a graph element in this article.
 
 
-\subsection{Graph Relational Algebra}
+\subsection{Relational Matching Algebra}
 \label{sec:graph-relational-algebra}
 
-In this paper, we extend the graph relational algebra for openCypher proposed in \cite{graph-relational-algebra}.
-The graph relational algebra utilizes graph relations as its outputs, and consists of operators for graph relations, such as selection ($\sigma$), projection ($\pi$), natural join ($\Join$), left-outer join ($\leftouterjoin$), get-vertices ($\bigcirc$), expand ($\updownarrow^{(w:L)}_{(v)}[e](r)$), and unwind ($\omega$).
-Graph relations default apply the \emph{bag} semantics, and assume no order for the relation unless an explicit \emph{sorting} operator is applied.
-In this subsection, these operators in graph relational algebra are first introduced with examples.
+In this paper, we extend the relational algebra to equip it with the capability to handle pattern matching.
+The new algebra is named relational matching algebra.
+The relational matching algebra expands the domain and range of the operators in relational algebra and introduces a new operator, i.e., the matching operator.
+Specifically, the domain and range of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are expanded from $\mathcal{J}_D$ to $\mathcal{J}$.
+In other words, in relational matching algebra, these operators act on graph relations, and their outputs are also graph relations.
+Since the semantics of the operators that already exist within relational algebra remain unchanged, the description of these operators are omitted.
+In the rest of this paper, the matching operator is proposed in detail.
+
+\begin{definition}[Matching Operator, $\mathcal{M}$]
+    Given two graph relations $V$ and $E$ consisting of the vertices and edges in a graph respectivey and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J} \times \mathcal{J} \times \mathcal{Q} \rightarrow \mathcal{J}$ return a graph relation consisting of the subgraphs matches the pattern.
+    $\mathcal{Q}$ is the set of possible patterns.
+\end{definition}
+
+Please note that the matching operator adopts homomorphism semantics by default.
+The matching operator is a logical concept and has varied physical implementations.
+For example, by applying the selection operator to filter the input tables based on specified constraints, one can obtain tables consisting of nodes and edges with various labels.
+Then, by associating these tables through hash join, homomorphic subgraphs corresponding to the pattern can be found.
+Please note that the results of pattern matching can be correctly obtained through joins between tables, and it is proven in Sec.~\ref{sec:proof-gpm-gro}.
+Clearly, replacing hash join with other join methods like merge join or changing the join order can yield more physical implementations of the matching operator.
 
 
+
+
+
+
+\iffalse
 \subsubsection{Source}
 The source operator gets vertices from a graph according to the constraints specified on the labels of the vertices.
 
@@ -211,50 +232,80 @@ The formal definition of the unwind operator is as follows.
     \end{equation*}
 \end{example}
 
+\subsubsection{Match}
+
+Given two graph relations $V$ and $E$ representing the vertex table and edge table of a graph respectively and a pattern $\mathcal{P}$, mapping $\mathcal{M}: \mathcal{J} \times \mathcal{J} \times \mathcal{Q} \rightarrow \mathcal{J}$, where $\mathcal{Q}$ is the set of possible patterns.
+
+The match operator adopts homomorphism semantics by default.
 
 According to SQL/PGQ, the outputs of graph queries should be a relation consisting of property values, identifiers, labels or types.
 References to vertices or edges should not be returned by graph queries.
 Therefore, the outputs of the graph relational algebra are projected and flattened with the project and unwind operator, respectively.
 Then, the output graph relation is converted to a relation over a relational schema, and can be involved in the following optimization of relational optimizer.
+\fi
+
+\subsection{Problem Definition}
+\label{sec:problem-definition}
+
+Select-Project-Join (abbr.~SPJ) queries are widely utilized in previous studies \cite{spj} and are defined as follows:
+\begin{equation*}
+    Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m)).
+\end{equation*}
+Specifically, SPJ queries describe a \emph{pattern} with the linear sequence of join operators.
+Inspired by SPJ queries, for the property graph data model proposed in Sec.~\ref{sec:data-model}, we design a new class of queries named SPJG under graph relational algebra.
+The definition of SPJG is as follows:
+\begin{equation*}
+    Q_g = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n))
+\end{equation*}
+where
+\begin{equation*}
+    \tilde{R}_i = \hat{\pi}_{col_i}(\mathcal{M}(V, E, \mathcal{P}))
+\end{equation*}
+is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$, which is a graph relation.
+Besides, $V$ and $E$ are graph relations of vertices and edges respectively, and $\mathcal{P}$ is the pattern.
+
+Regarding the SPJG problem, the main difference between the aforementioned four types of optimizers lies in their search space when optimizing the physical implementation of the matching operator.
+Specifically, for $Rel$ methods, the matching operator is implemented with only joins that do not leverage graph indices (named relational joins) such as hash joins.
+Therefore, $\widetilde{R}_i$ can be optimized with the relational optimizer.
+For $Rel^+$ methods, in the process of optimization, the matching operator is implemented with relational joins.
+Thus, the relational optimizer is also utilized to optimize $\widetilde{R_i}$.
+However, after that, relational joins are replaced with joins that leverage graph indices (named graph joins) if possible such as sip join in GrainDB.
+For $Rel+G$ methods, graph joins are considered in implementing the matching operator.
+Then, operators inside of $\widetilde{R}_i$ are optimized by the graph optimizer, while the operators out of $\widetilde{R}_i$ are optimized by the relational optimizer.
+Besides, the optimizations cannot be simultaneously related to operators within and outside of $\widetilde{R}_i$.
+For example, the filter operators, i.e., $\sigma_d$ cannot be pushed into $\widetilde{R}_i$.
+For $Rel\&G$, such optimizations are allowed.
+
+
+% The search space for relgo in the context of a SPJG query consists of operator trees that correspond to sequence of join operators, e.g., the sequence 
+% \begin{lstlisting}
+%     Join(Join(Join(Join(GR_1, GR_2), R_1), R_2), R_3)
+% \end{lstlisting}
+
 
 \subsection{Equivalence Between Graph Pattern Matching and Graph Relational Operators}
+\label{sec:proof-gpm-gro}
 
-Given a SQL/PGQ query like 
-\begin{lstlisting}
-    SELECT * 
-    FROM GRAPH_TABLE (graph_view
-        MATCH <Pattern>
-        COLUMNS (
-            ...
-        )
-    );
-\end{lstlisting}
-the graph query part is expressed with the corresponding graph relational algebra expression with operators such as source, expand, join, and extend-intersect operators, and the logical plan can be generated.
-However, the equivalence between the graph relational algebra expression and the graph query is not obvious.
-Since the logical plan is finally transformed to a physical plan, which is executed with relational databases, the graph operators for pattern matching such as expand and extend-intersect are indeed implemented with joins.
-Therefore, it is necessary to prove that the graph query is the same as its corresponding graph relational algebra expression.
+For the SPJG problem to be solved in this paper, we need to obtain the graph relations by pattern matching.
+In detail, the pattern matching process ought to be expressible through the traversal of paths, which are sequences of source, expand, and join operators.
+In this section, we prove that the match operator can be replaced with source, expand, and join operators. without changing the semantics of the query.
+Then, the matching order can be further optimized by relgo.
 
-Specifically, <Pattern> specified in the graph query is a list of path patterns, and for each path pattern, a path mode can be given.
-In SQL/PGQ, the path mode can be WALK (by default), TRAIL, ACYCLIC, or SIMPLE.
-Under the WALK mode, vertices and edges can repeated in the returned results.
-Under the TRAIL and ACYCLIC mode, results with repeated edges and vertices are not returned respectively.
-Under the SIMPLE mode, results with repeated vertices are not returned, unless these repeated vertices are the first and last vertices in the path (i.e., the path forms a circle).
-
-We start from the case that there is only one path pattern specified in the <Pattern> part, and firstly, we focus on the WALK path mode.
-In this mode, paths homomorphic to the path pattern are returned as the results.
+We start from the case that there is only one path in the specified pattern, and firstly, we focus on homomorphic pattern matching.
 Then, we have the following theorem.
 
 \begin{theorem}
-    Matching a path pattern in WALK mode have the same meanings as the corresponding graph relational algebra expression. 
+    Homomorphic pattern matching with a path pattern can be expressed with graph relational algebra expressions. 
 \end{theorem}
 \begin{proof}
-    The graph relational algebra operators related to pattern matching in SQL/PGQ include source, expand, join, and extend-intersect operators.
+    The graph relational algebra operators related to pattern matching include source, expand, join, and extend-intersect.
     Then, we prove the theorem by induction.
     Let each vertex and edge in a path pattern be an element.
-    If for each edge in a pattern, its adjacent vertices are also in the pattern, then the pattern is called a strict pattern $P$.
+    If for each edge in a pattern, its adjacent vertices are also specified in the pattern, then the pattern is called a strict pattern $P$.
     Otherwise, it is a loose pattern $\hat{P}$.
 
-    Since path patterns specified in SQL/PGQ are all strict patterns, the induction is conducted on the numnber of elements in the strict pattern.
+    %Since path patterns specified in SQL/PGQ are all strict patterns are, the induction is conducted on the number of elements in the strict pattern.
+    The path pattern is a strict pattern, and induction is conducted on the number of elements in the strict pattern.
     When there is only one element (i.e., a vertex like ``(u:Label)'') in the pattern, the corresponding algebra expression of the pattern is $\bigcirc_{(u:\text{Label})}$, and it is clear that the expression equals the pattern.
 
     Then, suppose for a path pattern with at most $n$ elements, the corresponding algebra expressions have the same meaning as matching the path pattern.
@@ -276,7 +327,7 @@ Then, we have the following theorem.
     Then, the corresponding algebra expression of $P$ can also be $\updownarrow_{(v)}^{(v_t:vLabel)}[e:eLabel]E_{p_1}$.
     The expand operator is also implemented by joining relational tables, which follows the semantics of homomorphism.
 
-    Condition 2: $P = P_1$ extends $v$ through edges $e_1:eLabel1, \cdots e_k:eLabelk$ ($k \geq 1$), i.e., at least one vertex in $P_1$ connects to vertex $v$.
+    Condition 2: $P = P_1$ extends $v$ through edges $[e_1:eLabel1], \cdots [e_k:eLabelk]$ ($k \geq 1$), i.e., at least one vertex in $P_1$ connects to vertex $v$.
     Then, the corresponding algebra expression of $P$ is 
     \begin{equation*}
         E_{p_1} \Diamond_{v_1, \cdots, v_k}^{eLabel1, \cdots, eLabelk} \bigcirc_{(v:vLabel)}.
@@ -285,10 +336,14 @@ Then, we have the following theorem.
 
     In conclusion, the corresponding algebra expressions of path pattern $P$ with $n + 1$ elements have the same meaning as matching the path pattern.
 
-    In conclusion, in the WALK mode, matching path patterns has the same meaning as the corresponding graph relational algebra expressions.
+    In conclusion, adopting the homomorphism semantics, matching path patterns has the same meaning as the corresponding graph relational algebra expressions.
 \end{proof}
 
+When the match operator adopt the isomorphic semantics, it is straightforward to add some constraints with selection operators to get the graph relational expressions equal to the match operator.
+Furthermore, when there are more than one path specified in the pattern, the expressions for different paths can be connected with join operators and the obtained expressions equal to the match operator.
 
+
+\iffalse
 Besides the WALK mode by default, when the path patterns are in TRAIL, ACYCLIC, or SIMPLE mode, we still have the same conclusions.
 Specifically, in TRAIL, ACYCLIC, or SIMPLE mode, a selection operator needs to be added to remove the results with repeated edges or vertices.
 In detail, the selection operator should wrap the corresponding algebra expression of path patterns in the WALK mode.
@@ -301,3 +356,4 @@ According to SQL/PGQ, the binding results of different path patterns are joined 
 If the match mode in SQL/PGQ is set to \textbf{REPEATABLE ELEMENTS}, there is no more constraint, and ``MATCH $P_1, \cdots, P_k$'' has the same meaning as $P_1 \Join \cdots \Join P_k$, both of which have the semantics of homomorphism.
 Otherwise, if the match mode in SQL/PGQ is set to \textbf{DIFFERENT EDGES}, the same edge cannot bind to different variables in different path patterns.
 Therefore, a selection operator is needed, and ``MATCH $P_1, \cdots, P_k$'' has the same meaning as $\sigma_{d}(P_1 \Join \cdots \Join P_k)$, where $d$ is the condition specifying that each edge cannot bind to more than one variables across all path patterns.
+\fi
