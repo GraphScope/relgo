@@ -31,7 +31,7 @@ Such an SQL expression is intricate and inconvenient to write.
 Indeed, the conditions specified within this SQL statement collectively establish the structure of a pattern graph.
 As shown in Fig.~\ref{fig:intro-pattern}, there are four vertices representing four persons, and these four persons form a complete graph.
 Therefore, this SQL query can be expressed as a graph query.
-The corresponding expression following the grammar of Cypher is as follows: 
+The corresponding expression following the grammar of Cypher \cite{opencypher} is as follows: 
 \begin{lstlisting}
     MATCH (p1:Person)-[:Knows]-(p2:Person)-[:Knows]-(p3:Person)-[:Knows]-(p4:Person),
         (p1)-[:Knows]-(p3), (p2)-[:Knows]-(p4)
@@ -116,7 +116,7 @@ The stages of query optimization that these four types of solution are involved 
 
 \textbf{Solution 1 ($Rel$)}. 
 The most direct solution is to transform graph queries to relational ones, and then optimize the new queries with relational optimizers.
-Apache/Age is a typical example.
+Apache Age \cite{apache-age} is a typical example.
 However, methods of this type only take effect in the stage of logical optimization and degrade into relational optimizers.
 Therefore, they lose the chance of query optimization from the graph perspecitve.
 
@@ -146,10 +146,10 @@ As shown in Fig.~\ref{fig:catagory}, such methods are separately involved in the
 It means that the optimizations w.r.t.~graph operators at the logical layer and the physical layer are disjointed.
 To be more specific, the cost of new operators introduced in physical optimization are unawared in logical optimization.
 
-The optimizer in GrainDB is a representative of type $Rel^+$.
-GrainDB builds RID indices on DuckDB, and proposes two new join methods, i.e., sip-join and merge-sip-join.
+The optimizer in GrainDB \cite{graindb} is a representative of type $Rel^+$.
+GrainDB builds RID indices on DuckDB \cite{duckdb}, and proposes two new join methods, i.e., sip-join and merge-sip-join.
 In detail, sip-join gets adjacent edges of vertices or gets adjacent vertices of edges based on the RID indices, while merge-sip-join obtains the neighbors of vertices.
-Since GrainDB follows the grammar of SQL, given a SQL/PGQ query, it is transformed to the equal relational query frist, and then GrainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
+Since GrainDB follows the grammar of SQL, given a SQL/PGQ query, the query is transformed to the equal relational query frist, and then GrainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
 Next, GrainDB replaces some hash-joins in the plan with sip-joins and merge-sip-joins to leverage the graph indices.
 It indicates that the cost-based optimization in GrainDB only finds the optimal execution plan before the graph indices are awared.
 Therefore, the plan can be suboptimal after replacement.
