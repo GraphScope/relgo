@@ -251,3 +251,123 @@ The experimental results show that the framework can be ?$\times$ faster than th
 The rest of this paper is organized as follows.
 
 
+The existing methods for solve the SPJM problem can be divided into four categories.
+The main difference between these methods lies in the approach to handling the matching operator.
+Before the details of these methods are introduced, concepts about graph information and minimum matching component are proposed as follows.
+
+\subsection{Graph Information}
+Graph information consists of graph structure and graph statistics, which are defined as follows.
+
+\begin{definition}[Graph Structure, abbr.~GS]
+    Graph structure refers to the connectivity relationships between vertices and edges within the graph, which can be stored in graph indices.
+\end{definition}
+
+\begin{definition}[Graph Statistics, abbr.~GAT]
+    Graph statistics record the occurrence of structures within the graph, such as the number of triangles appearing in the graph.
+\end{definition}
+
+Specifically, graph statistics can reflect the higher-order features of graphs (e.g., the number of subgraphs), and well represent the characteristics of graphs.
+Therefore, the cost of operators and cardinalities of internal results can be estimated more accurately.
+With graph structure, tables can be joined more efficiently.
+For example, when two tables representing persons and friendships respectively are joined together, the rows that can be joined are quickly located using graph indices.
+
+\subsection{Minimum Matching Component}
+
+Given a matching operator, it can be decomposed into two new matching operators.
+By joining the results of the new matching operators, the results of the original matching operator can be obtained.
+The decomposition of the matching operator can generate a binary tree.
+Each node of this tree is a matching operator.
+For each internal node of this tree, denoted by $TN_0 = \mathcal{M}(V, E, \mathcal{P}_0)$, it has two child nodes, i.e., $TN_1 = \mathcal{M}(V, E, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(V, E, \mathcal{P}_2)$, satisfying $\mathcal{P}_0 = \mathcal{P}_1 \cup \mathcal{P}_2$, $\mathcal{P}_1$ and $\mathcal{P_2}$ have common vertices and do not have common edges.
+Each leaf node is a minimum matching component, and the definition is as follows.
+
+\begin{definition}[Minimum Matching Component]
+    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be decomposed anymore.
+\end{definition}
+
+For relational optimizers, the minimum matching components are matching operators whose patterns consisting of only a vertex or an edge.
+Then, the physical implementation of such matching operators is scanning the tables of the corresponding vertex or edge, respectively.
+Therefore, for relational optimizers, the matching operator will be replaced with selection operators, projection operators, and a sequence of joins of tables representing vertices and edges.
+
+For graph optimizers, the minimum matching components are more diverse.
+Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex or a complete star are considered as minimum matching components.
+Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component , which is also a leaf node of the binary tree.
+A complete star is a connected subgraph, where only one vertex (the core) has a degree larger than or equal to 1 while other vertices (the outsiders) have degrees of 1 exactly.
+Denote the sibling leaf node of $TL$ nu $TS = \mathcal{M}(V, E, \mathcal{P}_s)$.
+Besides, for each outsider $v_o$ of a complete star, there should be a vertex in $\mathcal{P}_s$ that matches with the same vertex in the database as $v_o$.
+
+
+\subsection{Existing Methods}
+
+Existing methods can be divided into four categories based on whether graph information and graph optimizers (abbr.~GOpt) are used.
+
+
+(1) \emph{SPJM $\rightarrow$ SPJ $\rightarrow$ Physical Plan}.
+This kind of solutions first translate the matching operators to a sequence of selection, projection, and join operators.
+Then, the SPJM problem is converted to an equivalent SPJ problem, which is then optimized with well-known relational optimizers.
+Please note that graph information and graph optimizer are never utilized in the process of translation and optimization.
+This kind of solutions only leverage the ability of relational optimizers.
+A typical method is Apache Age.
+Besides, it will be prove in Theorem \ref{theorem:spjm-to-spj} that SPJM problems can always be losslessly converted to SPJ problems.
+
+In order to leverage the graph information to obtain better physical plans, the second kind of method is proposed.
+
+(2) \emph{SPJM $\rightarrow$ SPJ $\xrightarrow{GS}$ Physical Plan}.
+
+This kind of solutions also translate the matching operators to a sequence of SPJ operators.
+However, in the process of optimizing the SPJ problem, the graph structure is utilized.
+Specifically, hash joins in the physical plans can be replaced with more efficient joins that utilize graph indices.
+Therefore, in the later process of executing the physical plans, graph indices can be applied to improve the performances.
+A typical method is GrainDB.
+
+It is also reasonable to exploit the capability of graph optimizers for better optimization.
+Then, the third kind of method is proposed as follows.
+
+(3) \emph{SPJM $\xrightarrow{GO\&GAT}$ SPJ $\rightarrow$ Physical Plan}.
+
+In the process of converting SPJM problems to SPJ problems, the conversion of the matching operator is particularly important.
+In this kind of method, graph optimizer and graph statistics are utilized in this process.
+Specifically, the optimization tree of converting the matching operator is optimized to find the best join order following the pattern specified in the matching operator.
+Moreover, higher-order features of the graph are leveraged, and cardinalities can be estimated more accurately.
+Besides, for minimum matching components whose patterns are complete stars, the join w.r.t.~them can be implemented with intersection, which can reduce the cost of multiple joins.
+
+
+(4) \emph{SPJM $\xrightarrow{GO\&GAT}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
+
+This is the method utilized in this paper.
+Compared to method (3), this kind of methods further utilize graph strucutre.
+Therefore, physical implementations of join operators that can use graph indices can be applied.
+Besides, in the graph optimizer, the cost of joins are estimated assuming that graph indices can be utilized in execution.
+Therefore, the estimated cost are more accurate.
+
+\subsection{Proof}
+
+\begin{theorem}
+    \label{theorem:spjm-to-spj}
+    The SPJM problem can be losslessly converted to an SPJ problem.
+\end{theorem}
+\begin{proof}
+    Clearly, if the matching operator can be expressed with selection, projection, and join operators (abbr.~SPJ operators), then naturally, the theorem is correct.
+    We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
+    In this proof, vertices and edges are elements in a pattern and a pattern $\mathcal{P}$ is called a strict pattern, if the adjacent vertices of each edge in $\mathcal{P}$ are specified in the pattern (e.g., (u)-[e]-(v)).
+    Otherwise, the pattern is called a loose pattern (e.g., (u)-[e]).
+    Without the loss of generality, matching operator $\mathcal{M}(V, E, \mathcal{P})$ is considered.
+    Then, induction is conducted on the number of elements in $\mathcal{P}$.
+    
+    When there is only one element in $\mathcal{P}$ (e.g., $\mathcal{P}=(u:\text{Person})$), such a pattern can be expressed with the selection operators (e.g., $\sigma_{label=\text{``Person''}}(V)$).
+    Please note that is there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
+
+    Suppose for patterns with at most $n$ elements, they can be expressed with SPJ operators.
+    Denote the sequence of SPJ operators that have the same meaning as pattern $\mathcal{P}$ by $\mathcal{E}_{\mathcal{P}}$.
+    When there are $n+1$ elements in a pattern $\mathcal{P}$, let $v$ be a vertex in $\mathcal{P}$, and $e_1, \cdots, e_k$ are the edges connecting $v$ with the other vertices in $\mathcal{P}$.
+    $\widehat{\mathcal{P}}$ is the strict pattern obtained by removing $v$ and $e_1, \cdots, e_k$ from $\mathcal{P}$.
+    Then, $\mathcal{P}$ can be expressed with SPJ operators as follows:
+    \begin{equation*}
+        \mathcal{E}_{\widehat{\mathcal{P}}} \Join \sigma_{label=el_1}(E) \Join \cdots \Join \sigma_{label=el_k}(E) \Join \sigma_{label=vl}(V),
+    \end{equation*}
+    where $vl$ is the label of $v$, $el_1, \cdots, el_k$ are labels of $e_1, \cdots, e_k$.
+    In conclusion, adopting the homomorphism semantics, the matching operator can be expressed with SPJ operators.
+
+    Furthermore, when the matching operator adopt other semantics (e.g., isomorphism), it is straightforward to add some constraints on the elements with selection operators.
+    For instance, when the isomorphism semantics is adopted, constraints should be added to ensure that different vertices in the pattern graph match with different vertices in the database.
+    Therefore, the theorem is correct. 
+\end{proof}

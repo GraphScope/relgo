@@ -283,6 +283,7 @@ For $Rel\&G$, such optimizations are allowed.
 % \end{lstlisting}
 
 
+\iffalse
 \subsection{Equivalence Between Graph Pattern Matching and Graph Relational Operators}
 \label{sec:proof-gpm-gro}
 
@@ -343,7 +344,6 @@ When the match operator adopt the isomorphic semantics, it is straightforward to
 Furthermore, when there are more than one path specified in the pattern, the expressions for different paths can be connected with join operators and the obtained expressions equal to the match operator.
 
 
-\iffalse
 Besides the WALK mode by default, when the path patterns are in TRAIL, ACYCLIC, or SIMPLE mode, we still have the same conclusions.
 Specifically, in TRAIL, ACYCLIC, or SIMPLE mode, a selection operator needs to be added to remove the results with repeated edges or vertices.
 In detail, the selection operator should wrap the corresponding algebra expression of path patterns in the WALK mode.
