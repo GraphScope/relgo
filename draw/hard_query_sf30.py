@@ -6,7 +6,7 @@ xlabel = ['Triangle', 'Butterfly', '4-Clique']
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
 
-y_graindb = [145.96 , 955668.0, 955668.0]
+y_graindb = [145.96 , 955668.0, 374457297.0]
 
 y_ours = [20.04, 163645.0, 748070.0]
 

@@ -251,93 +251,127 @@ The experimental results show that the framework can be ?$\times$ faster than th
 The rest of this paper is organized as follows.
 
 
-The existing methods for solve the SPJM problem can be divided into four categories.
+The existing methods for optimizing the SPJM queries can be divided into four categories.
 The main difference between these methods lies in the approach to handling the matching operator.
-Before the details of these methods are introduced, concepts about graph information and minimum matching component are proposed as follows.
+Before the details of these methods are introduced, concepts about graph structure and graph matching decomposition are proposed as follows.
 
-\subsection{Graph Information}
-Graph information consists of graph structure and graph statistics, which are defined as follows.
+\subsection{Graph Structure}
+
+The definition of graph structure is as follows.
 
 \begin{definition}[Graph Structure, abbr.~GS]
-    Graph structure refers to the connectivity relationships between vertices and edges within the graph, which can be stored in graph indices.
+    Graph structure refers to the connectivity relationships between vertices and edges within the graph, which can be stored in graph indices in varied data structure such as adjacent lists.
 \end{definition}
 
-\begin{definition}[Graph Statistics, abbr.~GAT]
+With graph structure, tables can be joined more efficiently.
+For example, when two tables representing persons and friendships respectively are joined together, the rows that can be joined are quickly located using graph indices.
+Therefore, when graph indices are available, using join methods that can leverage graph indices is a more efficient choice.
+
+\subsection{Graph Matching Decomposition}
+
+Given a matching operator, it can be decomposed into two new matching operators.
+By joining the results of the new matching operators, the results of the original matching operator can be obtained.
+Decomposing the matching operator recursively can result in a binary tree, where each node is a matching operator.
+For each internal node of this tree, denoted by $TN_0 = \mathcal{M}(V, E, \mathcal{P}_0)$, it has two child nodes, i.e., $TN_1 = \mathcal{M}(V, E, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(V, E, \mathcal{P}_2)$.
+Denote the sets of vertices and edges in a pattern $\mathcal{P}$ by $\mathcal{P}.V$ and $\mathcal{P}.E$, respectively.
+Then, we have $\mathcal{P}_0.V = \mathcal{P}_1.V \cup \mathcal{P}_2.V$, $\mathcal{P}_0.E = \mathcal{P}_1.E \cup \mathcal{P}_2.E$, $\mathcal{P}_1.V \cap \mathcal{P}_2.V \neq \emptyset$, and $\mathcal{P}_1.E \cap \mathcal{P}_2.E = \emptyset$.
+Each leaf node is a minimum matching component, and the definition is as follows.
+
+\begin{definition}[Minimum Matching Component]
+    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be further decomposed.
+\end{definition}
+
+In the process of decomposing the matching operator, an important point is the order in which the nodes and edges are decomposed each time.
+In other words, it is necessary to determine the order of the joins to generate the pattern specified in the original matching operator.
+Therefore, optimizers are applied to optimize the order.
+
+For relational optimizers, the minimum matching components are matching operators whose patterns only contain a vertex or an edge.
+Then, the physical implementation of such matching operators is scanning the tables of the corresponding vertices or edges, respectively.
+Therefore, for relational optimizers, the matching operator will be replaced with selection operators, projection operators, and a sequence of join operators between tables representing vertices and edges.
+
+For graph optimizers, the minimum matching components are more diverse.
+Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex or a complete star are considered as minimum matching components.
+Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component, which is also a leaf node of the binary tree, and $\mathcal{P}$ is a complete star.
+Also, denote the sibling node of $TL$ by $TS = \mathcal{M}(V, E, \mathcal{P}_s)$.
+A complete star is a tree of depth one with at least two vertices, whose  root is called the core, while the other nodes are called the outsiders.
+For each outsider $v_o$ of a complete star, $v_o$ should exist in $\mathcal{P}_s$ as well.
+
+The minimum matching component whose pattern is a complete star can be implemented with extend-intersection.
+Besides, such a pattern can also be obtained by joining tables representing vertices and edges one by one.
+Specifically, in the process of extend-intersection, given a leaf node and the matching result of its sibling node, since the outsiders of the leaf node exist in the sibling node, the vertices that outsiders match are already known.
+Then, the neighbors of these outsiders are obtained by joining them with tables representing edges and vertices.
+The common neighbors are obtained by calculating the intersection.
+Please note that if graph structure is available, the neighbors can be obtained with graph indices.
+These common neighbors are the vertices that match with the core.
+With extend-intersection, the times of joins are reduced significantly, and it has better performances than joining tables one by one.
+
+
+Moreover, for optimizers, cost of different join orders should be estimated.
+Normally, the cardinalities of tables are utilized, which are low-order statistics of the patterns.
+Since the patterns in matching operators are graphs, it is more efficient to estimate the cost with graph statistics.
+
+\begin{definition}[Graph Statistics]
     Graph statistics record the occurrence of structures within the graph, such as the number of triangles appearing in the graph.
 \end{definition}
 
 Specifically, graph statistics can reflect the higher-order features of graphs (e.g., the number of subgraphs), and well represent the characteristics of graphs.
-Therefore, the cost of operators and cardinalities of internal results can be estimated more accurately.
-With graph structure, tables can be joined more efficiently.
-For example, when two tables representing persons and friendships respectively are joined together, the rows that can be joined are quickly located using graph indices.
+Thus, with garph statistics, better join orders with lower cost can be obtained.
 
-\subsection{Minimum Matching Component}
-
-Given a matching operator, it can be decomposed into two new matching operators.
-By joining the results of the new matching operators, the results of the original matching operator can be obtained.
-The decomposition of the matching operator can generate a binary tree.
-Each node of this tree is a matching operator.
-For each internal node of this tree, denoted by $TN_0 = \mathcal{M}(V, E, \mathcal{P}_0)$, it has two child nodes, i.e., $TN_1 = \mathcal{M}(V, E, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(V, E, \mathcal{P}_2)$, satisfying $\mathcal{P}_0 = \mathcal{P}_1 \cup \mathcal{P}_2$, $\mathcal{P}_1$ and $\mathcal{P_2}$ have common vertices and do not have common edges.
-Each leaf node is a minimum matching component, and the definition is as follows.
-
-\begin{definition}[Minimum Matching Component]
-    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be decomposed anymore.
-\end{definition}
-
-For relational optimizers, the minimum matching components are matching operators whose patterns consisting of only a vertex or an edge.
-Then, the physical implementation of such matching operators is scanning the tables of the corresponding vertex or edge, respectively.
-Therefore, for relational optimizers, the matching operator will be replaced with selection operators, projection operators, and a sequence of joins of tables representing vertices and edges.
-
-For graph optimizers, the minimum matching components are more diverse.
-Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex or a complete star are considered as minimum matching components.
-Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component , which is also a leaf node of the binary tree.
-A complete star is a connected subgraph, where only one vertex (the core) has a degree larger than or equal to 1 while other vertices (the outsiders) have degrees of 1 exactly.
-Denote the sibling leaf node of $TL$ nu $TS = \mathcal{M}(V, E, \mathcal{P}_s)$.
-Besides, for each outsider $v_o$ of a complete star, there should be a vertex in $\mathcal{P}_s$ that matches with the same vertex in the database as $v_o$.
+The aforementioned optimizations are collectively referred to as optimizations based on graph matching decompostion (abbr.~GMD).
 
 
 \subsection{Existing Methods}
 
-Existing methods can be divided into four categories based on whether graph information and graph optimizers (abbr.~GOpt) are used.
-
+The general approach to handling the SPJM queries is to first transform it into an SPJ queries, and then optimize the SPJ queries to obtain the corresponding physical plans.
+It is proved in Theorem \ref{theorem:spjm-to-spj} that SPJM queries can always be losslessly converted to SPJ queries.
+Existing methods can be divided into four categories based on whether GS and GMD are utilized in the process.
 
 (1) \emph{SPJM $\rightarrow$ SPJ $\rightarrow$ Physical Plan}.
-This kind of solutions first translate the matching operators to a sequence of selection, projection, and join operators.
-Then, the SPJM problem is converted to an equivalent SPJ problem, which is then optimized with well-known relational optimizers.
-Please note that graph information and graph optimizer are never utilized in the process of translation and optimization.
-This kind of solutions only leverage the ability of relational optimizers.
-A typical method is Apache Age.
-Besides, it will be prove in Theorem \ref{theorem:spjm-to-spj} that SPJM problems can always be losslessly converted to SPJ problems.
+This type of method does not apply GS and GMD in the process of optimizing the SPJM queries.
+In detail, matching operators are decomposed into minimum matching components, whose patterns contain only a vertex or an edge.
+Such matching operators are converted to table scans, and a new SPJ query is generated and optimized.
+This type of method degrades into relational optimizers and loses the chance of query optimization from the graph perspective.
+An typical method of this type is Apache Age.
+
 
 In order to leverage the graph information to obtain better physical plans, the second kind of method is proposed.
 
 (2) \emph{SPJM $\rightarrow$ SPJ $\xrightarrow{GS}$ Physical Plan}.
 
-This kind of solutions also translate the matching operators to a sequence of SPJ operators.
-However, in the process of optimizing the SPJ problem, the graph structure is utilized.
-Specifically, hash joins in the physical plans can be replaced with more efficient joins that utilize graph indices.
-Therefore, in the later process of executing the physical plans, graph indices can be applied to improve the performances.
-A typical method is GrainDB.
+For this type of method, graph structure is utilized in the process of optimizing the SPJ queries.
+Specifically, with graph indices, the connectivity between vertices and edges can be obtained efficiently.
+Therefore, new physical implementations of joins can be constructed to leverage the benefits of graph indices.
 
-It is also reasonable to exploit the capability of graph optimizers for better optimization.
+The optimizer in GrainDB is a representative of this type.
+GrainDB builds RID indices on DuckDB \cite{duckdb}, and proposes two new join methods, i.e., sip-join and merge-sip-join.
+In detail, sip-join gets adjacent edges of vertices or gets adjacent vertices of edges based on the RID indices, while merge-sip-join obtains the neighbors of vertices.
+Given a SPJM query, it is first transformed to the equal SPJ query, and then GrainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
+Next, GrainDB replaces some hash-joins in the plan with sip-joins and merge-sip-joins to leverage graph indices.
+
+It indicates that the cost-based optimization in GrainDB only finds the optimal execution plan before the graph indices are awared.
+Therefore, the plan can be suboptimal after replacement.
+Moreover, some efficient replacement cannot be applied w.r.t.~the obtained execution plan due to the order of joining tables representing vertices and edges.
+
+
+It is also reasonable to exploit the capability of graph matching decomposition for better optimization.
 Then, the third kind of method is proposed as follows.
 
-(3) \emph{SPJM $\xrightarrow{GO\&GAT}$ SPJ $\rightarrow$ Physical Plan}.
+(3) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\rightarrow$ Physical Plan}.
 
-In the process of converting SPJM problems to SPJ problems, the conversion of the matching operator is particularly important.
-In this kind of method, graph optimizer and graph statistics are utilized in this process.
-Specifically, the optimization tree of converting the matching operator is optimized to find the best join order following the pattern specified in the matching operator.
-Moreover, higher-order features of the graph are leveraged, and cardinalities can be estimated more accurately.
-Besides, for minimum matching components whose patterns are complete stars, the join w.r.t.~them can be implemented with intersection, which can reduce the cost of multiple joins.
+This type of method convert SPJM queries to SPJ queries in a different manner.
+Specifically, graph matching decomposition is applied and the matching of complete stars is a minimum matching component.
+With GMD, higher-order features of graphs are leveraged, and cost of join orders can be estimated more accurately.
+Please note graph structure is not applied in this type of method.
+Thus, when we optimize SPJ queries and generate physical plans, the physical implementations of joins cannot utilize the graph indices, and the same applies to the implementation of extend-intersection.
 
 
-(4) \emph{SPJM $\xrightarrow{GO\&GAT}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
+(4) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
 
 This is the method utilized in this paper.
-Compared to method (3), this kind of methods further utilize graph strucutre.
-Therefore, physical implementations of join operators that can use graph indices can be applied.
-Besides, in the graph optimizer, the cost of joins are estimated assuming that graph indices can be utilized in execution.
-Therefore, the estimated cost are more accurate.
+Compared to method (3), this kind of methods further utilize graph strucutre in optimization.
+Therefore, physical implementations of join operators can utilize the graph indices and the common neighbors can be obtained more efficiently in extend-intersection.
+Besides, in the process of graph matching decomposition, since the higher-order statistics are utilized (i.e., the number of subgraphs), the cost of joins are estimated assuming that graph indices can be utilized in execution.
+Therefore, cost estimation is more accurate for when graph indices are applicable. 
 
 \subsection{Proof}
 
