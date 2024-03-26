@@ -290,11 +290,15 @@ Then, the physical implementation of such matching operators is scanning the tab
 Therefore, for relational optimizers, the matching operator will be replaced with selection operators, projection operators, and a sequence of join operators between tables representing vertices and edges.
 
 For graph optimizers, the minimum matching components are more diverse.
-Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex or a complete star are considered as minimum matching components.
+Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex, an edge, or a complete star are considered as minimum matching components.
+Here, the pattern consisting of an edge actually contains the edge and its adjacent two vertices.
 Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component, which is also a leaf node of the binary tree, and $\mathcal{P}$ is a complete star.
 Also, denote the sibling node of $TL$ by $TS = \mathcal{M}(V, E, \mathcal{P}_s)$.
-A complete star is a tree of depth one with at least two vertices, whose  root is called the core, while the other nodes are called the outsiders.
+A complete star is a tree of depth one with at least three vertices, whose  root is called the core, while the other nodes are called the outsiders.
 For each outsider $v_o$ of a complete star, $v_o$ should exist in $\mathcal{P}_s$ as well.
+
+If graph strucutre is utilized, the minimum matching component whose pattern is an edge can be implemented with joins that leverage graph indices, and the neighbors of vertices can be obtained efficiently.
+If graph structure is not utilized, such a pattern is obtained by two joins between tables representing vertices and edges.
 
 The minimum matching component whose pattern is a complete star can be implemented with extend-intersection.
 Besides, such a pattern can also be obtained by joining tables representing vertices and edges one by one.
@@ -377,7 +381,7 @@ Therefore, cost estimation is more accurate for when graph indices are applicabl
 
 \begin{theorem}
     \label{theorem:spjm-to-spj}
-    The SPJM problem can be losslessly converted to an SPJ problem.
+    The SPJM query can be losslessly converted to an SPJ query.
 \end{theorem}
 \begin{proof}
     Clearly, if the matching operator can be expressed with selection, projection, and join operators (abbr.~SPJ operators), then naturally, the theorem is correct.

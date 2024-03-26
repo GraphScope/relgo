@@ -1,7 +1,7 @@
 \section{Optimizations}
 \label{sec:optimizations}
 
-The relational optimization module and graph optimization module optimize he relational plan and graph plans, respectively.
+The relational optimization module and match optimization module optimize the outer query and the process of graph match decomposition, respectively.
 In this subsection, we present the details of the optimization strategies utilized in these two modules. 
 
 \subsection{Optimization Strategies in Relational Optimization Module}
@@ -10,76 +10,34 @@ Like most relational optimizers, the relational optimization module applies both
 In detail, in terms of RBO, commonly used optimizations such as filter pushdown, join order optimization, and removal of unused columns are employed in the converged optimizer.
 In terms of CBO, the costs of plans are estimated based on the low-order statistics such as the cardinalities of tables and query conditions.
 
-Besides, since a new operator, i.e., GraphTableScan, is added for relational optimizer, it is possible to perform some optimization across the relational and graph subplans.
+Besides, since a new implementation of the scan operator, i.e., ScanMatchTable, is added for relational optimizer, it is possible to perform some optimization across the outer query plan and match scanning plan.
 
 \filterrule. 
-Inspired by FilterPushdownRule in relational optimizer, which can push down the predicates to the Scan operator to filter out invalid elements earlier, we propose \filterrule.
-As the ScanGraphTable operator is a special kind of Scan operator which acts like scanning a table obtained by a graph subplan, it is reasonable to integrate the filtering criteria into the ScanGraphTable operator.
-Specifically, the \filterrule seeks to push predicates on properties of graph elements from the relational subplan to graph subplans, so that invalid graph elements can be dropped earlier.
+Inspired by FilterPushdownRule in relational optimizer, which can push down the predicates to the scan operator to filter out invalid elements earlier, we propose \filterrule.
+As the ScanMatchTable is a physical implementation of the scan operator which acts like scanning a table obtained by matching specific patterns on the database, it is reasonable to integrate the filtering criteria into the ScanMatchTable operator.
+Specifically, \filterrule seeks to push predicates on properties of graph elements from the outer query to matching operators, so that invalid graph elements can be dropped earlier.
 An example of applying \filterrule is given in Example \ref{example:push_down}.
 
-Specifically, \filterrule can embed filter conditions into basic graph operators like \scan~, \expandedge~, or \getvertex~ to further push down filter conditions in graph queries. 
+In detail, \filterrule can embed filter conditions into the pattern given in the matching operator.
+Then, in the scan matching plan corresponding to the matching operator, the filter conditions can be further pushed down to operators such as the scan and join operators.
 This integration allows the direct exclusion of vertices and edges not satisfying the filter conditions, thus drastically cutting down the volume of intermediary outcomes.
 
 Formally, the equation rule w.r.t.~\filterrule is as follows:
 \begin{equation}
     \begin{split}
-    & \sigma_{\theta}\pi_{v.a_1, \cdots, v.a_k}(lr~\alpha_{(u)}^{(v)}[e]~er) \\
-    & \hspace*{2em} \equiv \pi_{v.a_1, \cdots, v.a_k}(lr~\sigma_{\theta}(\alpha_{(u)}^{(v:vLabel)}[e]~er)), \\
+        & \pi_A(\sigma_{\theta}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n)) \\
+        & \hspace*{2em} \equiv \pi_A(\sigma_{\theta_0}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_{1, \theta_1} \Join \cdots \Join \widetilde{R}_n)), \\
+        & \hspace*{4em} \text{where } \widetilde{R}_{1} = \widehat{\pi}_{col_1}(\mathcal{M}(V, E, \mathcal{P}_1)) \\
+        & \hspace*{4em} \text{and } \widetilde{R}_{1,\theta_1} = \widehat{\pi}_{col_1}(\mathcal{M}(V, E, \mathcal{P}_{1,\theta_1}))
     \end{split}
 \end{equation}
-where $lr$ and $er$ are graph relational algebra expressions, $\alpha \in \{\uparrow, \downarrow, \updownarrow\}$, and vLabel is specified if the label of $v$ is specified in $\theta$.
+where $\theta_1$ is the constraints related to $\widetilde{R}_1$ in $\theta$ and $\theta_0$ is obtained by removing $\theta_1$ from $\theta$.
+Besides, $\mathcal{P}_{1,\theta_1}$ is obtained by adding constraints in $\theta_1$ to $\mathcal{P}_1$.
 
 
-\intersectrule. 
-Please note that the intersection operator is not defined in graph queries, but it can be expressed with expand operators.
-Given a SQL/PGQ query, if the two subqueries that intersect are both graph queries, then the paths in these two graph queries can be combined with expand operators to generate new paths.
-That is, two graph queries combined with an intersection operator are converted to a new graph query.
-By leveraging graph indices, it can be more efficient to obtain the intersection results w.r.t.~the new graph query.
-To some extent, one of the graph queries can be considered as the predicates, and then \intersectrule is somehow pushing down predicates to the other graph query.
-The rule is as follows.
-\begin{equation}
-    \begin{split}
-        & \pi_{v.a_1, \cdots, v.a_k}(el~\alpha_{(u)}^{(v:vlabel)}[e]~er) \\
-        & \hspace*{2em} \equiv \pi_{v.a_1, \cdots, v.a_k}(el) \cap \pi_{v.a_1, \cdots, v.a_k}(\alpha_{(u)}^{(v:vlabel)}[e]~er),
-    \end{split}
-\end{equation}
-where $el$ and $er$ are graph relational algebra expressions, $\alpha \in \{\uparrow, \downarrow, \updownarrow\}$.
+\subsection{Optimization Strategies in Match Optimization Module}
 
-\begin{example}
-    Suppose we are going to find persons that know both Alice and Bob, the corresponding relational query is as follows:
-    \begin{lstlisting}
-        (
-            SELECT p2.name
-            FROM Person p1, Knows k1, Person p2
-            WHERE k1.sid = p1.id
-                AND k1.tid = p2.id
-                AND p1.name = 'Alice'
-        )
-        INTERSECT
-        (
-            SELECT p2.name
-            FROM Person p2, Knows k2, Person p3;
-            WHERE k2.sid = p2.id
-                AND k2.tid = p3.id
-                AND p3.name = 'Bob';
-        )
-    \end{lstlisting}
-    Then, based on the \intersectrule, the query can be transformed to the corresponding graph query as follow:
-    \begin{lstlisting}
-        SELECT name 
-        FROM GRAPH_TABLE (know_graph
-            MATCH (p1:Person {name: 'Alice'})-[k1:Knows]->(p2:Person)<-[k2:Knows]-(p3:Person {name: 'Bob'})
-            COLUMNS (p2.name as name);
-        );
-    \end{lstlisting}
-\end{example}
-
-
-
-\subsection{Optimization Strategies in Graph Optimization Module}
-
-In the graph optimization module, we formulate a specific rule set to capitalize on optimization potential among graph operators. 
+In the match optimization module, we formulate a specific rule set to capitalize on optimization potential in graph matching decomposition. 
 Both RBO and CBO strategies are included in the rule set.
 
 In terms of RBO strategies, two frequently utilized key rules, i.e., \trimrule and \fusionrule, are presented in this subsection.
@@ -88,76 +46,28 @@ In terms of RBO strategies, two frequently utilized key rules, i.e., \trimrule a
 The \trimrule~ is a well-established relational optimization strategy that removes superfluous data at intermediary stages of query processing. 
 Two particular instances where trimming helps include: 
 Firstly, \trimrule~ can eliminate intermediate results with aliases that are not required and reduce computations.
-Secondly, it involves discarding unneeded vertex and edge properties when retrieving from the data graph. 
-This is accomplished by specifying essential properties in the graph operators’ \code{COLUMNS} field.
+Secondly, it involves discarding unneeded vertex and edge properties.
+This is accomplished by adding projection operators to the match scanning plans.
 Formally, an example of applying \trimrule is as follows:
 \begin{equation}
-    \mathcal{S}_g \Rightarrow \pi_{u.a_1, \cdots, u.a_k}\mathcal{S} _g 
+    \begin{split}
+        \mathcal{M}(V, E, \mathcal{P}) & \Rightarrow \cdots \Join \mathcal{M}(V, E, \mathcal{P}_{sub}) \Join \cdots \\
+        & \Rightarrow \cdots \Join \pi_{u_1, \cdots, u_k}(\mathcal{M}(V, E, \mathcal{P}_{sub})) \Join \cdots,
+    \end{split} 
 \end{equation}
-where $\mathcal{P}_g$ is a graph relational algebra expression corresponding to a graph subplan, and $u.a_1, \cdots, u.a_k$ are necessary properties.
-
+where $\mathcal{M}(V, E, \mathcal{P}_{sub})$ is a minimum matching component and $u_1, \cdots, u_k$ are necesary properties.
 
 \fusionrule. 
 The \fusionrule~ is a graph-centric rule. 
-Commonly in graph queries, a sequence of \expandedge~ followed by \getvertex~ indicates a search for neighboring vertices. 
-The \fusionrule~ consolidates these operators into one integrated \expandvertex~ to boost efficiency. 
-Nonetheless, whether \expandedge~ and \getvertex~ can be merged is context-dependent. 
+In a match scanning plan, when intermediate results are joined with a table representing edges and subsequently with a table representing vertices, the availability of graph indices allows the \fusionrule~ to integrate these two join operations. 
+This consolidation creates a single join operation that leverages graph indices to directly retrieve the neighboring vertices.
+Nonetheless, whether the join operators can be merged is context-dependent. 
 For example, if some properties of the edges are needed, fusion might not be feasible.
 This rule evaluates such factors to ensure query optimization without compromising result integrity.
-%Formally, an example of applying \fusionrule is as follows:
-%\begin{equation}
-%    \begin{split}
-%    &  \\
-%    & \hspace*{2em} \Rightarrow \pi_{u.a_1, \cdots, u.a_k}\updownarrow_{(u)}^{(v:vLabel)}[:eLabel](\sigma_{d(u)}\bigcirc_{(u:uLabel)}), \\
-%    \end{split}
-%\end{equation}
-%where $d(u)$ is a filtering constraint on vertex $u$.
 
 
-\expandintersectrule.
-The \expandintersectrule replaces expand operators that expands to the same vertices with a new operator, i.e., the extend-intersect operator, to reduce the overhead of extending a partial pattern to a new vertex.
-This new operator is a new kind of join, and is defined as follows:
 
-\begin{equation}
-    \begin{split}
-        & R \Diamond^{l_1^{1}|\cdots|l_1^{k_1}, \cdots, l_n^{1}|\cdots|l_n^{k_n}}_{v_1, \cdots, v_n} P = \\ 
-        & \hspace{1em} \pi_{\mathcal{R} \cup \mathcal{E} \cup \mathcal{P}}(\sigma_{\lambda(e) = (R.v_1, P.v) \land (\text{Type}(e) = l_1^1 \lor \cdots \lor \text{Type}(e) = l_1^{k_1})}(R \times E \times P)) \\
-        & \hspace{1em} \Join \cdots \\
-        & \hspace{1em} \Join \pi_{\mathcal{R} \cup \mathcal{E} \cup \mathcal{P}}(\sigma_{\lambda(e) = (R.v_n, P.v) \land (\text{Type}(e) = l_n^1 \lor \cdots \lor \text{Type}(e) = l_n^{k_n})}(R \times E \times P)),
-    \end{split}
-\end{equation}
-where $P$ is a graph relation and each row of $P$ is a vertex,
-$E$ is a graph relation containing all the edges in the graph, 
-$\mathcal{R}$, $\mathcal{E}$, and $\mathcal{P}$ are the schemas of $R$, $E$, and $P$, respectively,
-and $v_1, \cdots, v_n$ are the vertices in $R$ that should connect to vertices in $P$.
-The type of the edge between $v_j$ and $p.v$ needs to be one of $\{l_j^1, \cdots l_j^{k_j}\}$.
-
-Given a openCypher query as follows:
-\begin{lstlisting}
-    MATCH (p1:Person)-[:Likes]->(m:Message),
-        (p1)-[:Knows]-(p2:Person)-[:Likes]->(m:Message)
-    RETURN p1.name;
-\end{lstlisting}
-With $\updownarrow^{(p2\text{:Person})}_{(p1)}[\text{:Knows}]\bigcirc_{(p1\text{:Person})}$, the partial results w.r.t.~$(p1)-[\text{:Knows}]-(p2)$ are obtained (denoted by $r$). 
-$r$ should be extended to the message $m$ from $p1$ and $p2$ respectively, and then intersection on $m$ is applied.
-Therefore, the extend-intersect operator is used, and the query can be compiled to
-\begin{equation}
-    \left(\updownarrow^{(p2\text{:Person})}_{(p1)}[\text{:Knows}]\bigcirc_{(p1\text{:Person})}\right) \hspace{0.2em} \Diamond_{p1, p2}^{\text{Likes, Likes}} \hspace{0.2em} \bigcirc_{m\text{:Message}}.
-\end{equation}
-
-Please note that the extend-intersect operator is friendly to vectorized query processing.
-Compared with natural joins, in the process of extend-intersection, fewer vectors are flattened and the time cost is significantly reduced.
-
-
-In terms of CBO, drawing from insignts gained in the prior research, we implement effective pattern matching by incorporating hybrid pattern join strategies and leveraging high-order statistics, which provide a more granular understanding of the data through the frequency of smaller patterns.
-Moreover, the prior research has some drawbacks, including using a bottom-up search framework that potentially missed early pruning opportunities and having a narrow focus on basic patterns without accommodating union patterns scenarios.
-Therefore, we also introduce a novel top-down search framework, inclusive of branch-and-bound pruning strategies, and devise specific cardinality estimation methods for union patterns. 
-Besides, in this implementation, we use a rule for pattern transformation to ensure all modifications maintain the original results’ integrity.
-Furthermore, for pattern matching, we consider binary join and extend-intersect operators. 
-The binary join applies a hash-join on two pattern mappings to produce a larger pattern's results.
-The extend-intersect operator optimizes the process when only one vertex is added to the existing pattern. 
-This expansion can vary from a simple addition of a single new edge to more complex scenarios involving multiple edges, implemented through optimal joins.
-
-Regarding cost and cardinality estimation, we adopt a cost model that considers both the communication costs of intermediate result transfer in distributed environments and the computational costs of physical plan operators. 
-Specifically, costs for the binary join and extend-intersect operators in graphs are defined. 
-Additionally, we estimate the operator cost using an expand ratio that reflects the change in pattern occurrences when edges are expanded.
+In terms of CBO, we adopt a cost model similar to GLogS, which considers both the communication costs of intermediate result transfer in distributed environments and the computational costs of physical plan operators. 
+Specifically, the computational costs for joins and extend-intersection are defined.
+They are estimated with pattern frequencies, which are higher-order statistics in graphs.
+Leveraging this cost model enhances the likelihood of identifying superior match scanning plans.

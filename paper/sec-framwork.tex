@@ -8,34 +8,35 @@
 \end{figure}
 
 
-The sketch of the converged graph relational optimization framework is shown in Fig.~\ref{fig:framework-overview}.
-Specifically, given a SQL/PGQ query which contains graph queries, the query is firstly parsed and the corresponding logical plan is generated.
-In such a SQL/PGQ query, it is straightforward to distinguish graph queries from relational queries, since the graph query are always marked with ``GRAPH\_TABLE (name, MATCH $\cdots$)''.
+\begin{corollary}
+    There is an assumption that if a graph index is built on tables $vt_1, et_1, vt_2$, the vertices in $vt_1$ and $vt_2$ are stored in $V$, and the edges in $et_1$ are stored in $E$ of $\mathcal{M}(V, E, \mathcal{P})$.
+\end{corollary}
 
-For each graph query, a graph logical plan is generated.
-The operators that can be utilized in graph logical plans are those defined in graph relational algebra (introduced in Sec.~\ref{sec:preliminaries}).
-Pleanse note that the output of a graph logical plan is a relational table.
-Therefore, the graph logical plan can be considered to guide the process of retrieving data from a graph table, and the plan as a whole is a new implementation of the Scan operator, which is called ScanGraphTable.
-The semantic of the ScanGraphTable operator is scanning a graph table obtained with graph queries.
-Then, for the outer relational query, by representing graph queries with ScanGraphTable operators, the relational logical plan can be optimized by most relational optimizers such as Calcite.
+
+To optimize SPJM queries efficiently, we propose the converged graph relational optimization framework.
+The sketch of the converged graph relational optimization framework is shown in Fig.~\ref{fig:framework-overview}.
+
+Specifically, given an SPJM query with several matching operators, the matching operators are first decomposed and the order of joins to obtain the pattern is optimized.
+After graph matching decomposition, a logical plan is generated simultaneously, which is called the matching logical plan.
+The operators that can be utilized in this plan include selection, projection, join, and matching operators.
+Specifically, the matching operators should be minimum matching components.
+
+Please note that the outputs of the matching logical plan is a graph relation, and after the selection $\widehat{\pi}$ is applied, a relational table $\widehat{R}$ is generated.
+Then, the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable), which is involved in the optimization of the other operators.
+The implementation of ScanMatchTable is called the match scanning plan.
+Since the matching operator is decomposed into a sequence of SPJ operators, the cardinality of the output of matching operator can be estimated, which is also the cardinality of ScanMatchTable.
+After that, the left operators form an SPJ query (called the outer query), and the relational optimizers such as Calcite can be utilized to optimize the query.
+The plan of the outer query is called the outer query plan.
 Therefore, rich optimization strategies for relational databases can be applied.
 
-In the process of optimization, the graph logical plans and the outer relational logical plan are optimized by the graph optimzation module and relaitonal optmization moduel, respectively.
-The workflow of the converged graph relational optimization framework is illustrated with Fig.~\ref{fig:workflow}.
-Firstly, graph queries are optimized with the graph optimization modules.
-Both rule-based optimizations and cost-based optimizations are utilized.
-Please note that during the process of optimizing the graph queries, the cardinalities of the outputs of the graph queries are estimated.
-Then, in the following opimization for the relation query, the cardinalities of ScanGraphTable operators are obtained.
-For the relaional optimization module, we propose two new rules specially for SQL/PGQ queries.
-These rules push predicates in relational queries to graph queries to filter out the invalid elements early, and the details are introduced in Sec.~\ref{sec:optimizations}.
-After the the relational query is optimized, it is tested whether the plan can be further optimized.
-If the plan can still be optimized, then the graph opmization module and relational optimization module are applied again.
-Otherwise, the optimal execution plan is obtained.
-
+In the process of optimization, graph matching decomposition and outer query are optimized by the match optimization module and relational optimization module, respectively.
+Both rule-based optimizations and cost-based optimizations are utilized in these two modules.
+For the relaional optimization module, we propose two efficient rules specially for SPJM queries.
+These rules push predicates in outer queries to matching operator to filter out the invalid elements early, and the details are introduced in Sec.~\ref{sec:optimizations}.
 
 As different databases usually support different operators and their physical plans can be greatly varied, it is of critical importance for an optimization framework to be flexible.
-Therefore, we implement a PlanConverter in the framework to ensure that the flexibility.
-Given the generated optimal physical plan, the PlanConverter transforms the plan to an internal representation (e.g., substrait), and then the internal representation is transformed to the physical plan that can be executed by the target database.
+Therefore, we implement a PlanConverter in the framework to ensure the flexibility.
+Given the generated optimal physical plan, the PlanConverter transforms the plan to an internal representation (e.g., Substrait \cite{substrait}), and then the internal representation is transformed to the physical plan that can be executed by the target database.
 Finally, the plan is executed and the query results are obtained.
 The above process of query processing is illustrated with the following example.
 
@@ -47,34 +48,40 @@ The above process of query processing is illustrated with the following example.
     \label{fig:workflow}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=.6\linewidth]{./figures/example_tree.png}
+    \caption{The operator tree of SPJM query in Example \ref{example:framework}.}
+    \label{fig:example-operator-tree}
+\end{figure}
 
 \begin{figure*}
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-logical-plan-relational.png}
-        \caption{Relational Subplan of the Converged Logical Plan.}
+        \caption{Outer query plan.}
         \label{fig:converged-logical-plan-relational}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-logical-plan-graph.png}
-        \caption{Graph Subplan of the Converged Logical Plan.}
+        \caption{Match scanning plan.}
         \label{fig:converged-logical-plan-graph}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-logical-plan-relational-optimized.png}
-        \caption{Relational Subplan after Optimization.}
+        \caption{Outer query plan after Optimization.}
         \label{fig:relational-plan-optimized}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-logical-plan-graph-optimized.png}
-        \caption{Graph Subplan after Optimization.}
+        \caption{Match scanning plan after Optimization.}
         \label{fig:graph-plan-optimized}
     \end{subfigure}
-    \begin{subfigure}[b]{0.4\linewidth}
+    \begin{subfigure}[b]{0.5\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-physical-plan.png}
         \caption{Obtained Optimial Physical Plan.}
@@ -85,9 +92,11 @@ The above process of query processing is illustrated with the following example.
 \end{figure*}
 
 
+
 The above process of query processing is illustrated with the following example.
 
 \begin{example}
+    \label{example:framework}
     Given a relational database with tables as follows,
     \begin{equation*}
         \begin{split}
@@ -99,38 +108,35 @@ The above process of query processing is illustrated with the following example.
     suppose we are going to find three persons satisfying: 
     (1) These three persons know each other;
     (2) At least two of them are from the department of computer science.
-    The SQL/PGQ query for this task is shown in Example \ref{example:introduction:sqlpgq}.      
-
-    There is one graph query for obtaining triangles of persons that know each other.
-    Therefore, the converged logical plan consists of one relational subplan and one graph subplan.
-    The algebra expression corresponding to this query is as follows:
-    Firstly, to obtain the triangles, the graph relational algebra expression is
+    The SPJM query can be illustrated as shown in Fig.~\ref{fig:example-operator-tree}.
+    
+    In relational matching algebra, the SPJM query can be expressed as follows:
+    Firstly, to obtain the triangles, the pattern $\mathcal{P}_{\triangle}$ is
+    \begin{lstlisting}
+        (p1:Person)-[:Knows]-(p2:Person),
+        (p2)-[:Knows]-(p3:Person),
+        (p1)-[:Knows]-(p3)
+    \end{lstlisting}
+    Then, to get the relational table that records the three person and their departments, the algebra expression is 
     \begin{equation*}
         \begin{split}
-            G_{\triangle} = & \sigma_{p4.id = p1.id}(\updownarrow_{(p3)}^{(p4)}[:Knows]\updownarrow_{(p2)}^{(p3:Person)}[:Knows] \\
-            & \updownarrow_{(p1)}^{(p2:Person)}[:Knows]\bigcirc_{(p1:Person)}).
+            \widehat{R}_{graph} = & \pi_{p1.name\rightarrow pn1, p1.dept\_id \rightarrow dept1,p2.name\rightarrow pn2, p2.dept\_id \rightarrow dept2,} \\
+            & _{p3.name\rightarrow pn3, p3.dept\_id \rightarrow dept3}(\mathcal{M}(V, E, \mathcal{P}_{\triangle})).
         \end{split}
     \end{equation*}
-    Then, to get the results of the graph query and formulate the results as a relational table, the algebra expression is 
-    \begin{equation*}
-        \begin{split}
-            R_{graph} = & \pi_{p1.name\rightarrow pn1, p1.dept\_id \rightarrow dept1,p2.name\rightarrow pn2, p2.dept\_id \rightarrow dept2,} \\
-            & _{p3.name\rightarrow pn3, p3.dept\_id \rightarrow dept3}(G_{\triangle}).
-        \end{split}
-    \end{equation*}
-    Finally, to obtain the triangles of persons with at least two persons from the department of computer science, the relational algebra expression is
+    Finally, to obtain the triangles of persons with at least two persons from the department of computer science, the algebra expression is
     \begin{equation*}
         \begin{split}
         \pi_{pn1, pn2, pn3}
-        (& \sigma_{dept.dept\_name = `Computer Science'}( \\ 
-        & dept \Join_{dept1=dept.dept\_id \land dept2=dept.dept\_id} R_{graph})).
+        (& \sigma_{dept.dept\_name = \text{`Computer Science'}}( \\ 
+        & dept \Join_{dept1=dept.dept\_id \land dept2=dept.dept\_id} \widehat{R}_{graph})).
         \end{split}
     \end{equation*}
 
-    Based on the above algebra expressions, the corresponding converged logical plan is shown, and its relational and graph subplans are presented in Fig.~\ref{fig:converged-logical-plan-relational} and Fig.~\ref{fig:converged-logical-plan-graph}, respectively.
+    Based on the above algebra expressions, the match scanning plan is shown in Fig.~\ref{fig:converged-logical-plan-graph} and the outer query plan is shown in Fig.~\ref{fig:converged-logical-plan-relational}.
     
-    Then, optimization modules in the optimization layer are applied to optimize the relational subplan and graph subplans.
-    The optimized converged logical plan is shown in Fig.~\ref{fig:relational-plan-optimized} and Fig.~\ref{fig:graph-plan-optimized}.
+    Then, optimization modules in the optimization layer are applied to optimize the plans.
+    The optimized plans are shown in Fig.~\ref{fig:relational-plan-optimized} and Fig.~\ref{fig:graph-plan-optimized}.
     Moreover, the finally obtained optimal physical plan is shown in Fig.~\ref{fig:physical-plan-optimized}.
 \end{example}
 
