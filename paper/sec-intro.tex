@@ -271,10 +271,18 @@ Therefore, when graph indices are available, using join methods that can leverag
 
 Given a matching operator, it can be decomposed into two new matching operators.
 By joining the results of the new matching operators, the results of the original matching operator can be obtained.
-Decomposing the matching operator recursively can result in a binary tree, where each node is a matching operator.
-For each internal node of this tree, denoted by $TN_0 = \mathcal{M}(V, E, \mathcal{P}_0)$, it has two child nodes, i.e., $TN_1 = \mathcal{M}(V, E, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(V, E, \mathcal{P}_2)$.
+Decomposing the matching operator recursively can result in a tree, which is called the match scanning plan.
+Each tree node represents an operator.
+\textbf{Without loss of generality, suppose for each join operator, the left subtree is computed first}.
+For each internal node, it can represent the join, selection, or projection operator.
+Take the join operator as an example.
+Internal nodes representing join operators are generated when matching operators are decomposed.
+Suppose a matching operator $TN_0 = \mathcal{M}(V, E, \mathcal{P}_0)$ is decomposed into two child operators, i.e., $TN_1 = \mathcal{M}(V, E, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(V, E, \mathcal{P}_2)$.
 Denote the sets of vertices and edges in a pattern $\mathcal{P}$ by $\mathcal{P}.V$ and $\mathcal{P}.E$, respectively.
 Then, we have $\mathcal{P}_0.V = \mathcal{P}_1.V \cup \mathcal{P}_2.V$, $\mathcal{P}_0.E = \mathcal{P}_1.E \cup \mathcal{P}_2.E$, $\mathcal{P}_1.V \cap \mathcal{P}_2.V \neq \emptyset$, and $\mathcal{P}_1.E \cap \mathcal{P}_2.E = \emptyset$.
+After $TN_0$ is decomposed, it is transformed to an internal node representing the join operator, and $TN_1$ as well as $TN_2$ are its child nodes.
+
+
 Each leaf node is a minimum matching component, and the definition is as follows.
 
 \begin{definition}[Minimum Matching Component]
@@ -292,21 +300,21 @@ Therefore, for relational optimizers, the matching operator will be replaced wit
 For graph optimizers, the minimum matching components are more diverse.
 Following the idea of StarJoin \cite{}, matching operators whose patterns consist of a vertex, an edge, or a complete star are considered as minimum matching components.
 Here, the pattern consisting of an edge actually contains the edge and its adjacent two vertices.
-Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component, which is also a leaf node of the binary tree, and $\mathcal{P}$ is a complete star.
-Also, denote the sibling node of $TL$ by $TS = \mathcal{M}(V, E, \mathcal{P}_s)$.
-A complete star is a tree of depth one with at least three vertices, whose  root is called the core, while the other nodes are called the outsiders.
-For each outsider $v_o$ of a complete star, $v_o$ should exist in $\mathcal{P}_s$ as well.
+Let $TL = \mathcal{M}(V, E, \mathcal{P})$ be a minimum matching component, which is also a leaf node of the tree, and $\mathcal{P}$ is a complete star.
+Also, denote the parent node of $TL$ by $Join_{TL}$.
+A complete star is a tree of depth one with at least three vertices, whose root is called the core, while the other nodes are called the outsiders.
+For each outsider $v_o$ of a complete star, $v_o$ should exist in the pattern of matching operators in $Join_{TL}$'s left subtree.
+Besides, $TL$ should be in the right subtree of $Join_{TL}$.
 
 If graph strucutre is utilized, the minimum matching component whose pattern is an edge can be implemented with joins that leverage graph indices, and the neighbors of vertices can be obtained efficiently.
 If graph structure is not utilized, such a pattern is obtained by two joins between tables representing vertices and edges.
 
-The minimum matching component whose pattern is a complete star can be implemented with extend-intersection.
-Besides, such a pattern can also be obtained by joining tables representing vertices and edges one by one.
-Specifically, in the process of extend-intersection, given a leaf node and the matching result of its sibling node, since the outsiders of the leaf node exist in the sibling node, the vertices that outsiders match are already known.
-Then, the neighbors of these outsiders are obtained by joining them with tables representing edges and vertices.
+For the minimum matching component $\mathcal{MMC}$ whose pattern is a complete star, it can be implemented with a table scan of the core.
+The outsiders are not handled, because they are already computed in the left subtree of the parent node of $\mathcal{MMC}$.
+$\mathcal{MMC}$'s parent node representing the join operator is then implemented with extend-intersection.
+Specifically, in the process of extend-intersection, the neighbors of the outsiders are obtained by joining them with tables representing edges and the results of $\mathcal{MMC}$, respectively.
 The common neighbors are obtained by calculating the intersection.
 Please note that if graph structure is available, the neighbors can be obtained with graph indices.
-These common neighbors are the vertices that match with the core.
 With extend-intersection, the times of joins are reduced significantly, and it has better performances than joining tables one by one.
 
 
@@ -366,7 +374,7 @@ This type of method convert SPJM queries to SPJ queries in a different manner.
 Specifically, graph matching decomposition is applied and the matching of complete stars is a minimum matching component.
 With GMD, higher-order features of graphs are leveraged, and cost of join orders can be estimated more accurately.
 Please note graph structure is not applied in this type of method.
-Thus, when we optimize SPJ queries and generate physical plans, the physical implementations of joins cannot utilize the graph indices, and the same applies to the implementation of extend-intersection.
+Thus, when we optimize SPJ queries and generate physical plans, the physical implementations of joins cannot utilize the graph indices, including the implementation of extend-intersection.
 
 
 (4) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
