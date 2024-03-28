@@ -377,7 +377,7 @@ Then, the third kind of method is proposed as follows.
 
 (3) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\rightarrow$ Physical Plan}.
 
-This type of method convert SPJM queries to SPJ queries in a different manner.
+This type of method converts SPJM queries to SPJ queries in a different manner.
 Specifically, graph matching decomposition is applied and the matching of complete stars is a minimum matching component.
 With GMD, higher-order features of graphs are leveraged, and cost of join orders can be estimated more accurately.
 Please note graph structure is not applied in this type of method.
@@ -400,18 +400,19 @@ Therefore, cost estimation is more accurate for when graph indices are applicabl
 \end{theorem}
 \begin{proof}
     Clearly, if the matching operator can be expressed with selection, projection, and join operators (abbr.~SPJ operators), then naturally, the theorem is correct.
-    We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
+    We first discuss the matching operators under the semantics of homomorphism and prove the theorem by induction.
+    % We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
     In this proof, vertices and edges are elements in a pattern and a pattern $\mathcal{P}$ is called a strict pattern, if the adjacent vertices of each edge in $\mathcal{P}$ are specified in the pattern (e.g., (u)-[e]-(v)).
     Otherwise, the pattern is called a loose pattern (e.g., (u)-[e]).
-    Without the loss of generality, matching operator $\mathcal{M}(V, E, \mathcal{P})$ is considered.
+    Without the loss of generality, matching operator $\mathcal{M}(GR, \mathcal{P})$ is considered.
     Then, induction is conducted on the number of elements in $\mathcal{P}$.
     
     When there is only one element in $\mathcal{P}$ (e.g., $\mathcal{P}=(u:\text{Person})$), such a pattern can be expressed with the selection operators (e.g., $\sigma_{label=\text{``Person''}}(V)$).
-    Please note that is there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
+    Please note that if there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
 
     Suppose for patterns with at most $n$ elements, they can be expressed with SPJ operators.
     Denote the sequence of SPJ operators that have the same meaning as pattern $\mathcal{P}$ by $\mathcal{E}_{\mathcal{P}}$.
-    When there are $n+1$ elements in a pattern $\mathcal{P}$, let $v$ be a vertex in $\mathcal{P}$, and $e_1, \cdots, e_k$ are the edges connecting $v$ with the other vertices in $\mathcal{P}$.
+    When there are $n+1$ elements in a pattern $\mathcal{P}$, let $v$ be a vertex in $\mathcal{P}$, and $e_1, \cdots, e_k$ are the edges adjacent to $v$. %connecting $v$ with the other vertices in $\mathcal{P}$.
     $\widehat{\mathcal{P}}$ is the strict pattern obtained by removing $v$ and $e_1, \cdots, e_k$ from $\mathcal{P}$.
     Then, $\mathcal{P}$ can be expressed with SPJ operators as follows:
     \begin{equation*}
