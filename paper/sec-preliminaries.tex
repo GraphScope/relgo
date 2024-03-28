@@ -3,7 +3,8 @@
 
 \subsection{Data Model}
 \label{sec:data-model}
-Let $L$ be a finite set of labels, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
+
+Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
 \begin{itemize}
     \item $V$ is a finite set of vertices,
     \item $E$ is a finite set of edges,
@@ -15,35 +16,70 @@ Let $L$ be a finite set of labels, $D = \bigcup_i D_i$ be the union of atomic do
     \item $P_e$ is a set of edge properties, where $p_e^j: E \mapsto D_j \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_j$ to each edge. 
     In particular, if an edge $e$ does not have the property $p_e^j$, $p_e^j(e) = \epsilon$.
 \end{itemize}
+For simplicity, vertices and edges are collectively referred to as graph elements.
 
 Let $U = \{a_1, a_2, \ldots, a_n\}$ be a finite set of attributes, then $S = (a_1, a_2, \ldots, a_n)$ is called a schema over $U$. 
-The attributes of $S$ is denoted as $\attr(R) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
-Let $\mathcal{J} = 2^{2^{V \cup E \cup D}}$ be the domain of the sets of records, $\mathcal{J}_D = 2^{2^{D}}$ be the domain of the sets of records whose attributes are not vertices or edges. 
+The attributes of $S$ is denoted as $\attr(S) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
 
-Given a property graph $G$, a graph schema is such a schema $S$ that $\forall a \in \attr(S)$, $\Dom(a) \subseteq V \cup E \cup D$. 
-In other words, each attribute of a graph schema is either a vertex, or an edge, or data from arbitrary domain. 
-A relation $R$ over a graph schema $S$ (i.e. $\sch(R) = S$) is called a graph relation. 
-For simplicity, we denote $\attr(R)$ in short for $\attr(S)$ with $\sch(R) = S$ to retrieve the attributes of a graph relation $R$. 
-We write $R.a$ to access a given attribute $a$ in the relation $R$. 
+A relation $R$ is a set of tuples, and $R$ is called to be over schema $S$ if and only if for each tuple $t \in R$, its $i$-th item (i.e., $t_i$) satisfies $t_i \in Dom(a_i)$.
+A relation can be represented as a relational table \cite{relation-as-table}.
+Given a property graph $G$, a graph schema is such a schema $S_g$ that $\forall a \in \attr(S_g)$, $\Dom(a) \subseteq V \cup E$. 
+In other words, each attribute of a graph schema is either a vertex or an edge. 
+A relation $GR$ over a graph schema $S_g$ (i.e. $\sch(GR) = S_g$) is called a graph relation. 
+% For simplicity, we denote $\attr(GR)$ in short for $\attr(S_g)$ with $\sch(R) = S$ to retrieve the attributes of a graph relation $GR$. 
+% We write $GR.a$ to access a given attribute $a$ in the relation $GR$. 
 
-Given a graph relation $R$, if $a \in \attr(R) \subseteq V \cup E$, we can further access the property $p$ on the vertex/edge attribute via $p(R.a)$ (or $p(a)$ if the relation $R$ is clear in the context). 
-Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge. 
-To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation, while the term ``property'' always refers to the property of a graph element in this article.
+% Given a graph relation $GR$, if $a \in \attr(GR) \subseteq V \cup E$, we can further access the property $p$ on the vertex/edge attribute via $p(GR.a)$ (or $p(a)$ if the graph relation $GR$ is clear in the context). 
+% Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge. 
+To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation or a graph relation, while the term ``property'' always refers to the property of a graph element in this paper.
 
+It is easy to convert relational tables (relations) to a graph relation.
+Given a set of relational tables $T$, some of tables can be regarded as vertices in a property graph (denoted by vertex tables), while others can be regarded as edges (denoted by edge tables).
+For instance, according to the grammar of SQL/PGQ, with the following statement, a graph view can be generated.
+\begin{lstlisting}
+    CREATE PROPERTY GRAPH graph_view
+        VERTEX TABLES (
+            Person KEY(person_id),
+            Message KEY(message_id)
+        )
+        EDGE TABLES (
+            Send KEY(pid, mid) SOURCE KEY(pid) REFERENCE Person(person_id) DESTINATION KEY(mid) REFERENCE Message(message_id)
+        )
+\end{lstlisting}
+Specifically, rows in tables Person and Message are utilized as vertices and rows in table Send are edges, and a graph view is constructed.
+It indicates that the attributes of graph relations, which are graph elements, come from rows of relational tables.
+These vertices and edges can form a tuple representing a property graph.
+Then, a graph relation that consists of this tuple is obtained.
+
+
+A graph relation $GR$ can be represented as a set of property graphs, where each property graph in the set represents a tuple in $GR$ and the graph elements in the property graphs correspond to the attributes of $GR$.
+To retrieve the labels of graph elements, the relational tables that the graph elements come from are obtained, and the names of the tables are the labels.
+The process of retrieving the properties of the graph elements is similar to that of retrieving labels.
+
+In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
 \subsection{Relational Matching Algebra}
 \label{sec:graph-relational-algebra}
 
 In this paper, we extend the relational algebra to equip it with the capability to handle pattern matching.
 The new algebra is named relational matching algebra.
-The relational matching algebra expands the domain and range of the operators in relational algebra and introduces a new operator, i.e., the matching operator.
-Specifically, the domain and range of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are expanded from $\mathcal{J}_D$ to $\mathcal{J}$.
-In other words, in relational matching algebra, these operators act on graph relations, and their outputs are also graph relations.
-Since the semantics of the operators that already exist within relational algebra remain unchanged, the description of these operators are omitted.
-In the rest of this paper, the matching operator is proposed in detail.
+The relational matching algebra expands the domain and range of the operators in relational algebra and introduces three new operators, i.e., the conversion operator and the matching operator.
+Specifically, the domain and range of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are expanded from $\mathcal{J}_R$ to $\mathcal{J}$.
+In other words, in relational matching algebra, these operators act on relations or graph relations, and their outputs are also relations or graph relations.
+Please note that the new projection operator can project a relation to a new relation or project a graph relation to a new graph relation, but cannot project between relations and graph relations.
+Since the semantics of these operators remain unchanged, the description of these operators are omitted.
+In the rest of this paper, the new operators are proposed in detail.
+
+The conversion operator is variant of the projection operator.
+Its difference from the projection operator mainly lies in the distinct domains and ranges.
+The formal definition of the conversion operators is as follows.
+
+\begin{definition}[Conversion Operator, $\widehat{\pi}_{prop}$]
+    Given a graph relation $GR$, the conversion operator $\widehat{\pi}_{prop}: \mathcal{J}_{GR} \rightarrow \mathcal{J}_R$ projects the vertices and edges to a list of their properties (i.e., $prop$) and outputs a relation.
+\end{definition}
 
 \begin{definition}[Matching Operator, $\mathcal{M}$]
-    Given two graph relations $V$ and $E$ consisting of the vertices and edges in a graph respectivey and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J} \times \mathcal{J} \times \mathcal{Q} \rightarrow \mathcal{J}$ return a graph relation consisting of the subgraphs matches the pattern.
+    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ return a graph relation consisting of the subgraphs matching the pattern.
     $\mathcal{Q}$ is the set of possible patterns.
 \end{definition}
 
@@ -253,17 +289,18 @@ Select-Project-Join (abbr.~SPJ) queries are widely utilized in previous studies 
     Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m)).
 \end{equation*}
 Specifically, SPJ queries describe a \emph{pattern} with the linear sequence of join operators.
-Inspired by SPJ queries, for the property graph data model proposed in Sec.~\ref{sec:data-model}, we design a new class of queries named SPJM under relational matching algebra.
-The definition of an SPJM query is as follows:
+Inspired by SPJ queries, for the property graph data model proposed in Sec.~\ref{sec:data-model}, we design a new class of queries named SPJCM under relational matching algebra.
+The definition of an SPJCM query is as follows:
 \begin{equation*}
     Q_m = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n))
 \end{equation*}
 where
 \begin{equation*}
-    \tilde{R}_i = \hat{\pi}_{col_i}(\mathcal{M}(V, E, \mathcal{P}))
+    \tilde{R}_i = \hat{\pi}_{prop_i}(\mathcal{M}(GR, \mathcal{P}))
 \end{equation*}
 is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$, which is a graph relation.
-Besides, $V$ and $E$ are graph relations of vertices and edges respectively, and $\mathcal{P}$ is the pattern.
+Besides, $GR$ is the graph relation that contains the data graphs pattern matching is conducted on and $\mathcal{P}$ is the pattern.
+$prop_i$ is a list of necessary properties of vertices and edges in the resultant relation.
 
 \iffalse
 Regarding the SPJM problem, the main difference between the aforementioned four types of optimizers lies in their search space when optimizing the physical implementation of the matching operator.
