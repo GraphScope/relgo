@@ -65,7 +65,7 @@ Then, a graph relation containing the tuple is generated.
     
 \end{example}
 
-In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
+%In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
 \subsection{Relational Matching Algebra}
 \label{sec:graph-relational-algebra}
@@ -73,20 +73,23 @@ In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the doma
 In this paper, we extend the relational algebra to equip it with the capability to handle pattern matching.
 The new algebra is named relational matching algebra.
 The relational matching algebra expands the domain and range of the operators in relational algebra and introduces a new operator, i.e., the matching operator.
-Specifically, the domain and range of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are expanded from $\mathcal{J}_R$ to $\mathcal{J}$.
+Specifically, the inputs and outs of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are allowed to be relations and graph relations.
 In other words, in relational matching algebra, these operators act on relations or graph relations, and their outputs are also relations or graph relations.
 Since the semantics of these operators remain unchanged, the description of these operators are omitted.
 The formal definition of the matching operator is as follows.
 
 \begin{definition}[Matching Operator, $\mathcal{M}$]
-    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ returns a graph relation consisting of the subgraphs matching the pattern.
-    $\mathcal{Q}$ is the set of possible patterns.
+    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator takes a graph relation and a pattern as inputs, and outputs a graph relation $GR_{out}$ as the result, i.e., $\mathcal{M}(GR, \mathcal{P}) \rightarrow GR_{out}$.
+    The graph relation consists of the subgraphs matching the pattern.
+    % $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ returns a graph relation consisting of the subgraphs matching the pattern.
+    % $\mathcal{Q}$ is the set of possible patterns.
 \end{definition}
 
 By default, the matching operator adopts the homomorphism semantics.
 Therefore, in the output graph relation of the matching operator, each row is a tuple of vertices and edges, whose corresponding property graph is homomorphic to the given pattern.
 
-A special kind of projection is graph projection $\widehat{\pi}_{prop} : \mathcal{J}_{GR} \rightarrow \mathcal{J}_{R}$ that maps graph relations to relations.
+A special kind of projection is graph projection that maps graph relations to relations.
+%$\widehat{\pi}_{prop} : \mathcal{J}_{GR} \rightarrow \mathcal{J}_{R}$ that maps graph relations to relations.
 $\widehat{\pi}_{prop}$ is always used immediately following the matching operator to map vertices and edges to their properties, respectively.
 
 

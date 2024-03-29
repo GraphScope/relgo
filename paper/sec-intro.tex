@@ -116,7 +116,7 @@ The stages of query optimization that these four types of solution are involved 
 
 \textbf{Solution 1 ($Rel$)}. 
 The most direct solution is to transform graph queries to relational ones, and then optimize the new queries with relational optimizers.
-Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ} are typical examples.
+Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB} are typical examples.
 However, methods of this type only take effect in the stage of logical optimization and degrade into relational optimizers.
 Therefore, they lose the chance of query optimization from the graph perspecitve.
 
@@ -350,7 +350,7 @@ This type of method does not apply GS and GMD in the process of optimizing the S
 In detail, matching operators are decomposed into minimum matching components, whose patterns contain only a vertex or an edge.
 Such matching operators are converted to table scans, and a new SPJ query is generated and optimized.
 This type of method degrades into relational optimizers and loses the chance of query optimization from the graph perspective.
-Typical methods of this type include Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ}.
+Typical methods of this type include Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB}.
 
 
 In order to leverage the graph information to obtain better physical plans, the second kind of method is proposed.
