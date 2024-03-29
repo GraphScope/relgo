@@ -6,7 +6,6 @@
 
 A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
-We use $\schema(R)$ to denote the schema of relation $R$.
 Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
