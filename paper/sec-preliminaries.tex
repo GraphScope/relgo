@@ -4,6 +4,22 @@
 \subsection{Data Model}
 \label{sec:data-model}
 
+A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
+A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
+We use $\schema(R)$ to denote the schema of relation $R$.
+Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
+
+%Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
+Consider two distinct sets of relations: the vertex relations \(\overline{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and the edge relations \(\overline{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\). An \rgmapping, denoted as \(\zeta: R_v \cup R_e \to G\), is defined to map these relations to a property graph \(G = (V, E, \id, \lab, \attr)\), where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
+
+\begin{itemize}
+\item \textbf{Vertex Mapping}: For each vertex relation \(R_{v_i}\) in \(\overline{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v\) in a corresponding subset of \(V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attribute \(\attr(v, a_i)\) that mirror the attribute \(\attr(t, a_i)\) of \(t\).
+
+\item \textbf{Edge Mapping}: For the edge relations in \(\overline{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of vertices, determined by surjective mappings \(\lambda_s: R_{e} \to R_{v_s}\) and \(\lambda_t: R_{e} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are vertex relations in \(\overline{R_v}\). For each tuple \(t\) in \(R_{e_i}\), a corresponding edge \(e\) is defined, linking vertices that \rgmapping maps from \(t_s \in R_{v_s}\) and \(t_t \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(\attr(e, a_i)\) that reflect the attributes of \(t\).
+
+\end{itemize}
+
+
 Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
 \begin{itemize}
     \item $V$ is a finite set of vertices,
@@ -11,34 +27,36 @@ Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i 
     \item $\lambda: E \mapsto V \times V$ connects each edge $e$ with a tuple $(s, t)$ of source and target vertices,
     \item $\vlabel: V \mapsto 2^L$ assigns a set of labels to each vertex,
     \item $\elabel: E \mapsto T$ assigns a type to each edge,
-    \item $P_v$ is a set of vertex properties, where $p_v^i: V \mapsto D_i \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_i$ to each vertex. 
+    \item $P_v$ is a set of vertex properties, where $p_v^i: V \mapsto D_i \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_i$ to each vertex.
     In particular, if a vertex $v$ does not have the property $p_v^i$, $p_v^i(v) = \epsilon$,
-    \item $P_e$ is a set of edge properties, where $p_e^j: E \mapsto D_j \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_j$ to each edge. 
+    \item $P_e$ is a set of edge properties, where $p_e^j: E \mapsto D_j \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_j$ to each edge.
     In particular, if an edge $e$ does not have the property $p_e^j$, $p_e^j(e) = \epsilon$.
 \end{itemize}
 For simplicity, vertices and edges are collectively referred to as graph elements.
 Given a vertex $u \in V$, we write $u.prop$ to access the value of property $prop$ of $u$, and it is analogous for edges.
 
-Let $U = \{a_1, a_2, \ldots, a_n\}$ be a finite set of attributes, then $S = (a_1, a_2, \ldots, a_n)$ is called a schema over $U$. 
+
+
+
 The attributes of $S$ is denoted as $\attr(S) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
 
 A relation $R$ is a set of tuples, and $R$ is called to be over schema $S$ if and only if for each tuple $t \in R$, its $i$-th item (i.e., $t_i$) satisfies $t_i \in Dom(a_i)$.
 A relation can be represented as a relational table \cite{relation-as-table}.
-Given a property graph $G$, a graph schema is such a schema $S_g$ that $\forall a \in \attr(S_g)$, $\Dom(a) \subseteq V \cup E$. 
-In other words, each attribute of a graph schema is either a vertex or an edge. 
-A relation $GR$ over a graph schema $S_g$ (i.e. $\sch(GR) = S_g$) is called a graph relation. 
-% For simplicity, we denote $\attr(GR)$ in short for $\attr(S_g)$ with $\sch(R) = S$ to retrieve the attributes of a graph relation $GR$. 
-% We write $GR.a$ to access a given attribute $a$ in the relation $GR$. 
+Given a property graph $G$, a graph schema is such a schema $S_g$ that $\forall a \in \attr(S_g)$, $\Dom(a) \subseteq V \cup E$.
+In other words, each attribute of a graph schema is either a vertex or an edge.
+A relation $GR$ over a graph schema $S_g$ (i.e. $\sch(GR) = S_g$) is called a graph relation.
+% For simplicity, we denote $\attr(GR)$ in short for $\attr(S_g)$ with $\sch(R) = S$ to retrieve the attributes of a graph relation $GR$.
+% We write $GR.a$ to access a given attribute $a$ in the relation $GR$.
 
-% Given a graph relation $GR$, if $a \in \attr(GR) \subseteq V \cup E$, we can further access the property $p$ on the vertex/edge attribute via $p(GR.a)$ (or $p(a)$ if the graph relation $GR$ is clear in the context). 
-% Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge. 
+% Given a graph relation $GR$, if $a \in \attr(GR) \subseteq V \cup E$, we can further access the property $p$ on the vertex/edge attribute via $p(GR.a)$ (or $p(a)$ if the graph relation $GR$ is clear in the context).
+% Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge.
 To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation or a graph relation, while the term ``property'' always refers to the property of a graph element in this paper.
 
 \begin{definition}[RG Mapping, $\zeta$]
     Given a set of relations $SR$, an RG mapping $\zeta_{V_r, E_r, \mathcal{C}}$ maps $SR$ to a property graph $G = \zeta_{V_r, E_r, \mathcal{C}}(SR)$, where $V_r$ and $E_r$ are two subsets of $SR$ with $V_r \cap E_r = \emptyset$.
     $\mathcal{C}$ is a set of 7-tuples $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol})$, where $e_n$ is the name of a relation in $E_r$, $e_{scol}$ and $e_{tcol}$ are attributes of that relation.
     Similarly, $v_{sn}$ and $v_{tn}$ are names of relations in $V_r$, $v_{scol}$ and $v_{tcol}$ are attributes of these two relations respectively.
-    The resultant property graph $G$ satisfies that 
+    The resultant property graph $G$ satisfies that
     (1) Each vertex $u \in G.V$ corresponds to a row of a table in $V_r$, the label of $u$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row.
     (2) Each edge $e \in G.E$ corresponds to a row of tables in $E_r$, the label of $e$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row;
     (3) Given $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol}) \in \mathcal{C}$, $\forall e \in G.E$ with $\elabel(e) = e_n$, $\exists u_1, u_2 \in G.V$ with $\vlabel(u_1) = v_{sn}$ and $\vlabel(u_2) = v_{tn}$, we have $e_n.e_{scol} = u_1.v_{sn}$ and $e_n.e_{tcol} = u_2.v_{tcol}$.
@@ -62,7 +80,7 @@ Then, a graph relation containing the tuple is generated.
             )
     \end{lstlisting}
     Specifically, $V_r = \{Person, Message\}$, $E_r = \{Send\}$, and $\mathcal{C} = (Send,$ $pid, mid, Person, person\_id, Message, message\_id)$.
-    
+
 \end{example}
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
@@ -188,7 +206,7 @@ For simplicity, the definition of the expand-both operator is given as follows, 
     The expand-both operator is a mapping $\updownarrow_{(v)}^{(w:L)}[e] : \mathcal{J} \rightarrow \mathcal{J}$.
     For each record $c$ containing vertex $v$ and each edge $e$ satisfying $\lambda(e) = (v, w)$ (or $\lambda(e) = (w, v)$), a new record is created by appending ($e$, $w$) to $c$.
 \end{definition}
- 
+
 \begin{example}
     To get all the ``Teaching''' relationships between students and teachers, the following expression can be used:
     \begin{equation*}
@@ -221,7 +239,7 @@ The natural join operator can be expressed as follows:
         \begin{split}
             & \pi_{v_3\text{.name}}( \\
             & \hspace{1em} (\downarrow_{(v_c)}^{(v_3\text{:Person})}[\text{:Teaching}]\updownarrow_{(v_1)}^{(v_c\text{:Person})}[\text{:Friend}]\sigma_{v_1\text{.name=``Alice''}}(\bigcirc_{(v_1\text{:Person})})) \\
-            & \hspace{1em} \Join (\updownarrow_{(v_2)}^{(v_c\text{:Person})}[\text{:Friend}]\sigma_{v_2\text{.name=``Bob''}}(\bigcirc_{(v_2\text{:Person})}))\\ 
+            & \hspace{1em} \Join (\updownarrow_{(v_2)}^{(v_c\text{:Person})}[\text{:Friend}]\sigma_{v_2\text{.name=``Bob''}}(\bigcirc_{(v_2\text{:Person})}))\\
             & )
         \end{split}
     \end{equation*}
@@ -246,7 +264,7 @@ Specifically, `*' can be $\uparrow$ or $\downarrow$, representing sorting the re
 The results of the sort operator are put in an ordered list rather than a bag.
 
 The top operator $\lambda_k^s$ skips the first $s$ records in the input list, and return the next $k$ records as the outputs.
-Since the \emph{bag} semantics are applied in graph relations, the records are unsorted by default and the top operator is meaningless in such bags. 
+Since the \emph{bag} semantics are applied in graph relations, the records are unsorted by default and the top operator is meaningless in such bags.
 Therefore, the sort operator is usually applied before the top operator is used.
 
 \begin{example}
@@ -326,7 +344,7 @@ For example, the filter operators, i.e., $\sigma_d$ cannot be pushed into $\wide
 For $Rel\&G$, such optimizations are allowed.
 \fi
 
-% The search space for relgo in the context of a SPJG query consists of operator trees that correspond to sequence of join operators, e.g., the sequence 
+% The search space for relgo in the context of a SPJG query consists of operator trees that correspond to sequence of join operators, e.g., the sequence
 % \begin{lstlisting}
 %     Join(Join(Join(Join(GR_1, GR_2), R_1), R_2), R_3)
 % \end{lstlisting}
@@ -345,7 +363,7 @@ We start from the case that there is only one path in the specified pattern, and
 Then, we have the following theorem.
 
 \begin{theorem}
-    Homomorphic pattern matching with a path pattern can be expressed with graph relational algebra expressions. 
+    Homomorphic pattern matching with a path pattern can be expressed with graph relational algebra expressions.
 \end{theorem}
 \begin{proof}
     The graph relational algebra operators related to pattern matching include source, expand, join, and extend-intersect.
@@ -360,9 +378,9 @@ Then, we have the following theorem.
 
     Then, suppose for a path pattern with at most $n$ elements, the corresponding algebra expressions have the same meaning as matching the path pattern.
     Denote a graph relational algebra with the same meaning as matching path pattern $P$ by $E_p$.
-    
+
     When there are $n + 1$ elements in the path pattern $P$:
-    
+
     %Condition 1: $P = P_1, P_2$, i.e., pattern $P$ is obtained by concatenating subpatterns $P_1$ and $P_2$.
     %(e.g., $P_1 = (u)-[e]-(v), P_2 = (u)-[e']-(w), P = (u)-[e]-(v), (u)-[e']-(w)$).
     %Then, $E_{p_1} \Join E_{p_2}$ equals $P$, since join operator implemented in relational databases follows the semantics of homomorphism.
@@ -378,7 +396,7 @@ Then, we have the following theorem.
     The expand operator is also implemented by joining relational tables, which follows the semantics of homomorphism.
 
     Condition 2: $P = P_1$ extends $v$ through edges $[e_1:eLabel1], \cdots [e_k:eLabelk]$ ($k \geq 1$), i.e., at least one vertex in $P_1$ connects to vertex $v$.
-    Then, the corresponding algebra expression of $P$ is 
+    Then, the corresponding algebra expression of $P$ is
     \begin{equation*}
         E_{p_1} \Diamond_{v_1, \cdots, v_k}^{eLabel1, \cdots, eLabelk} \bigcirc_{(v:vLabel)}.
     \end{equation*}

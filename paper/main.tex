@@ -114,7 +114,7 @@
   language={pgq},
   basicstyle=\lst@ifdisplaystyle\fontsize{8.5}{10.2}\fi\ttfamily, % Global Code Style
   extendedchars=true, % Allows 256 instead of 128 ASCII characters
-  tabsize=2, % number of spaces indented when discovering a tab 
+  tabsize=2, % number of spaces indented when discovering a tab
   columns=fullflexible, % fixed to make all characters equal width (but adds too much whitespace!)
   keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
   showstringspaces=false, % lets spaces in strings appear as real spaces
@@ -145,11 +145,11 @@
 \newcommand\vldbyear{2020}
 % should be fine as it is
 \newcommand\vldbauthors{\authors}
-\newcommand\vldbtitle{\shorttitle} 
+\newcommand\vldbtitle{\shorttitle}
 % leave empty if no availability url should be set
 \newcommand\vldbavailabilityurl{URL_TO_YOUR_ARTIFACTS}
 % whether page numbers should be shown or not, use 'plain' for review versions, 'empty' for camera ready
-\newcommand\vldbpagestyle{plain} 
+\newcommand\vldbpagestyle{plain}
 
 
 \def\ojoin{\setbox0=\hbox{$\bowtie$}%
@@ -171,11 +171,11 @@
 \newcommand{\vars}{\kw{vars}}
 \newcommand{\vlabel}{\mathcal{L}}
 \newcommand{\elabel}{\mathcal{T}}
-\newcommand{\lab}{\kw{Label}}
+\newcommand{\lab}{\kw{label}}
 \newcommand{\type}{\kw{Type}}
-\newcommand{\labx}{\kwnospace{Label}}
-\newcommand{\id}{\kw{Id}}
-\newcommand{\idx}{\kwnospace{Id}}
+\newcommand{\labx}{\kwnospace{label}}
+\newcommand{\id}{\kw{id}}
+\newcommand{\idx}{\kwnospace{id}}
 \newcommand{\shortest}{\kw{min}}
 \newcommand{\simple}{\kw{simple}}
 \newcommand{\pred}{\kw{pred}}
@@ -206,6 +206,7 @@
 \newcommand{\either}{\kw{Either}}
 \newcommand{\todo}[1]{\textcolor{red}{$\Rightarrow$#1}}
 
+
 \newcommand{\kk}[1]{\texttt{#1}}
 \newcommand{\scan}{{\kk{SCAN}}}
 \newcommand{\expandedge}{{\kk{EXPAND}\_\kk{EDGE}}}
@@ -219,6 +220,9 @@
 \newcommand{\trimrule}{\kw{FieldTrimRule}}
 \newcommand{\intersectrule}{\kw{SetPullUpRule}}
 \newcommand{\expandintersectrule}{\kw{ExtendIntersectRule}}
+
+\newcommand{\rgmapping}{\kw{RGMapping}}
+\newcommand{\schema}{\kw{schema}}
 
 
 \begin{document}
