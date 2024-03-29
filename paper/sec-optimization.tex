@@ -27,8 +27,8 @@ Formally, the equation rule w.r.t.~\filterrule is as follows:
     \begin{split}
         & \pi_A(\sigma_{\theta}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n)) \\
         & \hspace*{2em} \equiv \pi_A(\sigma_{\theta_0}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_{1, \theta_1} \Join \cdots \Join \widetilde{R}_n)), \\
-        & \hspace*{4em} \text{where } \widetilde{R}_{1} = \widehat{\pi}_{col_1}(\mathcal{M}(V, E, \mathcal{P}_1)) \\
-        & \hspace*{4em} \text{and } \widetilde{R}_{1,\theta_1} = \widehat{\pi}_{col_1}(\mathcal{M}(V, E, \mathcal{P}_{1,\theta_1}))
+        & \hspace*{4em} \text{where } \widetilde{R}_{1} = \widehat{\pi}_{col_1}(\mathcal{M}(GR, \mathcal{P}_1)) \\
+        & \hspace*{4em} \text{and } \widetilde{R}_{1,\theta_1} = \widehat{\pi}_{col_1}(\mathcal{M}(GR, \mathcal{P}_{1,\theta_1}))
     \end{split}
 \end{equation}
 where $\theta_1$ is the constraints related to $\widetilde{R}_1$ in $\theta$ and $\theta_0$ is obtained by removing $\theta_1$ from $\theta$.
@@ -51,11 +51,11 @@ This is accomplished by adding projection operators to the match scanning plans.
 Formally, an example of applying \trimrule is as follows:
 \begin{equation}
     \begin{split}
-        \mathcal{M}(V, E, \mathcal{P}) & \Rightarrow \cdots \Join \mathcal{M}(V, E, \mathcal{P}_{sub}) \Join \cdots \\
-        & \Rightarrow \cdots \Join \pi_{u_1, \cdots, u_k}(\mathcal{M}(V, E, \mathcal{P}_{sub})) \Join \cdots,
+        \mathcal{M}(GR, \mathcal{P}) & \Rightarrow \cdots \Join \mathcal{M}(GR, \mathcal{P}_{sub}) \Join \cdots \\
+        & \Rightarrow \cdots \Join \pi_{u_1, \cdots, u_k}(\mathcal{M}(GR, \mathcal{P}_{sub})) \Join \cdots,
     \end{split} 
 \end{equation}
-where $\mathcal{M}(V, E, \mathcal{P}_{sub})$ is a minimum matching component and $u_1, \cdots, u_k$ are necesary properties.
+where $\mathcal{M}(GR, \mathcal{P}_{sub})$ is a minimum matching component and $u_1, \cdots, u_k$ are necesary properties.
 
 \fusionrule. 
 The \fusionrule~ is a graph-centric rule. 

@@ -17,6 +17,7 @@ Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i 
     In particular, if an edge $e$ does not have the property $p_e^j$, $p_e^j(e) = \epsilon$.
 \end{itemize}
 For simplicity, vertices and edges are collectively referred to as graph elements.
+Given a vertex $u \in V$, we write $u.prop$ to access the value of property $prop$ of $u$, and it is analogous for edges.
 
 Let $U = \{a_1, a_2, \ldots, a_n\}$ be a finite set of attributes, then $S = (a_1, a_2, \ldots, a_n)$ is called a schema over $U$. 
 The attributes of $S$ is denoted as $\attr(S) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
@@ -33,28 +34,36 @@ A relation $GR$ over a graph schema $S_g$ (i.e. $\sch(GR) = S_g$) is called a gr
 % Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge. 
 To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation or a graph relation, while the term ``property'' always refers to the property of a graph element in this paper.
 
-It is easy to convert relational tables (relations) to a graph relation.
-Given a set of relational tables $T$, some of tables can be regarded as vertices in a property graph (denoted by vertex tables), while others can be regarded as edges (denoted by edge tables).
-For instance, according to the grammar of SQL/PGQ, with the following statement, a graph view can be generated.
-\begin{lstlisting}
-    CREATE PROPERTY GRAPH graph_view
-        VERTEX TABLES (
-            Person KEY(person_id),
-            Message KEY(message_id)
-        )
-        EDGE TABLES (
-            Send KEY(pid, mid) SOURCE KEY(pid) REFERENCE Person(person_id) DESTINATION KEY(mid) REFERENCE Message(message_id)
-        )
-\end{lstlisting}
-Specifically, rows in tables Person and Message are utilized as vertices and rows in table Send are edges, and a graph view is constructed.
-It indicates that the attributes of graph relations, which are graph elements, come from rows of relational tables.
-These vertices and edges can form a tuple representing a property graph.
-Then, a graph relation that consists of this tuple is obtained.
+\begin{definition}[RG Mapping, $\zeta$]
+    Given a set of relations $SR$, an RG mapping $\zeta_{V_r, E_r, \mathcal{C}}$ maps $SR$ to a property graph $G = \zeta_{V_r, E_r, \mathcal{C}}(SR)$, where $V_r$ and $E_r$ are two subsets of $SR$ with $V_r \cap E_r = \emptyset$.
+    $\mathcal{C}$ is a set of 7-tuples $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol})$, where $e_n$ is the name of a relation in $E_r$, $e_{scol}$ and $e_{tcol}$ are attributes of that relation.
+    Similarly, $v_{sn}$ and $v_{tn}$ are names of relations in $V_r$, $v_{scol}$ and $v_{tcol}$ are attributes of these two relations respectively.
+    The resultant property graph $G$ satisfies that 
+    (1) Each vertex $u \in G.V$ corresponds to a row of a table in $V_r$, the label of $u$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row.
+    (2) Each edge $e \in G.E$ corresponds to a row of tables in $E_r$, the label of $e$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row;
+    (3) Given $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol}) \in \mathcal{C}$, $\forall e \in G.E$ with $\elabel(e) = e_n$, $\exists u_1, u_2 \in G.V$ with $\vlabel(u_1) = v_{sn}$ and $\vlabel(u_2) = v_{tn}$, we have $e_n.e_{scol} = u_1.v_{sn}$ and $e_n.e_{tcol} = u_2.v_{tcol}$.
+\end{definition}
 
+A set of relations can be transformed to a property graph with an RG mapping.
+Clearly, a property graph $G$ can be further transformed to a graph relation by constructing a tuple consisting of the vertices and edges in $G$.
+Then, a graph relation containing the tuple is generated.
 
-A graph relation $GR$ can be represented as a set of property graphs, where each property graph in the set represents a tuple in $GR$ and the graph elements in the property graphs correspond to the attributes of $GR$.
-To retrieve the labels of graph elements, the relational tables that the graph elements come from are obtained, and the names of the tables are the labels.
-The process of retrieving the properties of the graph elements is similar to that of retrieving labels.
+\begin{example}
+    According to the grammar of SQL/PGQ, an RG mapping is defined with the \lstinline{CREATE PROPERTY GRAPH} statement.
+    For instance, an RG mapping is presented as follows.
+    \begin{lstlisting}
+        CREATE PROPERTY GRAPH graph_view
+            VERTEX TABLES (
+                Person PROPERTIES(person_id, name),
+                Message PROPERTIES(message_id, content)
+            )
+            EDGE TABLES (
+                Send SOURCE KEY(pid) REFERENCE Person(person_id) DESTINATION KEY(mid) REFERENCE Message(message_id)
+            )
+    \end{lstlisting}
+    Specifically, $V_r = \{Person, Message\}$, $E_r = \{Send\}$, and $\mathcal{C} = (Send,$ $pid, mid, Person, person\_id, Message, message\_id)$.
+    
+\end{example}
 
 In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
@@ -70,9 +79,12 @@ Since the semantics of these operators remain unchanged, the description of thes
 The formal definition of the matching operator is as follows.
 
 \begin{definition}[Matching Operator, $\mathcal{M}$]
-    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ return a graph relation consisting of the subgraphs matching the pattern.
+    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ returns a graph relation consisting of the subgraphs matching the pattern.
     $\mathcal{Q}$ is the set of possible patterns.
 \end{definition}
+
+By default, the matching operator adopts the homomorphism semantics.
+Therefore, in the output graph relation of the matching operator, each row is a tuple of vertices and edges, whose corresponding property graph is homomorphic to the given pattern.
 
 A special kind of projection is graph projection $\widehat{\pi}_{prop} : \mathcal{J}_{GR} \rightarrow \mathcal{J}_{R}$ that maps graph relations to relations.
 $\widehat{\pi}_{prop}$ is always used immediately following the matching operator to map vertices and edges to their properties, respectively.
@@ -291,10 +303,10 @@ The definition of an SPJM query is as follows:
 \end{equation*}
 where
 \begin{equation*}
-    \tilde{R}_i = \hat{\pi}_{prop_i}(\mathcal{M}(GR, \mathcal{P}))
+    \tilde{R}_i = \hat{\pi}_{prop_i}(\mathcal{M}(GR_i, \mathcal{P}_i))
 \end{equation*}
 is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
-Besides, $GR$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}$ is the pattern.
+Besides, $GR_i$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}_i$ is the pattern.
 $prop_i$ is a list of necessary properties of vertices and edges in the resultant relation.
 
 \iffalse
