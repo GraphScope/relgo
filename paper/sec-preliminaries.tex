@@ -9,7 +9,7 @@ A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relati
 Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
-Consider two distinct sets of relations: \(\overline{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\overline{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\). An \rgmapping, denoted as \(\zeta: R_v \cup R_e \to G\), is defined to map these relations to a property graph \(G = (V, E, \id, \lab, \attr)\), where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
+Consider two distinct sets of relations: \(\overline{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\overline{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\). An \rgmapping, denoted as \(\zeta: \overline{R_v} \cup \overline{R_e} \to G\), is defined to map these relations to a property graph \(G = (V, E, \id, \lab, \attr)\), where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
 
 \begin{itemize}
 \item \textbf{Vertex Mapping}: For each vertex relation \(R_{v_i}\) in \(\overline{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v\) in a corresponding subset of \(V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attribute \(\attr(v, a_i)\) that mirror the attribute \(\attr(t, a_i)\) of \(t\).
