@@ -6,71 +6,32 @@
 
 A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
-Moreover, for any tuple \(t\) in the relation \(R\), the notation \(t.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
-To formalize the integration of graph syntax within the realm of relational data, we reference the property graph model as outlined in~\cite{property-graph}. In this context, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
+Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\), or \(t.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
+
+We define a \emph{Property Graph} as $G(V_G, E_G, \id, \lab, \attr)$\footnote{Note that we may write $G = (V_G, E_G)$ for simplicity in the following.}, where
+\begin{itemize}
+    \item $V_G$ stands for the set of vertices. For each $v \in V_G$, we denote $\id(v)$, $\lab(v)$ as the globally unique identifier and the label of $v$, respectively. Given an attribute $a_i$, $\attr(v, a_i)$, or $v.a_i$, denotes the value of the attribute $a$ of $v$.
+    \item $E_G \subseteq V \times V$ stands for the set of edges. For each $e = (s, t) \in E_G$ from the source vertex
+    $s \in V_G$ pointing to the target vertex $t \in V_G$, we use $\lab(e)$ to denote the label of $e$, and $\attr(e, a_i)$, or $e.a_i$, to denote the value of the attribute $a_i$ of $e$.
+\end{itemize}
+
+
+To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
 \begin{definition}[\rgmapping, $\zeta$]
 \label{def:rgmapping}
-Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E, \id, \lab)\)\footnote{Note that we will write $G = (V, E)$ for simplicity in the following.}, where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
+Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V_G, E_G)\). This mapping is elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
+\item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V_G\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
 
-\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of vertices, determined by \emph{total} functions \(\lambda_s: R_{e_i} \to R_{v_s}\) and \(\lambda_t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e\) is defined, linking vertices that \rgmapping maps from \(\lambda_s(t) \in R_{v_s}\) and \(\lambda_t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
+\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of relations, determined by \emph{total} functions \(\lambda_s: R_{e_i} \to R_{v_s}\) and \(\lambda_t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e \in E_G\) is defined, linking vertices that \rgmapping maps from \(\lambda_s(t) \in R_{v_s}\) and \(\lambda_t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
 
 \end{itemize}
 \end{definition}
 
 \todo{refine examples}
-
-\comment{
-Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
-\begin{itemize}
-    \item $V$ is a finite set of vertices,
-    \item $E$ is a finite set of edges,
-    \item $\lambda: E \mapsto V \times V$ connects each edge $e$ with a tuple $(s, t)$ of source and target vertices,
-    \item $\vlabel: V \mapsto 2^L$ assigns a set of labels to each vertex,
-    \item $\elabel: E \mapsto T$ assigns a type to each edge,
-    \item $P_v$ is a set of vertex properties, where $p_v^i: V \mapsto D_i \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_i$ to each vertex.
-    In particular, if a vertex $v$ does not have the property $p_v^i$, $p_v^i(v) = \epsilon$,
-    \item $P_e$ is a set of edge properties, where $p_e^j: E \mapsto D_j \cup \{\epsilon\}$ is a partial function that assigns a property value in $D_j$ to each edge.
-    In particular, if an edge $e$ does not have the property $p_e^j$, $p_e^j(e) = \epsilon$.
-\end{itemize}
-For simplicity, vertices and edges are collectively referred to as graph elements.
-Given a vertex $u \in V$, we write $u.prop$ to access the value of property $prop$ of $u$, and it is analogous for edges.
-
-
-
-
-The attributes of $S$ is denoted as $\attr(S) = U$. The value of each attribute $a \in \attr(S)$ comes from specific domain, denoted as $\Dom(a)$.
-
-A relation $R$ is a set of tuples, and $R$ is called to be over schema $S$ if and only if for each tuple $t \in R$, its $i$-th item (i.e., $t_i$) satisfies $t_i \in Dom(a_i)$.
-A relation can be represented as a relational table \cite{relation-as-table}.
-Given a property graph $G$, a graph schema is such a schema $S_g$ that $\forall a \in \attr(S_g)$, $\Dom(a) \subseteq V \cup E$.
-In other words, each attribute of a graph schema is either a vertex or an edge.
-A relation $GR$ over a graph schema $S_g$ (i.e. $\sch(GR) = S_g$) is called a graph relation.
-% For simplicity, we denote $\attr(GR)$ in short for $\attr(S_g)$ with $\sch(R) = S$ to retrieve the attributes of a graph relation $GR$.
-% We write $GR.a$ to access a given attribute $a$ in the relation $GR$.
-
-% Given a graph relation $GR$, if $a \in \attr(GR) \subseteq V \cup E$, we can further access the property $p$ on the vertex/edge attribute via $p(GR.a)$ (or $p(a)$ if the graph relation $GR$ is clear in the context).
-% Particularly, we use $\id$ and $\lab$/$\type$ to denote the built-in properties of the globally unique identifier and label/type of a vertex/edge.
-To clarify ambiguity, the term ``attribute'' always refers to the attribute of a relation or a graph relation, while the term ``property'' always refers to the property of a graph element in this paper.
-
-\begin{definition}[RG Mapping, $\zeta$]
-    Given a set of relations $SR$, an RG mapping $\zeta_{V_r, E_r, \mathcal{C}}$ maps $SR$ to a property graph $G = \zeta_{V_r, E_r, \mathcal{C}}(SR)$, where $V_r$ and $E_r$ are two subsets of $SR$ with $V_r \cap E_r = \emptyset$.
-    $\mathcal{C}$ is a set of 7-tuples $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol})$, where $e_n$ is the name of a relation in $E_r$, $e_{scol}$ and $e_{tcol}$ are attributes of that relation.
-    Similarly, $v_{sn}$ and $v_{tn}$ are names of relations in $V_r$, $v_{scol}$ and $v_{tcol}$ are attributes of these two relations respectively.
-    The resultant property graph $G$ satisfies that
-    (1) Each vertex $u \in G.V$ corresponds to a row of a table in $V_r$, the label of $u$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row.
-    (2) Each edge $e \in G.E$ corresponds to a row of tables in $E_r$, the label of $e$ equals the name of the table, the properties of $u$ corresponds to the attributes of the row;
-    (3) Given $(e_n, e_{scol}, e_{tcol}, v_{sn}, v_{scol}, v_{tn}, v_{tcol}) \in \mathcal{C}$, $\forall e \in G.E$ with $\elabel(e) = e_n$, $\exists u_1, u_2 \in G.V$ with $\vlabel(u_1) = v_{sn}$ and $\vlabel(u_2) = v_{tn}$, we have $e_n.e_{scol} = u_1.v_{sn}$ and $e_n.e_{tcol} = u_2.v_{tcol}$.
-\end{definition}
-
-A set of relations can be transformed to a property graph with an RG mapping.
-Clearly, a property graph $G$ can be further transformed to a graph relation by constructing a tuple consisting of the vertices and edges in $G$.
-Then, a graph relation containing the tuple is generated.
-}
 
 \begin{example}
     According to the grammar of SQL/PGQ, an RG mapping is defined with the \lstinline{CREATE PROPERTY GRAPH} statement.
@@ -91,256 +52,55 @@ Then, a graph relation containing the tuple is generated.
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
-\subsection{Relational Matching Algebra}
+\subsection{Matching Operator}
 \label{sec:graph-relational-algebra}
-Graph pattern matching lies at the core of graph query processing, and is also the most fundamental extension in SQL/PGQ~\cite{sqlpgq}.
-%In this work, we extend the conventional relational algebra to equip it with the capability to handle graph pattern matching.
-With \rgmapping to transform relational data into a property graph $G(V, E)$, we introduce a new algebra that can handle both relational and graph data.
-Let $GR$ denote a graph relation over a schema $S = (v_1, v_2, \ldots, v_n, e_1, e_2, \ldots, e_m)$, where the domain of each $v_i$
-is the vertex set $V$, and the domain of each $e_j$ is the edge set $E$ in $G$, respectively.
-A graph relation \(GR\) can be seamlessly transformed into a traditional relation \(R\) via a specialized projection operator, \(\widehat{\pi}_{v_1.a_{v_1}, \ldots, e_1.a_{e_1}, \ldots}\). This operator meticulously projects each vertex and edge onto specified attributes. Consequently, the resultant relation \(R\) is fully compatible with conventional relational operations, thus enabling the integration of graph-based data within the realm of existing relational databases. %and facilitating a holistic approach to data management and query processing.
+In this work, we extend the conventional relational algebra to equip it with the capability to handle graph pattern matching, which lies at the core of graph query processing, and is also the most fundamental extension in SQL/PGQ~\cite{sqlpgq}.
 
+Given a property graph $G(V_G, E_G)$, we let $GR$ denote a graph relation over a schema $S = (v_1, v_2, \ldots, v_n, e_1, e_2, \ldots, e_m)$, where the domain of each $v_i$
+is the vertex set $V_G$, and the domain of each $e_j$ is the edge set $E_G$ in $G$, respectively.
+ %and facilitating a holistic approach to data management and query
 
-The new algebra is named relational matching algebra.
-The relational matching algebra expands the domain and range of the operators in relational algebra and introduces a new operator, i.e., the matching operator.
-Specifically, the inputs and outs of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are allowed to be relations and graph relations.
-In other words, in relational matching algebra, these operators act on relations or graph relations, and their outputs are also relations or graph relations.
-Since the semantics of these operators remain unchanged, the description of these operators are omitted.
-The formal definition of the matching operator is as follows.
+We further consider a pattern graph, denoted as \(\pattern(V_\pattern, E_\pattern)\), that is a property graph without attributes. %Graph pattern matching is defined as the task of identifying all subgraphs within a target graph \(G\) that are \emph{homomorphic} to \(\pattern\).
+Graph pattern matching seeks to determine all \emph{total} mappings \(\sigma: V_\pattern \cup E_\pattern \to V_G \cup E_G\) that satisfy the following conditions: (1) For every vertex \(v \in V_\pattern\), there is a corresponding vertex \(\sigma(v) \in V_G\) with \(\lab(v) = \lab(\sigma(v))\); (2) For each edge \(e = (u_s, u_t) \in E_\pattern\), there is a corresponding edge \(\sigma(e) = (v_s, v_t) \in E_G\), ensuring that the mapping preserves the edge's the label, as well as its source and target vertices , that is \(\lab(e) = \lab(\sigma(e))\), and \(\sigma(u_s) = v_s\), \(\sigma(u_t) = v_t\). It's important to highlight that we employ homomorphism semantics~\cite{angles2017foundations} for graph pattern matching. This means that we do not require each pattern vertex and edge being uniquely mapped to distinct vertices and edges in the data graph. This facilitates a seamless integration between graph pattern matching and relational operations, as will be further discussed in~\reflem{xx}.
 
-\begin{definition}[Matching Operator, $\mathcal{M}$]
-    Given a graph relation $GR$ representing the data graph and a pattern $\mathcal{P}$, the matching operator takes a graph relation and a pattern as inputs, and outputs a graph relation $GR_{out}$ as the result, i.e., $\mathcal{M}(GR, \mathcal{P}) \rightarrow GR_{out}$.
-    The graph relation consists of the subgraphs matching the pattern.
-    % $\mathcal{M}: \mathcal{J}_{GR} \times \mathcal{Q} \rightarrow \mathcal{J}_{GR}$ returns a graph relation consisting of the subgraphs matching the pattern.
-    % $\mathcal{Q}$ is the set of possible patterns.
+The formulation of graph relation inherently positions any graph $G$ as a graph relation consisting of a single tuple that encapsulates the entirety of its vertices and edges.
+Furthermore, the results of graph pattern matching are likewise expressible as a graph relation \(GR_G(\pattern)\) (or \(GR(\pattern)\) for short when the context is clear) based on the schema \(S = V_\pattern \cup E_\pattern\), wherein \(V_G\) and \(E_G\) act as the domains for the vertices and edges that have been matched, respectively. In this context, we introduce the \emph{Match} operator as detailed below.
+
+\begin{definition}[Match Operator, \(\matching\)]
+    Given a graph relation \(GR\) and a pattern graph \(\pattern\) as inputs, the match operator executes graph pattern matching of \(\pattern\) against each graph \(g\) contained within \(GR\). It produces a graph relation \(GR_{out}\), which represents the aggregation of all mappings from \(\pattern\) to \(g\). Formally, this can be described as \(\matching(GR, \pattern) = \bigcup_{g \in GR} GR_g(\pattern)\).
 \end{definition}
-
-By default, the matching operator adopts the homomorphism semantics.
-Therefore, in the output graph relation of the matching operator, each row is a tuple of vertices and edges, whose corresponding property graph is homomorphic to the given pattern.
-
-A special kind of projection is graph projection that maps graph relations to relations.
-%$\widehat{\pi}_{prop} : \mathcal{J}_{GR} \rightarrow \mathcal{J}_{R}$ that maps graph relations to relations.
-$\widehat{\pi}_{prop}$ is always used immediately following the matching operator to map vertices and edges to their properties, respectively.
-
-
-\iffalse
-Please note that the matching operator adopts homomorphism semantics by default.
-The matching operator is a logical concept and has varied physical implementations.
-For example, by applying the selection operator to filter the input tables based on specified constraints, one can obtain tables consisting of nodes and edges with various labels.
-Then, by associating these tables through hash join, homomorphic subgraphs corresponding to the pattern can be found.
-Please note that the results of pattern matching can be correctly obtained through joins between tables, and it is proven in Sec.~\ref{sec:proof-gpm-gro}.
-Clearly, replacing hash join with other join methods like merge join or changing the join order can yield more physical implementations of the matching operator.
-\fi
-
-
-
-
-
-\iffalse
-\subsubsection{Source}
-The source operator gets vertices from a graph according to the constraints specified on the labels of the vertices.
-
-\begin{definition}
-    The source operator $\bigcirc_{(v:l_1, \cdots, l_k)}$ gets a set of vertices from the graph.
-    Each obtained vertex should contain the specified labels $l_1, \cdots, l_k$.
-\end{definition}
-
-\begin{figure*}
-    \centering
-    \begin{subfigure}[b]{0.4\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/example-graph.png}
-        \caption{Example Graph.}
-        \label{fig:example-graph}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.4\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/example-graph.png}
-        \caption{Formal Definition of Example Graph.}
-        \label{fig:example-graph-def}
-    \end{subfigure}
-    \caption{Definition of an example graph.}
-    \label{fig:example-graph-full}
-\end{figure*}
-
-\begin{example}
-    Suppose property graph $G = (V, E, \lambda, L, T, \mathcal{L}, \mathcal{T}, P_v, P_e)$ represents the relationships among persons.
-    The property graph is shown in Fig.~\ref{fig:example-graph}.
-    Then, to find all the persons with label \text{Student}, the corresponding expression is:
-    \begin{equation*}
-        \bigcirc_{(v_1\text{:Person})}.
-    \end{equation*}
-\end{example}
-
-
-\subsubsection{Selection}
-
-The selection operator is used to filter out the records that do not satisfy the specified constraints.
-The formal definition of the selection operator is as follows.
-
-\begin{definition}
-    The selection operator is a mapping $\sigma_d : \mathcal{J} \rightarrow \mathcal{J}$, where $d$ represents the constraints the resultant records should satisfy.
-\end{definition}
-
-\begin{example}
-    To find all the students whose name is ``Bob'', the following expression can be used:
-    \begin{equation*}
-        \sigma_{v_1.\text{name} = ``Bob''}\bigcirc_{(v_1\text{:Student})}.
-    \end{equation*}
-\end{example}
-
-\subsubsection{Projection}
-The projection operator bridges the gap between graphs and tables, which make it possible to combine graph and relational queries.
-Its formal definition is as follows.
-
-\begin{definition}
-    The projection operator is a mapping $\pi : \mathcal{J} \rightarrow \mathcal{J}$, which maps vertices and edges to a subset of them or their properties, and maps other attributes to a subset of them.
-\end{definition}
-
-Please note that if the resultant records of a projection operator cannot contain any vertex or edge, then it is called a flatten projection operator $\hat{\pi} : \mathcal{J} \rightarrow \mathcal{J}_D$.
-A flatten projection operator can convert a property graph to a relational table.
-
-\begin{example}
-    Suppose we are going to get a relational table of persons, and the schema of the table is (name, age).
-    Then, the following expression can achieve the goal.
-    \begin{equation*}
-        \pi_{v.name, v.age}(\bigcirc_{(v:Person)}).
-    \end{equation*}
-\end{example}
-
-\subsubsection{Expand}
-
-The expand operator gets the edges adjacent to the given vertices.
-Based on the direction of the expansion, the expand operator can be categorized into three types, i.e., expand-out ($\uparrow$), expand-in ($\downarrow$), and expand-both ($\updownarrow$).
-For simplicity, the definition of the expand-both operator is given as follows, and those of expand-out and expand-in are similar.
-
-\begin{definition}
-    The expand-both operator is a mapping $\updownarrow_{(v)}^{(w:L)}[e] : \mathcal{J} \rightarrow \mathcal{J}$.
-    For each record $c$ containing vertex $v$ and each edge $e$ satisfying $\lambda(e) = (v, w)$ (or $\lambda(e) = (w, v)$), a new record is created by appending ($e$, $w$) to $c$.
-\end{definition}
-
-\begin{example}
-    To get all the ``Teaching''' relationships between students and teachers, the following expression can be used:
-    \begin{equation*}
-        \downarrow_{(v)}^{(v_t\text{:Teacher})}[\text{:Teaching}]\bigcirc_{(v\text{:Student})}.
-    \end{equation*}
-\end{example}
-
-\subsubsection{Join}
-
-The join operator can join two relational tables or join two property graphs.
-Similar to that in relational algebra, the join operator in graph relational algebra also has many types, such as natural join ($\Join$), left-outer join, and right-outer join.
-For simplicity, the definition of natural join is proposed, and those of other types of joins is similar.
-
-\begin{definition}
-    The natural join operator $\Join : \mathcal{J} \times \mathcal{J} \rightarrow \mathcal{J}$ combines two relations if they have the same values on common attributes.
-\end{definition}
-
-The natural join operator can be expressed as follows:
-\begin{equation*}
-    \begin{split}
-        & R \Join P = \sigma_{R.a_1 = P.a_1 \land \cdots \land R.a_k = P.a_k}(R \times P), \\
-        & \hspace{2em} \text{where } \text{attr(sch($R$))} \cap \text{attr(sch($P$))} = \{a_1, \cdots, a_k\}
-    \end{split}
-\end{equation*}
-
-\begin{example}
-    To obtain the names of the teachers who teach the common friends of Alice and Bob, the following expression can be used:
-    \begin{equation*}
-        \footnotesize
-        \begin{split}
-            & \pi_{v_3\text{.name}}( \\
-            & \hspace{1em} (\downarrow_{(v_c)}^{(v_3\text{:Person})}[\text{:Teaching}]\updownarrow_{(v_1)}^{(v_c\text{:Person})}[\text{:Friend}]\sigma_{v_1\text{.name=``Alice''}}(\bigcirc_{(v_1\text{:Person})})) \\
-            & \hspace{1em} \Join (\updownarrow_{(v_2)}^{(v_c\text{:Person})}[\text{:Friend}]\sigma_{v_2\text{.name=``Bob''}}(\bigcirc_{(v_2\text{:Person})}))\\
-            & )
-        \end{split}
-    \end{equation*}
-\end{example}
-
-\subsubsection{Aggregation}
-The aggregation operator groups the records according to the values of the specified attributes, and output new records that may contain aggregated values.
-The aggregation operator is denoted by $\gamma_{c_1, \cdots, c_i}^{o_1, \cdots, o_j}$.
-Specifically, the records are grouped according to attributes $c_1, \cdots, c_i \in V \cup E \cup D$, and $o_1, \cdots, o_j$ are the outputed new attributes.
-
-\begin{example}
-    To count the number of students taught by David, the following expression can be used:
-    \begin{equation*}
-        \gamma_{}^{count(v_s)}\uparrow_{(v_1)}^{(v_s:Student)}[\text{:Teaching}]\sigma_{v_1\text{.name=``David''}}(\bigcirc_{(v_1:Person)})
-    \end{equation*}
-\end{example}
-
-\subsubsection{Sorting and Top}
-
-The sort operator $\tau_{* a_1, \cdots, * a_n}$ is used to sort the input graph relation according to attributes $a_1, \cdots, a_n \in D$.
-Specifically, `*' can be $\uparrow$ or $\downarrow$, representing sorting the records ascendingly or descendingly, respectively.
-The results of the sort operator are put in an ordered list rather than a bag.
-
-The top operator $\lambda_k^s$ skips the first $s$ records in the input list, and return the next $k$ records as the outputs.
-Since the \emph{bag} semantics are applied in graph relations, the records are unsorted by default and the top operator is meaningless in such bags.
-Therefore, the sort operator is usually applied before the top operator is used.
-
-\begin{example}
-    To obtain the most aged five teachers, the utilized expression can be as follows:
-    \begin{equation*}
-        \lambda_{0}^{5}\tau_{\downarrow \text{age}}(\bigcirc_{(v_1\text{:Teacher})})
-    \end{equation*}
-\end{example}
-
-
-\subsubsection{Unwind}
-
-Given a graph relation $R$, suppose attribute $xs \in \text{attr}(\text{sch}(R))$ is a list.
-Then, for each record $r$ in $R$, the unwind operator appends each value in $r.x$ to $r$ respectively and removes attribute $xs$ from $r$ to generate new records.
-The formal definition of the unwind operator is as follows.
-
-\begin{definition}
-    Given graph relation $R$ with $\text{sch}(R) = (a_1, \cdots, a_n)$.
-    Without loss of generality, suppose the value of attribute $a_1$ is of list type.
-    Then, we have $\text{sch}(\omega_{a_1 \rightarrow a_s}(R)) = (a_2, \cdots, a_n, a_s)$.
-    For each record $(val_1, \cdots, val_n) \in R$ with $val_1 = [l_1, \cdots, l_k]$,  $k$ new records are generated, where $r'_j = (val_2, \cdots, val_n, l_j)$, $j \in \{1, \cdots, k\}$.
-\end{definition}
-
-\begin{example}
-    To get all the classes taught by David, the following expression can be used:
-    \begin{equation*}
-        \begin{split}
-            \pi_{\text{course}}(\omega_{\text{curriculum} \rightarrow \text{course}}(\sigma_{v_1\text{.name=``David''}}(\bigcirc_{(v_1\text{:Person})}))).
-        \end{split}
-    \end{equation*}
-\end{example}
-
-\subsubsection{Match}
-
-Given two graph relations $V$ and $E$ representing the vertex table and edge table of a graph respectively and a pattern $\mathcal{P}$, mapping $\mathcal{M}: \mathcal{J} \times \mathcal{J} \times \mathcal{Q} \rightarrow \mathcal{J}$, where $\mathcal{Q}$ is the set of possible patterns.
-
-The match operator adopts homomorphism semantics by default.
-
-According to SQL/PGQ, the outputs of graph queries should be a relation consisting of property values, identifiers, labels or types.
-References to vertices or edges should not be returned by graph queries.
-Therefore, the outputs of the graph relational algebra are projected and flattened with the project and unwind operator, respectively.
-Then, the output graph relation is converted to a relation over a relational schema, and can be involved in the following optimization of relational optimizer.
-\fi
 
 \subsection{Problem Definition}
 \label{sec:problem-definition}
 
-Select-Project-Join (abbr.~SPJ) queries are widely utilized in previous studies \cite{spj} and are defined as follows:
-\begin{equation*}
-    Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m)).
-\end{equation*}
-Specifically, SPJ queries describe a \emph{pattern} with the linear sequence of join operators.
-Inspired by SPJ queries, for the property graph data model proposed in Sec.~\ref{sec:data-model}, we design a new class of queries named SPJM under relational matching algebra.
-The definition of an SPJM query is as follows:
-\begin{equation*}
-    Q_m = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n))
-\end{equation*}
+To study relational query optimization, it is common to focus on a category of queries known as \spj queries,
+which encapsulate the three most frequently employed operations in database management: select, project, and join.
+These operations form the backbone of many relational queries and are formally represented as:
+\[
+Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m)).
+\]
+
+Inspired from the \spj paradigm, we introduce a novel category of queries, termed \spjm queries, to address SQL/PGQ queries that
+blend relational and graph operations. The \spjm framework augments \spj queries by incorporating a match operator, thereby enriching the query's expressive power to seamlessly navigate both relational and graph data domains. Specifically, an \spjm query is articulated as:
+\begin{equation}
+    \label{eq:spjm}
+Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_1 \Join \cdots \Join \widetilde{R}_n))
+\end{equation}
 where
-\begin{equation*}
-    \tilde{R}_i = \hat{\pi}_{prop_i}(\mathcal{M}(GR_i, \mathcal{P}_i))
-\end{equation*}
-is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
-Besides, $GR_i$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}_i$ is the pattern.
-$prop_i$ is a list of necessary properties of vertices and edges in the resultant relation.
+\[
+\tilde{R}_i = \widehat{\pi}_{attr}\matching(GR_i, \pattern_i).
+\]
+In this formulation, \(\widehat{\pi}_{attr}(GR)\) denotes a specialized projection operator that precisely extracts specified attributes from vertices and edges within a graph relation. When applied to a graph \(G\) constructed through \rgmapping, the resultant relation \(R\) emerges fully compatible with traditional relational operations. This compatibility is pivotal, facilitating the integration of graph-derived data into existing relational database.
+
+Given a set of relations and a property graph constructed from these relations via an \rgmapping (\refdef{rgmapping}),
+this paper studies the optimization \spjm queries in \refeq{spjm}.
+
+
+\todo{give a final example of spjm}
+
+%is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
+%Besides, $GR_i$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}_i$ is the pattern.
+%$prop_i$ is a list of necessary properties of vertices and edges in the resultant relation.
 
 \iffalse
 Regarding the SPJM problem, the main difference between the aforementioned four types of optimizers lies in their search space when optimizing the physical implementation of the matching operator.
