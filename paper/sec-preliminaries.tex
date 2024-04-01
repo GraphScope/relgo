@@ -78,7 +78,19 @@ Then, a graph relation containing the tuple is generated.
                 Send SOURCE KEY(pid) REFERENCE Person(person_id) DESTINATION KEY(mid) REFERENCE Message(message_id)
             )
     \end{lstlisting}
-    Specifically, $V_r = \{Person, Message\}$, $E_r = \{Send\}$, and $\mathcal{C} = (Send,$ $pid, mid, Person, person\_id, Message, message\_id)$.
+    Specifically, \(\lab(v_1)\) = ``Person'', \(\attr(v_1, ``name'')\) = ``Tom''.
+
+    For another example, suppose each person has exactly one nickname, and attribute nick\_id is a foreign key in table Person that references to the primary key in table Nickname.
+    Then, the \rgmapping specified with SQL/PGQ is as follows.
+    \begin{lstlisting}
+        CREATE PROPERTY GRAPH graph_view
+            VERTEX TABLES (
+                Person PROPERTIES(person_id, name),
+                Nickname PROPERTIES(nick_id, nickname)
+            )
+            EDGE TABLES (
+                Person SOURCE KEY(person_id) REFERENCE Person(person_id) DESTINATION KEY(nick_id) REFERENCE Nickname(nick_id)
+    \end{lstlisting}
 
 \end{example}
 
