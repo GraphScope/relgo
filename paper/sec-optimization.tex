@@ -46,16 +46,16 @@ In terms of RBO strategies, two frequently utilized key rules, i.e., \trimrule a
 The \trimrule~ is a well-established relational optimization strategy that removes superfluous data at intermediary stages of query processing. 
 Two particular instances where trimming helps include: 
 Firstly, \trimrule~ can eliminate intermediate results with aliases that are not required and reduce computations.
-Secondly, it involves discarding unneeded vertex and edge properties.
+Secondly, it involves discarding unneeded vertices and edges.
 This is accomplished by adding projection operators to the match scanning plans.
 Formally, an example of applying \trimrule is as follows:
 \begin{equation}
     \begin{split}
         \mathcal{M}(GR, \mathcal{P}) & \Rightarrow \cdots \Join \mathcal{M}(GR, \mathcal{P}_{sub}) \Join \cdots \\
-        & \Rightarrow \cdots \Join \pi_{u_1, \cdots, u_k}(\mathcal{M}(GR, \mathcal{P}_{sub})) \Join \cdots,
+        & \Rightarrow \cdots \Join \pi_{v_1, \cdots, v_s, e_1, \cdots, e_t}(\mathcal{M}(GR, \mathcal{P}_{sub})) \Join \cdots,
     \end{split} 
 \end{equation}
-where $\mathcal{M}(GR, \mathcal{P}_{sub})$ is a minimum matching component and $u_1, \cdots, u_k$ are necesary properties.
+where $\mathcal{M}(GR, \mathcal{P}_{sub})$ is a minimum matching component and $v_1, \cdots,$ $v_s,$ $e_1, \cdots, e_t$ are necesary vertices and edges.
 
 \fusionrule. 
 The \fusionrule~ is a graph-centric rule. 

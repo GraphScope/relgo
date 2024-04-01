@@ -1,8 +1,9 @@
-\section{Intuitive solutions for SPJM problem}
-
-The existing methods for optimizing the SPJM queries can be divided into four categories.
-The main difference between these methods lies in the approach to handling the matching operator.
-Before the details of these methods are introduced, concepts about graph structure and graph matching decomposition are proposed as follows.
+\section{Solutions for SPJM Problem}
+Two techniques can be applied to assist in solving the SPJM problem.
+Since the inputs of matching operators include a graph relation that can be represented as a property graph and a pattern, this process can be regarded as querying on graphs.
+Then, the graph structure can be leveraged to generate better plans.
+Moreover, in a graph, vertices and edges do not have to be joined one by one and the results of specific substructures can be obtained more efficienctly.
+In this section, we first introduce the concepts of the above techniques, and then present different types of methods for solving the SPJM problem.
 
 \subsection{Graph Structure}
 
@@ -18,13 +19,13 @@ Therefore, when graph indices are available, using join methods that can leverag
 
 \subsection{Graph Matching Decomposition}
 
-Given a matching operator, it can be decomposed into two new matching operators.
+A matching operator can be decomposed into two new matching operators.
 By joining the results of the new matching operators, the results of the original matching operator can be obtained.
 Decomposing the matching operator recursively can result in a tree, which is called the match scanning plan.
 Each tree node represents an operator.
 \textbf{Without loss of generality, the left-deep join order is employed on the tree}.
-For each internal node, it can represent the join, selection, or projection operator.
-Please note these operators in the tree always map graph relations to graph relations, because in the matching process, graph elements are the smallest units that operators can manipulate.
+Each internal node represents an operator including the join, selection, and projection operator.
+Please note that these operators in the tree always map graph relations to graph relations, because in the matching process, graph elements are the smallest units that operators can manipulate.
 
 For internal nodes representing join operators, they are generated when matching operators are decomposed.
 Suppose a matching operator $TN_0 = \mathcal{M}(GR, \mathcal{P}_0)$ is decomposed into two child operators, i.e., $TN_1 = \mathcal{M}(GR, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(GR, \mathcal{P}_2)$.
@@ -42,6 +43,7 @@ Each leaf node of the match scanning plan is a minimum matching component, and t
 In the process of decomposing the matching operator, an important point is the order in which the nodes and edges are decomposed each time.
 In other words, it is crucial to determine the order of the joins to generate the pattern specified in the original matching operator.
 Therefore, optimizers are applied to optimize the match scanning plan.
+In this paper, optimizers utilized in relational databases (e.g., Calcite) are called relational optimizers and those applied in graph databases (e.g., GLogS) are called graph optimizers.
 
 For relational optimizers, the MMCs are matching operators whose patterns only contain a vertex or an edge.
 Then, the physical implementation of such matching operators is scanning the tables of the corresponding vertices or edges, respectively.
@@ -88,14 +90,16 @@ Thus, with garph statistics, better join orders with lower cost can be obtained.
 The aforementioned optimizations are collectively referred to as optimizations based on graph matching decompostion (abbr.~GMD).
 
 
-\subsection{Existing Methods}
+\subsection{Different Types of Methods}
+\label{sec:different-type-of-methods}
 
 The general approach to handling the SPJM queries is to first transform it into an SPJ queries, and then optimize the SPJ queries to obtain the corresponding physical plans.
 It is proved in Theorem \ref{theorem:spjm-to-spj} that SPJM queries can always be losslessly converted to SPJ queries.
 Existing methods can be divided into four categories based on whether GS and GMD are utilized in the process.
 
-(1) \emph{SPJM $\rightarrow$ SPJ $\rightarrow$ Physical Plan}.
-This type of method does not apply GS and GMD in the process of optimizing the SPJM queries.
+(1) \emph{\textbf{Translator}: SPJM $\rightarrow$ SPJ $\rightarrow$ Physical Plan}.
+
+Translators do not apply GS and GMD in the process of optimizing the SPJM queries.
 In detail, matching operators are decomposed into minimum matching components, whose patterns contain only a vertex or an edge.
 Such matching operators are converted to table scans, and a new SPJ query is generated and optimized.
 This type of method degrades into relational optimizers and loses the chance of query optimization from the graph perspective.
@@ -104,7 +108,7 @@ Typical methods of this type include Apache Age \cite{apache-age} and DuckPGQ \c
 
 In order to leverage the graph information to obtain better physical plans, the second kind of method is proposed.
 
-(2) \emph{SPJM $\rightarrow$ SPJ $\xrightarrow{GS}$ Physical Plan}.
+(2) \emph{\textbf{Post-processor}: SPJM $\rightarrow$ SPJ $\xrightarrow{GS}$ Physical Plan}.
 
 For this type of method, graph structure is utilized in the process of optimizing the SPJ queries.
 Specifically, with graph indices, the connectivity between vertices and edges can be obtained efficiently.
@@ -124,7 +128,7 @@ Moreover, some efficient replacement cannot be applied w.r.t.~the obtained execu
 It is also reasonable to exploit the capability of graph matching decomposition for better optimization.
 Then, the third kind of method is proposed as follows.
 
-(3) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\rightarrow$ Physical Plan}.
+(3) \emph{\textbf{Sorter}: SPJM $\xrightarrow{GMD}$ SPJ $\rightarrow$ Physical Plan}.
 
 This type of method converts SPJM queries to SPJ queries in a different manner.
 Specifically, graph matching decomposition is applied and the matching of complete stars is a minimum matching component.
@@ -133,7 +137,7 @@ Please note graph structure is not applied in this type of method.
 Thus, when we optimize SPJ queries and generate physical plans, the physical implementations of joins cannot utilize the graph indices, including the implementation of extend-intersection.
 
 
-(4) \emph{SPJM $\xrightarrow{GMD}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
+(4) \emph{\textbf{Optimizer}: SPJM $\xrightarrow{GMD}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
 
 This is the method utilized in this paper.
 Compared to method (3), this kind of methods further utilize graph strucutre in optimization.
@@ -141,7 +145,9 @@ Therefore, physical implementations of join operators can utilize the graph indi
 Besides, in the process of graph matching decomposition, since the higher-order statistics are utilized (i.e., the number of subgraphs), the cost of joins are estimated assuming that graph indices can be utilized in execution.
 Therefore, cost estimation is more accurate for when graph indices are applicable. 
 
-\subsection{Proof}
+\subsection{Feasibility of Converting SPJM Queries to SPJ Queries}
+In this subsection, we prove that SPJM queries can always be converted to SPJ queries.
+Therefore, it is possible to leverage relational databases to process matching operators, and the methods proposed in Sec.~\ref{sec:different-type-of-methods} are workable. 
 
 \begin{theorem}
     \label{theorem:spjm-to-spj}
