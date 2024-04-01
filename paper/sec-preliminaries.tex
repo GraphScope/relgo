@@ -6,19 +6,25 @@
 
 A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
-Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
+Moreover, for any tuple \(t\) in the relation \(R\), the notation \(t.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
+To formalize the integration of graph syntax within the realm of relational data, we reference the property graph model as outlined in~\cite{property-graph}. In this context, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
-Consider two distinct sets of relations: \(\overline{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\overline{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\). An \rgmapping, denoted as \(\zeta: \overline{R_v} \cup \overline{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E, \id, \lab, \attr)\), where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
+\begin{definition}[\rgmapping, $\zeta$]
+\label{def:rgmapping}
+Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E, \id, \lab)\)\footnote{Note that we will write $G = (V, E)$ for simplicity in the following.}, where \(V\) and \(E\) are the vertex and edge sets of \(G\), respectively. This mapping is elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\overline{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attribute \(\attr(v, a_i)\) that mirror the attribute \(\attr(t, a_i)\) of \(t\).
+\item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
 
-\item \textbf{Edge Mapping}: For the relations in \(\overline{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of vertices, determined by \emph{total} functions \(\lambda_s: R_{e_i} \to R_{v_s}\) and \(\lambda_t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\overline{R_v}\). For each tuple \(t\) in \(R_{e_i}\), a corresponding edge \(e\) is defined, linking vertices that \rgmapping maps from \(\lambda_s(t) \in R_{v_s}\) and \(\lambda_t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(\attr(e, a_i)\) that reflect the attributes of \(t\).
+\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of vertices, determined by \emph{total} functions \(\lambda_s: R_{e_i} \to R_{v_s}\) and \(\lambda_t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e\) is defined, linking vertices that \rgmapping maps from \(\lambda_s(t) \in R_{v_s}\) and \(\lambda_t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
 
 \end{itemize}
+\end{definition}
 
+\todo{refine examples}
 
+\comment{
 Let $L$ and $T$ be finite sets of labels and types respectively, $D = \bigcup_i D_i$ be the union of atomic domains $D_i$, and $\epsilon$ be the \kw{NULL} value. We define a \textit{property graph} as $G = (V, E, \lambda, L, T, \vlabel, \elabel, P_v, P_e)$, where
 \begin{itemize}
     \item $V$ is a finite set of vertices,
@@ -64,6 +70,7 @@ To clarify ambiguity, the term ``attribute'' always refers to the attribute of a
 A set of relations can be transformed to a property graph with an RG mapping.
 Clearly, a property graph $G$ can be further transformed to a graph relation by constructing a tuple consisting of the vertices and edges in $G$.
 Then, a graph relation containing the tuple is generated.
+}
 
 \begin{example}
     According to the grammar of SQL/PGQ, an RG mapping is defined with the \lstinline{CREATE PROPERTY GRAPH} statement.
@@ -86,8 +93,14 @@ Then, a graph relation containing the tuple is generated.
 
 \subsection{Relational Matching Algebra}
 \label{sec:graph-relational-algebra}
+Graph pattern matching lies at the core of graph query processing, and is also the most fundamental extension in SQL/PGQ~\cite{sqlpgq}.
+%In this work, we extend the conventional relational algebra to equip it with the capability to handle graph pattern matching.
+With \rgmapping to transform relational data into a property graph $G(V, E)$, we introduce a new algebra that can handle both relational and graph data.
+Let $GR$ denote a graph relation over a schema $S = (v_1, v_2, \ldots, v_n, e_1, e_2, \ldots, e_m)$, where the domain of each $v_i$
+is the vertex set $V$, and the domain of each $e_j$ is the edge set $E$ in $G$, respectively.
+A graph relation \(GR\) can be seamlessly transformed into a traditional relation \(R\) via a specialized projection operator, \(\widehat{\pi}_{v_1.a_{v_1}, \ldots, e_1.a_{e_1}, \ldots}\). This operator meticulously projects each vertex and edge onto specified attributes. Consequently, the resultant relation \(R\) is fully compatible with conventional relational operations, thus enabling the integration of graph-based data within the realm of existing relational databases. %and facilitating a holistic approach to data management and query processing.
 
-In this paper, we extend the relational algebra to equip it with the capability to handle pattern matching.
+
 The new algebra is named relational matching algebra.
 The relational matching algebra expands the domain and range of the operators in relational algebra and introduces a new operator, i.e., the matching operator.
 Specifically, the inputs and outs of the operators such as selection ($\sigma_d$), projection ($\pi_A$), and join ($\Join$) operators are allowed to be relations and graph relations.
