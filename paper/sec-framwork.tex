@@ -18,22 +18,21 @@ To optimize SPJM queries efficiently, we propose the converged graph relational 
 The sketch of the converged graph relational optimization framework is shown in Fig.~\ref{fig:framework-overview}.
 
 Specifically, given an SPJM query with several matching operators, the matching operators are first decomposed and the order of joins to obtain the pattern is optimized.
-After graph matching decomposition, a logical plan is generated simultaneously, which is called the matching logical plan.
+After graph matching decomposition, the match scanning plan is generated simultaneously.
 The operators that can be utilized in this plan include selection, projection, join, and matching operators.
 Specifically, the matching operators should be minimum matching components.
 
-Please note that the outputs of the matching logical plan is a graph relation, and after the selection $\widehat{\pi}$ is applied, a relational table $\widehat{R}$ is generated.
-Then, the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable), which is involved in the optimization of the other operators.
-The implementation of ScanMatchTable is called the match scanning plan.
-Since the matching operator is decomposed into a sequence of SPJ operators, the cardinality of the output of matching operator can be estimated, which is also the cardinality of ScanMatchTable.
-After that, the left operators form an SPJ query (called the outer query), and the relational optimizers such as Calcite can be utilized to optimize the query.
+Please note that the outputs of the match scanning plan form a graph relation, and after the selection $\widehat{\pi}$ is applied, a relational table $\widehat{R}$ is generated.
+Then, the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable), which is involved in the optimization of the left operators.
+% The implementation of ScanMatchTable is called the match scanning plan.
+Since the matching operator is decomposed into a sequence of SPJ operators as well as matching operators implemented by scanning relational tables, the cardinality of the output of matching operator can be estimated, which is also the cardinality of ScanMatchTable.
+After that, the left operators form an SPJ query (called the outer query), and the relational optimizers such as Calcite can be utilized to optimize the outer query and rich optimization strategies for relational databases can be applied.
 The plan of the outer query is called the outer query plan.
-Therefore, rich optimization strategies for relational databases can be applied.
 
 In the process of optimization, graph matching decomposition and outer query are optimized by the match optimization module and relational optimization module, respectively.
 Both rule-based optimizations and cost-based optimizations are utilized in these two modules.
 For the relaional optimization module, we implement it with Calcite and propose two efficient rules specially for SPJM queries.
-These rules push predicates in outer queries to matching operator to filter out the invalid elements early, and the details are introduced in Sec.~\ref{sec:optimizations}.
+These rules push predicates in outer queries to matching operators so that invalid elements can be filtered out early, and the details are introduced in Sec.~\ref{sec:optimizations}.
 For the match optimization module, we implemement it with GLogS, which is one of the state-of-the-art graph optimizers.
 
 As different databases usually support different operators and their physical plans can be greatly varied, it is of critical importance for an optimization framework to be flexible.
