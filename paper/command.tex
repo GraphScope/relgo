@@ -1,0 +1,87 @@
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+\newcommand{\kw}[1]{{\ensuremath {\mathsf{#1}}}\xspace}
+\newcommand{\kws}[1]{\textsf{\scriptsize{#1}}\xspace}
+\newcommand{\bkw}[1]{{\ensuremath {\mathsf{\textbf{#1}}}}\xspace}
+
+\newcommand{\kwnospace}[1]{{\ensuremath {\mathsf{#1}}}}
+%=============defined for reference======
+\newcommand{\attr}{\kw{attr}}
+\newcommand{\sch}{\kw{sch}}
+\newcommand{\Dom}{\kw{Dom}}
+\newcommand{\meta}{\kw{meta}}
+\newcommand{\vars}{\kw{vars}}
+\newcommand{\vlabel}{\mathcal{L}}
+\newcommand{\elabel}{\mathcal{T}}
+\newcommand{\lab}{\mathcal{L}}
+\newcommand{\type}{\kw{Type}}
+\newcommand{\labx}{\kwnospace{label}}
+\newcommand{\id}{\kw{id}}
+\newcommand{\idx}{\kwnospace{id}}
+\newcommand{\shortest}{\kw{min}}
+\newcommand{\simple}{\kw{simple}}
+\newcommand{\pred}{\kw{pred}}
+\newcommand{\vpred}{\kw{vpred}}
+\newcommand{\epred}{\kw{epred}}
+\newcommand{\getV}{\kw{getV}}
+\newcommand{\getE}{\kw{getE}}
+\newcommand{\short}{\kw{short}}
+\newcommand{\In}{\downarrow}
+\newcommand{\Out}{\uparrow}
+\newcommand{\Both}{\updownarrow}
+\newcommand{\InE}{\swarrow}
+\newcommand{\OutE}{\nearrow}
+\newcommand{\BothE}{\neswarrow}
+\newcommand{\NotIn}{\bar{\In}}
+\newcommand{\NotOut}{\bar{\Out}}
+\newcommand{\NotBoth}{\bar{\Both}}
+\newcommand{\vecExpandIn}{\vec{\In}}
+\newcommand{\vecExpandOut}{\vec{\Out}}
+\newcommand{\vecExpandBoth}{\vec{\Both}}
+\newcommand{\allDistinct}{\not\equiv}
+\newcommand{\params}{\kw{params}}
+\newcommand{\code}{\texttt}
+\newcommand{\apply}{\mathcal{A}}
+\newcommand{\segapply}{\mathcal{SA}}
+% enclose given text with a single quote in the math mode
+\newcommand{\sq}[1]{`#1\mrq}
+\newcommand{\either}{\kw{Either}}
+\newcommand{\todo}[1]{\textcolor{red}{$\Rightarrow$#1}}
+
+
+\newcommand{\kk}[1]{\texttt{#1}}
+\newcommand{\scan}{{\kk{SCAN}}}
+\newcommand{\expandedge}{{\kk{EXPAND}\_\kk{EDGE}}}
+\newcommand{\getvertex}{{\kk{GET}\_\kk{VERTEX}}}
+\newcommand{\expandvertex}{{\kk{EXPAND}}}
+\newcommand{\project}{\kk{PROJECT}}
+\newcommand{\select}{\kk{SELECT}}
+
+\newcommand{\filterrule}{\kw{FilterIntoMatchRule}}
+\newcommand{\fusionrule}{\kw{ExpandGetVFusionRule}}
+\newcommand{\trimrule}{\kw{FieldTrimRule}}
+\newcommand{\intersectrule}{\kw{SetPullUpRule}}
+\newcommand{\expandintersectrule}{\kw{ExtendIntersectRule}}
+
+\newcommand{\rgmapping}{\kw{RGMapping}}
+
+\long\def\comment#1{}
+
+% =============defined for reference======
+\newcommand{\reffig}[1]{Figure~\ref{fig:#1}}
+\newcommand{\refsec}[1]{Section~\ref{sec:#1}}
+\newcommand{\reftable}[1]{Table~\ref{tab:#1}}
+\newcommand{\refalg}[1]{Algorithm~\ref{alg:#1}}
+\newcommand{\refeq}[1]{Equation~\ref{eq:#1}}
+\newcommand{\refdef}[1]{Definition~\ref{def:#1}}
+\newcommand{\refthm}[1]{Theorem~\ref{thm:#1}}
+\newcommand{\reflem}[1]{Lemma~\ref{lem:#1}}
+\newcommand{\refrem}[1]{Remark~\ref{rem:#1}}
+\newcommand{\refcoro}[1]{Corollary~\ref{coro:#1}}
+\newcommand{\refex}[1]{Example~\ref{ex:#1}}
+\newcommand{\refppt}[1]{Property~\ref{ppt:#1}}
