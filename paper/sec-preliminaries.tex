@@ -72,32 +72,41 @@ Clearly, a property graph $G$ can be further transformed to a graph relation by 
 Then, a graph relation containing the tuple is generated.
 }
 
-\begin{example}
-    According to the grammar of SQL/PGQ, an RG mapping is defined with the \lstinline{CREATE PROPERTY GRAPH} statement.
-    For instance, an RG mapping is presented as follows.
-    \begin{lstlisting}
-        CREATE PROPERTY GRAPH graph_view
-            VERTEX TABLES (
-                Person PROPERTIES(person_id, name),
-                Message PROPERTIES(message_id, content)
-            )
-            EDGE TABLES (
-                Send SOURCE KEY(pid) REFERENCE Person(person_id) DESTINATION KEY(mid) REFERENCE Message(message_id)
-            )
-    \end{lstlisting}
-    Specifically, \(\lab(v_1)\) = ``Person'', \(\attr(v_1, ``name'')\) = ``Tom''.
+\begin{figure*}
+    \centering
+    \includegraphics[width=\linewidth]{./figures/rgmapping.pdf}
+    \caption{An example of \rgmapping.}
+    \label{fig:intro-rgmapping-example}
+\end{figure*}
 
-    For another example, suppose each person has exactly one nickname, and attribute nick\_id is a foreign key in table Person that references to the primary key in table Nickname.
-    Then, the \rgmapping specified with SQL/PGQ is as follows.
+\begin{example}
+    \rgmapping{s} can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.
+    The following statement is a typical example.
     \begin{lstlisting}
-        CREATE PROPERTY GRAPH graph_view
-            VERTEX TABLES (
-                Person PROPERTIES(person_id, name),
-                Nickname PROPERTIES(nick_id, nickname)
-            )
-            EDGE TABLES (
-                Person SOURCE KEY(person_id) REFERENCE Person(person_id) DESTINATION KEY(nick_id) REFERENCE Nickname(nick_id)
+CREATE PROPERTY GRAPH g1
+    VERTEX TABLES (
+        Person PROPERTIES(person_id, name),
+        Message PROPERTIES(message_id, content)
+    )
+    EDGE TABLES (
+        Likes 
+        SOURCE KEY(pid) REFERENCE Person(person_id) 
+        DESTINATION KEY(mid) REFERENCE Message(message_id) 
+        PROPERTIES(date)
+    )
     \end{lstlisting}
+    Specifically, suppose \textbf{Person}, \textbf{Message}, and \textbf{Likes} are relational tables.
+    According to this statement, tuples in \(\vec{R_v} = \{Person, Message\}\) are mapped to vertices in graph $g1$.
+    Specifically, \(\lab(v_{p_1})\) = `Person', \(\attr(v_{p_1}, \text{`name'})\) = `Tom'.
+
+    \emph{s, t -> s, d to distinguish tuple t and target t}
+
+    Moreover, tuples in \(\vec{R_e} = \{Likes\}\) are mapped to the edges.
+    As specified in the statement, $\lambda_{s, likes}$ and $\lambda_{t, likes}$ are defined to map tuples in \textbf{Likes} to those in \textbf{Person} and \textbf{Message}, respectively.
+    In detail, a tuple $t_l$ in \textbf{Likes} is mapped to tuple $t_p$ in \textbf{Person}, if \(\lab(t_l, \text{`pid'})\) = \(\lab(t_p, \text{`person\_id'})\), then \(\lambda_{s, likes}(t_l) = t_p\).
+    For instance, $\lambda_{s, likes}(l_1) = p_1$ since \(\lab(l_1, \text{`pid'})\) = \(\lab(t_{p_1}, \text{`person\_id'}) = p_1\).
+    It is similar for \(\lambda_{t, likes}\) and we have $\lambda_{t, likes}(l_1) = m_1$ since \(\lab(l_1, \text{`mid'})\) = \(\lab(t_{m_1}, \text{`message\_id'}) = m_1\).
+    Therefore, $l_1$ is mapped to $e_{l_1}$ in $g1$ linking $v_{p_1}$ and $v_{m_1}$, with \(\lab(e_1)\) = `Likes' and \(\attr(e_{l_1}, \text{`data'})\) = 2024-03-31.
 
 \end{example}
 
