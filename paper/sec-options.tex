@@ -10,9 +10,41 @@ For simplicity, the pattern graph given in matching operators are assumed to be 
 \label{sec:intuitive-method}
 A straightforward method for processing the matching operator is to transform it into an SPJ query, and then optimize the query with relational optimizers.
 Specifically, given a matching operator $\mathcal{M}(GR, \mathcal{P})$, according to the \rgmapping, vertices and edges in $\mathcal{P}$ have corresponding relations.
-Then. the matching operator can be converted to a sequence of join operators between these relations.
+Then, the matching operator can be converted to a sequence of join operators between these relations.
+The following lemma indicates that matching operators can always be transformed to SPJ queries losslessly.
+Therefore, this method is applicable across different scenarios.
 
-Since Lemma \ref{} indicates that matching operators can always be transformed to SPJ queries losslessly, it is ensured that this method is applicable across different scenarios.
+\todo{matching operator with $\widehat{\pi}$}
+\begin{lemma}
+    \label{lemma:spjm-to-spj}
+    The matching operator can be losslessly converted to an SPJ query.
+\end{lemma}
+\begin{proof}
+    We first focus on the matching operators under the semantics of homomorphism and prove the theorem by induction.
+    % We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
+    Given a matching operator $\matching(GR, \pattern)$, vertices and edges are called elements in $\pattern$.
+    Then, induction is conducted on the number of elements in $\mathcal{P}$.
+    
+    When there is only one element in $\mathcal{P}$ (e.g., $\mathcal{P}=(u:\text{Person} \{\cdots\})$), such a matching operator can be expressed with a relation and a selection operator (e.g., $\sigma_d(Person)$).
+    Please note that if there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
+
+    Suppose a matching operator $\matching(GR, \pattern_x)$, whose pattern graph contains $x$ elements ($x \leq n$), can be expressed with SPJ operators.
+    Denote the sequence of SPJ operators by $\mathcal{E}_{\mathcal{P}_x}$.
+    When there are $n+1$ elements in the pattern graph of a matching operator $\matching(GR, \mathcal{P}_{n+1})$, let $v$ be a vertex in $\mathcal{P}_{n+1}$, and $e_1, \cdots, e_k$ are the edges adjacent to $v$. %connecting $v$ with the other vertices in $\mathcal{P}$.
+    $\mathcal{P}_s$ is the pattern obtained by removing $v$ and $e_1, \cdots, e_k$ from $\mathcal{P}_{n+1}$.
+    $\mathcal{P}_s$ contains $s$ elements and $\matching(GR, \mathcal{P}_s)$ can be expressed with $\mathcal{E}_{\mathcal{P}_s}$.
+    Then, $\matching(GR, \mathcal{P}_{n+1})$ can be expressed with SPJ operators as follows:
+    \begin{equation*}
+        \mathcal{E}_{\mathcal{P}_s} \Join R_{el_1} \Join \cdots \Join R_{el_k} \Join R_{vl},
+    \end{equation*}
+    where $vl$ is the label of $v$, $el_1, \cdots, el_k$ are labels of $e_1, \cdots, e_k$, $R_{l}$ is the relation corresponding to vertices or edges labeled $l$ according to the \rgmapping.
+    In conclusion, adopting the homomorphism semantics, the matching operator can be expressed with SPJ operators.
+
+    Furthermore, when the matching operator adopt other semantics (e.g., isomorphism), it is straightforward to add some constraints on the elements with selection operators.
+    For instance, when the isomorphism semantics is adopted, constraints should be added to ensure that different vertices in the pattern graph match with different vertices in the database.
+    Therefore, the theorem is correct. 
+\end{proof}
+
 Some existing works have adopted this idea and implemented translators to convert SPJM queries to SPJ queries.
 Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB}.
 
