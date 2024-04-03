@@ -11,6 +11,8 @@ For simplicity, the pattern graph given in matching operators are assumed to be 
 A straightforward method for processing the matching operator is to transform it into an SPJ query, and then optimize the query with relational optimizers.
 Specifically, given a matching operator $\mathcal{M}(GR, \mathcal{P})$, according to the \rgmapping, vertices and edges in $\mathcal{P}$ have corresponding relations.
 Then, the matching operator can be converted to a sequence of join operators between these relations.
+Please note a matching operator is always followed by a projection operator $\widehat{\pi}_{attr}$ to extracts specified attributes from the output graph relation.
+After the matching operator is converted to an SPJ query, the projection operation should be modified accordingly to project the output relation onto the corresponding attributes.
 The following lemma indicates that matching operators can always be transformed to SPJ queries losslessly.
 Therefore, this method is applicable across different scenarios.
 
@@ -25,7 +27,8 @@ Therefore, this method is applicable across different scenarios.
     Given a matching operator $\matching(GR, \pattern)$, vertices and edges are called elements in $\pattern$.
     Then, induction is conducted on the number of elements in $\mathcal{P}$.
     
-    When there is only one element in $\mathcal{P}$ (e.g., $\mathcal{P}=(u:\text{Person} \{\cdots\})$), such a matching operator can be expressed with a relation and a selection operator (e.g., $\sigma_d(Person)$).
+    When there is only one element in $\mathcal{P}$, e.g., $\mathcal{P}=(u:\text{Person} \{\cdots\})$, such a matching operator can be expressed with a relation and a selection operator, e.g., $\sigma_d(Person)$.
+    The SPJ query has the same meaning as the matching operator, since all the attributes of vertices labeled $Person$ are contained in the output relation.
     Please note that if there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
 
     Suppose a matching operator $\matching(GR, \pattern_x)$, whose pattern graph contains $x$ elements ($x \leq n$), can be expressed with SPJ operators.
