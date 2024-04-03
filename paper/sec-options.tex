@@ -1,6 +1,183 @@
 \section{Solving SPJM Problem}
+\label{sec:solve-spjm-problem}
 There are already a considerable number of research findings and solutions for the SPJ problem \cite{}.
+Given that the main difference between SPJM and SPJ lies in the matching operator, in addressing the SPJM problem, solutions from the SPJ problem can be referenced.
+In this section, we focus on the method to deal with the matching operators.
+Firstly, an intuitive method is presented and then an advanced method based on matching decomposition is proposed.
+For simplicity, the pattern graph given in matching operators are assumed to be connected in this section.
 
+\subsection{Intuitive Method}
+\label{sec:intuitive-method}
+A straightforward method for processing the matching operator is to transform it into an SPJ query, and then optimize the query with relational optimizers.
+Specifically, given a matching operator $\mathcal{M}(GR, \mathcal{P})$, according to the \rgmapping, vertices and edges in $\mathcal{P}$ have corresponding relations.
+Then. the matching operator can be converted to a sequence of join operators between these relations.
+
+Since Lemma \ref{} indicates that matching operators can always be transformed to SPJ queries losslessly, it is ensured that this method is applicable across different scenarios.
+Some existing works have adopted this idea and implemented translators to convert SPJM queries to SPJ queries.
+Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB}.
+
+\begin{example}
+    For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
+    \begin{equation*}
+        \pi_A(\sigma_d(\pi_{A'}(Person \Join Likes \Join Message \Join Likes \Join Person) \Join Place))
+    \end{equation*}
+    Then, this SPJ query can be optimized with relational optimizers.
+\end{example}
+
+\subsection{Decomposition-based Method}
+The straightforward method proposed in Sec.~\ref{sec:intuitive-method} is inefficient, because tables representing vertices and edges are treated equally by relational optimizers and worst-case optimality cannot be guaranteed.
+Besides, in the sequence of join operators, a table representing edges may not be joined with tables representing its adjacent vertices.
+Then, some graph-level optimizations cannot be applied.
+
+Therefore, in this subsection, we present a decomposition-based method to process matching operators.
+In detail, given a matching operator $\matching(GR, \mathcal{P}_0)$ in an SPJM query, it is decomposed into two new matching operators $\matching(GR, \mathcal{P}_1)$ and $\matching(GR, \mathcal{P}_2)$ connected with a join operator $\widehat{\Join}$, following \cite{huge}.
+Specifically, $\mathcal{P}_1$ and $\mathcal{P}_2$ should satisfy: 
+(1) $V_{\mathcal{P}_0} = V_{\mathcal{P}_1} \cup V_{\mathcal{P}_2}$,
+(2) $E_{\mathcal{P}_0} = E_{\mathcal{P}_1} \cup E_{\mathcal{P}_2}$,
+(3) $V_{\mathcal{P}_1} \cap V_{\mathcal{P}_2} \neq \emptyset$,
+(4) $E_{\mathcal{P}_1} \cap E_{\mathcal{P}_2} = \emptyset$.
+Please note that $\widehat{\Join}$ and $\Join$ is almost identical, except for the fact that $\widehat{\Join}$ joins two graph relations and outputs a new graph relation.
+
+The new matching operators can be further decomposed.
+To prevent the matching operator from being decomposed indefinitely, it is necessary to define a type of matching operator that cannot be decomposed.
+In this paper, such a matching operator is called a minimum matching component (abbr.~MMC).
+
+\begin{definition}[Minimum Matching Component, abbr.~MMC]
+    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be further decomposed.
+\end{definition} 
+
+Therefore, decomposing the matching operators recursively can finally result in a tree, whose leaf nodes are MMCs.
+To ensure worst-case optimality, in the process of decomposition, the pattern graph of each decomposed matching operator should be an induced subgraph of $\mathcal{P}_0$.
+The generated tree is called a decomposition tree and it is actually a logical plan of the matching operator.
+\modify{Without loss of generality, the left-deep join order is employed on the tree.}
+
+Then, it is crucial to identify which matching operators to treat as MMCs.
+We adopt the definition of \emph{complete star} from \cite{huge} and utilize 
+Specifically, suppose $\matching(GR, \mathcal{P})$ is decomposed into $\matching(GR, \mathcal{P}_1)$ $\widehat{\Join}$ $\matching(GR, \mathcal{P}_2)$, $\mathcal{P}_2$ is called a complete star iff $\mathcal{P}_2$ is a star $(v_r; \mathcal{L})$ and $\mathcal{L} \subseteq E_{\mathcal{P}_1}$, where $v_r$ is the root and $\mathcal{L}$ is the set of its leaf vertices.
+Inspired by HUGE \cite{huge} and GLogS \cite{GLogS}, matching operators located on the right subtree of the join operator with complete stars as the pattern graphs are the MMCs in this paper.
+
+Besides, a matching operator located on the left subtree of the join oeprator is an MMC iff its pattern graph is an edge (i.e., one edge and its adjacent two vertices).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.8\linewidth]{./figures/match-decompose.png}
+    \caption{Decomposion of the match operator in the SPJM query shown in Fig.~\ref{fig:spjm}.}
+    \label{fig:match-decomposition}
+\end{figure}
+
+\begin{example}
+    Given the matching operator in Fig.~\ref{fig:spjm}, it is decomposed into two matching operators as shown in Fig.~\ref{fig:match-decomposition}.
+    For the right matching operator, because its pattern is a complete star $(p_1, \{m_1\})$, the operator is an MMC.
+    For the left matching operator, as its pattern is an edge pattern, it is also an MMC.
+    Therefore, the decomposition tree cannot be further decomposed and is a logical plan.
+\end{example}
+
+\subsection{Comparision of Search Space}
+\label{sec:compare-search-space}
+
+The search space complexity of the decomposition-based method differs greatly from that of the straightforward method for optimization.
+In this subsection, we compare the complexities with theoretically analysis.
+For simplicity, we focus on the search space of join order optimization and the selection and projection operators are omitted.
+
+Specifically, for the straightforward method, the matching operator is transformed into a sequence of join operators between relations representing vertices and edges.
+Therefore, the join order can be optimized with any relational optimizer.
+Since Calcite \cite{calcite,columbia} is one of the most widely adopted optimizers for relational databases, it is utilized as a representative of relational optimizers in this analysis.
+
+For the decomposition-based method, given a matching operator $\matching(GR, \pattern)$ in an SPJM query, the outputs of the join operators in the decomposition tree are all induced subgraphs of $\pattern$.
+This is consistent with the requirements of GLogS \cite{GLogS}, which is one of the state-of-the-art graph optimizers.
+Therefore, the obtained plan is optimized with GLogS.
+
+The complexity of optimization with Calcite is analyzed first.
+\begin{theorem}
+    \label{theorem:complexity-of-calcite}
+    Given $n + m$ relations joined together, $n$ of them representing vertcies and $m$ representing edges, the complexity of join order optimization with Calcite is at least $O(4^{m+n-1})$.
+\end{theorem}
+\begin{proof}
+    We first construct a graph with these $n + m$ relations.
+    Specifically, each relation corresponds to a vertex in this graph, and if there is a join condition w.r.t.~two relations, there is an edge between the corresponding vertices.
+    To avoid cross product, everytime two relations are joined together, there should be join conditions between them.
+    Therefore, the join order can be represented as a spanning tree in the graph.
+    By computing the number of physical plans can be generated according to each spanning tree, the total number of physical plans can be obtained.
+    
+    In this proof, we compute the number of physical plans for one spanning tree, and this number is a lower bound of the number of physical plans that can be generated.
+
+    We start with a spanning tree with $k$ edges ($k \geq 1$), which has only one leaf node (i.e., it is a path).
+    Then, the number of logical plans corresponding to the spanning tree is
+    \begin{equation*}
+        \begin{split}
+            c_l(k) & = 2 * (c(0)c(k-1) + c(1)c(k-2) + \cdots + c(k-1)c(0)) \\
+            & = 2\Sigma_{i=0}^{i=k-1}c(i)c(k-1-i), \\
+            & \text{where } c_l(0) = 1.
+        \end{split}
+    \end{equation*}
+    With the generating function, it is obtained that 
+    \begin{equation*}
+        \begin{split}
+            c_l(k) & = \frac{2^k}{k+1}C(2k, k) \geq \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
+            & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
+        \end{split}
+    \end{equation*}
+
+    For any spanning tree $T$ with $k = m + n - 1$ edges, denote the longest path in the tree by $p_1$, and its length is $P_1 = |p_1|$.
+    By removing the path (i.e., edges in $p_1$) from $T$, we can obtain a new subgraph $T_1$.
+    Similarly, the longest path in $T_1$ that intersects with the already removed paths (i.e., $p_1$) is obtained and denoted by $p_2$, with $P_2 = |p_2|$.
+    After that, $p_2$ is removed from $T_1$ and subgraph $T_2$ is obtained.
+    For $p_1$ and $p_2$, since they are both paths, the numbers of logical plans corresponding to them are $c_l(P_1)$ and $c_l(P_2)$, respectively.
+    Without loss of generality, suppose $p_1$ and $p_2$ intersects at vertex $v_i$, and then, $v_i$ appears in each logical plan corresponding to $p_1$.
+    Then, by replacing $v_i$ with the plans corresponding to $p_2$, respectively, $c(p_1 \cup p_2) \geq c_l(P_1)c_l(P_2)$ plans are obtained, where $c(t)$ is the number of logical plans corresponding to tree $t$ and $c(t) = c_l(k)$ when $t$ is a path with $k$ edges.
+
+    As $T$ is a tree, by repeatedly finding and removing the paths as above, all the edges in $T$ are finally removed.
+    Let the number of paths removed be $s$, we have 
+    \begin{equation*}
+        \begin{split}
+            c(T) & = c(p_1 \cup \cdots \cup p_s) \geq c_l(P_1) \cdots c_l(P_s) \\
+            & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{m + n - 1}}{2^s} \geq 2^{m+n-1}.
+        \end{split}
+    \end{equation*}
+    
+    %Thus, the number of logical plans w.r.t.~a spanning tree is 
+    %\begin{equation*}ƒ
+    %    \frac{2^{m+n-1}}{m+n}C(2m+2n-2, m+n-1) \geq \frac{4^{m+n-1}}{m+n}.
+    %\end{equation*}
+    
+
+    Thus, the number of physical plans is at least $2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
+   
+    In conclusion, Theorem \ref{theorem:complexity-of-calcite} is correct.
+\end{proof}
+
+Then, we analyze the complexity of optimization with GLogS.
+
+\begin{theorem}
+    \label{theorem:complexity-of-glogue}
+    Given a matching operator whose pattern graph consists of $n$ vertices and $m$ edges, the complexity of join order optimization with GLogS is smaller than $3^n$.
+\end{theorem}
+\begin{proof}
+    Since the considered patterns are all induced subgraphs in GLogS, the complexity of join order optimization is not related to the number of edges (i.e., $m$).
+    Then, the join order optimization problem is reduced to a variant of the shortest path problem, and the complexity is $O(\mathcal{E})$, where $\mathcal{E}$ is the number of edges in GLogue.
+    In detail, 
+    \begin{equation*}
+        \begin{split}
+            %O(\mathcal{E}) & = C(n, n-1)*(2^{n-1}-1) + C(n, n-2) * (2^{n-2}- 1) \\
+            %& + \cdots + C(n, 1) * (2^1 - 1) \\
+            O(\mathcal{E}) & = \Sigma_{i=1}^{i=n-1}C(n, i)(2^i - 1) = 3^n - 2^{n+1} +1 < 3^n.
+        \end{split}
+    \end{equation*}
+    
+    In conclusion, Theorem \ref{theorem:complexity-of-glogue} is correct.
+
+\end{proof}
+
+Based on the complexity analysis in Theorem \ref{theorem:complexity-of-calcite} and Theorem \ref{theorem:complexity-of-glogue}, it is found that when there is only a matching operator, 
+\begin{equation*}
+    \begin{split}
+        \frac{\text{Complexity of Calcite}}{\text{Complexity of relgo}} & > O(\frac{4^{m+n-1}}{3^n}) = O(4^{m-1}(\frac{4}{3})^n).
+    \end{split}
+\end{equation*}
+Therefore, it suggests that GLogS is exponentially faster than Calcite in optimizing matching operators.
+It also illustrates the superiority of the decomposition-based method.
+
+\iffalse
 \section{Solutions for SPJM Problem}
 Two techniques can be applied to assist in solving the SPJM problem.
 Since the inputs of matching operators include a graph relation that can be represented as a property graph and a pattern, this process can be regarded as querying on graphs.
@@ -183,3 +360,4 @@ Therefore, it is possible to leverage relational databases to process matching o
     For instance, when the isomorphism semantics is adopted, constraints should be added to ensure that different vertices in the pattern graph match with different vertices in the database.
     Therefore, the theorem is correct. 
 \end{proof}
+\fi
