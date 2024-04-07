@@ -42,29 +42,29 @@ Given a set of vertex relations \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n
 \begin{example}
     \label{ex:rgmapping}
     An \rgmapping can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.
-    Given four relations as follows:
-    \begin{equation*}
-        \begin{split}
-            & \textit{Person = (\underline{person\_id}, name, place\_id)} \\
-            & \textit{Message = (\underline{message\_id}, content)} \\
-            & \textit{Place = (\underline{place\_id}, pl\_name)} \\
-            & \textit{Likes = (\underline{pid}, \underline{mid}, date)}
-        \end{split}
-    \end{equation*}
-    the following statement defines an \rgmapping (\todo{better plot the statement in Figure 4}):
-    \begin{lstlisting}
-CREATE PROPERTY GRAPH G1
-    VERTEX TABLES (
-        Person PROPERTIES(person_id, name),
-        Message PROPERTIES(message_id, content)
-    )
-    EDGE TABLES (
-        Likes
-        SOURCE KEY(pid) REFERENCE Person(person_id)
-        DESTINATION KEY(mid) REFERENCE Message(message_id)
-        PROPERTIES(date)
-    )
-    \end{lstlisting}
+    Given four relations, an \rgmapping is defined with the statement shown in Fig.~\ref{fig:intro-rgmapping-example}. 
+    %\begin{equation*}
+    %    \begin{split}
+    %        & \textit{Person = (\underline{person\_id}, name, place\_id)} \\
+    %        & \textit{Message = (\underline{message\_id}, content)} \\
+    %        & \textit{Place = (\underline{place\_id}, pl\_name)} \\
+    %        & \textit{Likes = (\underline{pid}, \underline{mid}, date)}
+    %    \end{split}
+    %\end{equation*}
+    %the following statement defines an \rgmapping (\todo{better plot the statement in Figure 4}):
+    %\begin{lstlisting}
+%CREATE PROPERTY GRAPH G1
+%    VERTEX TABLES (
+%        Person PROPERTIES(person_id, name),
+%        Message PROPERTIES(message_id, content)
+%    )
+%    EDGE TABLES (
+%        Likes
+%        SOURCE KEY(pid) REFERENCE Person(person_id)
+%        DESTINATION KEY(mid) REFERENCE Message(message_id)
+%        PROPERTIES(date)
+%    )
+%    \end{lstlisting}
     The described \rgmapping involves assigning tuples from vertex relations such as \relation{Person} and \relation{Message} to graph vertices. For example, vertex $v_{p_1}$ is associated with the tuple $t_{p_1}$ in \relation{Person}, and thus assigned ``Person'' label and named ``Tom''. Edge relations \relation{Likes} correspond to graph edges, with their source and target vertices defined by $\lambda_s$ and $\lambda_t$ mappings. Consider edge $e_{l_1}$, originating from tuple $t_{l_1}$ in \relation{Likes}, with source vertex $v_{p_1}$ linked to tuple $t_{p_1}$ via the condition of
     ``$t_{l_1}.pid = t_{p_1}.\text{person\_id}$'', and target vertex $v_{m_1}$ associated with tuple $t_{m_1}$
     via ``$t_{l_1}.mid = t_{m_1}.\text{message\_id}$''. This mapping gives $e_{l_1}$ the label ``Likes'' and the attribute of date ``2024-03-31''.
@@ -150,6 +150,21 @@ This paper studies the optimization of \spjm queries in \refeq{spjm}.
     \caption{The operator tree of an SPJM query.}
     \label{fig:spjm}
 \end{figure}
+
+\iffalse
+\begin{lstlisting}
+SELECT f.pn1, f.pn2
+FROM GRAPH_TABLE (G1
+    MATCH (p1:Person)-[:Likes]->(m1:Message)<-[:Likes]-(p2:Person)
+    COLUMNS (
+        p1.name as pn1,
+        p1.place_id as ppid,
+        p2.name as pn2)
+) f, Place pl
+WHERE f.ppid = pl.place_id
+AND pl.pl_name = 'Germany';
+\end{lstlisting}
+\fi
 
 \begin{example}
     Given an SPJM query shown in Fig.~\ref{fig:spjm}, this query aims to find two persons who like the same message, one of whom lives in Germany. \todo{Figure 5 can also be plot in Figure 4. Like rgmapping,
