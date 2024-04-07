@@ -98,7 +98,7 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
 
 \begin{definition}[Match Operator, \(\matching\)]
     \label{def:match}
-    The Match Operator, denoted as \(\matching\), is designed to perform graph pattern matching on a given graph relation \(GR\) against a specified pattern graph \(\pattern\). For each graph instance \(g\) within \(GR\), \(\matching\) identifies all subgraphs of \(g\) that are homomorphic to \(\pattern\), and subsequently, aggregates these mappings to construct a comprehensive graph relation. The operation of the Match Operator can be formally articulated as \(\matching(GR, \pattern) = \bigcup_{g \in GR} GR_g^\pattern\).%, where each \(GR_g^\pattern\) represents the subgraph(s) of \(g\) that align with the structure and properties of \(\pattern\).
+    The Match Operator, denoted as \(\matching\), is designed to perform graph pattern matching on a given graph relation \(GR\) against a specified pattern graph \(\pattern\). For each graph instance \(g\) within \(GR\), \(\matching\) identifies all subgraphs of \(g\) that are homomorphic to \(\pattern\), and subsequently, aggregates these mappings to construct a comprehensive graph relation. The operation of the match Operator can be formally articulated as \(\matching(GR, \pattern) = \bigcup_{g \in GR} GR_g^\pattern\).%, where each \(GR_g^\pattern\) represents the subgraph(s) of \(g\) that align with the structure and properties of \(\pattern\).
 \end{definition}
 
 \begin{example}
@@ -107,10 +107,9 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
     Given a pattern graph \(\pattern\), the results of graph pattern matching are subgraphs of \(G_1\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G_1}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
 \end{example}
 
-This definition ensures that the match operator is inherently 'closed' regarding graph relations.
-\modify{Then, it can naturally support nested matching, as outlined in the language opportunities PGQ-079 of SQL/PGQ.}
-
-\todo{may explain why we need this, nested match?}
+This definition ensures that the match operator is inherently closed regarding graph relations,
+which adheres to the language opportunities of ``nested matching'' (specified as PGQ-079) in SQL/PGQ~\cite{sql-pgq}.
+In this paper, we only handle cases where $G$ represents the entire property graph, and thereafter simplify the match operator notation to $\matching_G(\pattern)$, or $\matching(\pattern)$ when the context is clear.
 
 \subsection{Problem Definition}
 \label{sec:problem-definition}
@@ -134,7 +133,7 @@ Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}))
 \end{equation}
 where
 \[
-\widetilde{R} = \widehat{\pi}_{attr}\matching(GR^G, \pattern).
+\widetilde{R} = \widehat{\pi}_{attr}\matching_G(\pattern).
 \]
 In this formulation, \(\widehat{\pi}_{attr}(GR)\) denotes a specialized projection operator that precisely extracts specified attributes
 from vertices and edges within a graph relation $GR$, whose attributes have the domain from the property graph.
