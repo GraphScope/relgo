@@ -22,7 +22,7 @@ To formalize the integration of graph syntax within the realm of relational data
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
 \begin{definition}[\rgmapping, $\zeta$]
 \label{def:rgmapping}
-Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E)\). This mapping is elaborated as follows:
+Given a set of vertex relations \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and edge relations \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E)\). This mapping is elaborated as follows:
 
 \begin{itemize}
 \item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
@@ -32,12 +32,6 @@ Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}
 \end{itemize}
 \end{definition}
 
-\modify{
-    The relations in $\vec{R_v}$ and $\vec{R_e}$ are called representing vertices and edges, respectively.
-}
-
-\todo{refine examples}
-
 \begin{figure*}
     \centering
     \includegraphics[width=\linewidth]{./figures/rgmapping.pdf}
@@ -46,8 +40,8 @@ Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}
 \end{figure*}
 
 \begin{example}
-    \label{example:rgmapping}
-    \rgmapping{s} can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements. 
+    \label{ex:rgmapping}
+    An \rgmapping can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.
     Given four relations as follows:
     \begin{equation*}
         \begin{split}
@@ -57,7 +51,7 @@ Given two sets of relations: \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}
             & \textit{Likes = (\underline{pid}, \underline{mid}, date)}
         \end{split}
     \end{equation*}
-    the following statement defines an \rgmapping:
+    the following statement defines an \rgmapping (\todo{better plot the statement in Figure 4}):
     \begin{lstlisting}
 CREATE PROPERTY GRAPH G1
     VERTEX TABLES (
@@ -65,26 +59,15 @@ CREATE PROPERTY GRAPH G1
         Message PROPERTIES(message_id, content)
     )
     EDGE TABLES (
-        Likes 
-        SOURCE KEY(pid) REFERENCE Person(person_id) 
-        DESTINATION KEY(mid) REFERENCE Message(message_id) 
+        Likes
+        SOURCE KEY(pid) REFERENCE Person(person_id)
+        DESTINATION KEY(mid) REFERENCE Message(message_id)
         PROPERTIES(date)
     )
     \end{lstlisting}
-    With this statement, relations \textbf{Person}, \textbf{Message}, and \textbf{Likes} are mapped to a property graph, as shown in Fig.~\ref{fig:intro-rgmapping-example}(b).
-
-    According to this statement, tuples in \(\vec{R_v} = \{Person, Message\}\) are mapped to vertices in graph $g1$.
-    Specifically, \(\lab(v_{p_1})\) = `Person', \(v_{p_1}\text{.name}\) = `Tom'.
-
-    % \emph{s, t -> s, d to distinguish tuple t and target t}
-
-    Moreover, tuples in \(\vec{R_e} = \{Likes\}\) are mapped to the edges.
-    As specified in the statement, $\lambda_{s, likes}$ and $\lambda_{t, likes}$ are defined to map tuples in \textbf{Likes} to those in \textbf{Person} and \textbf{Message}, respectively.
-    In detail, a tuple $t_l$ in \textbf{Likes} is mapped to tuple $t_p$ in \textbf{Person} (i.e., \(\lambda_{s, likes}(t_l) = t_p\)), if \(t_l\text{.pid}\) = \(t_p\text{.person\_id}\).
-    For instance, $\lambda_{s, likes}(t_{l_1}) = t_{p_1}$ since \(t_{l_1}\text{.pid}\) = \(t_{p_1}\text{.person\_id} = p_1\).
-    It is similar for \(\lambda_{t, likes}\) and we have $\lambda_{t, likes}(t_{l_1}) = m_1$ since \(t_{l_1}\text{.mid}\) = \(t_{m_1}\text{.message\_id} = m_1\).
-    Therefore, $t_{l_1}$ is mapped to $e_{l_1}$ in $g1$ linking $v_{p_1}$ and $v_{m_1}$, with \(\lab(e_1)\) = `Likes' and \(e_{l_1}\text{.date}\) = 2024-03-31.
-
+    The described \rgmapping involves assigning tuples from vertex relations such as \relation{Person} and \relation{Message} to graph vertices. For example, vertex $v_{p_1}$ is associated with the tuple $t_{p_1}$ in \relation{Person}, and thus assigned ``Person'' label and named ``Tom''. Edge relations \relation{Likes} correspond to graph edges, with their source and target vertices defined by $\lambda_s$ and $\lambda_t$ mappings. Consider edge $e_{l_1}$, originating from tuple $t_{l_1}$ in \relation{Likes}, with source vertex $v_{p_1}$ linked to tuple $t_{p_1}$ via the condition of
+    ``$t_{l_1}.pid = t_{p_1}.\text{person\_id}$'', and target vertex $v_{m_1}$ associated with tuple $t_{m_1}$
+    via ``$t_{l_1}.mid = t_{m_1}.\text{message\_id}$''. This mapping gives $e_{l_1}$ the label ``Likes'' and the attribute of date ``2024-03-31''.
 \end{example}
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
@@ -99,11 +82,12 @@ is the vertex set $V_G$, and the domain of each $e_j$ is the edge set $E_G$ in $
 }
  %and facilitating a holistic approach to data management and query
 
-Consider a property graph \(G(V_G, E_G)\), alongside a pattern graph, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes. %Graph pattern matching is defined as the task of identifying all subgraphs within a target graph \(G\) that are \emph{homomorphic} to \(\pattern\).
+Consider a property graph \(G(V_G, E_G)\), alongside a pattern graph\footnote{Throughout this paper, we deal with \emph{connected} pattern graphs for simple presentation, where each vertex is associated with at least one edge.}, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes.
+%Graph pattern matching is defined as the task of identifying all subgraphs within a target graph \(G\) that are \emph{homomorphic} to \(\pattern\).
 Graph pattern matching seeks to determine all subgraphs in \(G\) that are \emph{homomorphic} to \(\pattern\).
 Formally, given a subgraph $g \subseteq G$, a homomorphism from \(\pattern\) to \(g\) is a \emph{surjective}, total mapping \(\sigma: V_\pattern \cup E_\pattern \to V_{g} \cup E_{g}\) that satisfy the following conditions: (1) For every vertex \(v \in V_\pattern\), there is a corresponding vertex \(\sigma(v) \in V_{g}\) with \(\lab_\pattern(v) = \lab_{g}(\sigma(v))\); (2) For each edge \(e = (u_s, u_t) \in E_\pattern\), there is a corresponding edge \(\sigma(e) = (v_s, v_t) \in E_{g}\), ensuring that the mapping preserves the edge's the label, as well as its source and target vertices , that is \(\lab_\pattern(e) = \lab_g(\sigma(e))\), and \(\sigma(u_s) = v_s\), \(\sigma(u_t) = v_t\). It's important to highlight the homomorphism semantics, as one of the widely used semantics for graph pattern matching~\cite{angles2017foundations}, \modify{does} not require each pattern vertex and edge being uniquely mapped to distinct vertices and edges in the data graph. This facilitates a seamless integration between graph pattern matching and relational operations, as will be further discussed in~\reflem{xx}.
 
-The outcomes of graph pattern matching can be succinctly modeled as a relation \(GR_G^\pattern\), or more compactly \(GR^\pattern\) in contexts where the meaning remains unambiguous, defined over the schema \(S = V_\pattern \cup E_\pattern\). Here, the sets \(V_G\) and \(E_G\) serve as the respective domains for the vertices and edges identified through the matching process. Within this framework, we refer to such a relation as a \emph{Graph Relation}, a construct where all attributes are derived from the domain of a property graph.
+The outcomes of graph pattern matching can be succinctly modeled as a relation \(GR_G^\pattern\), or more compactly \(GR^\pattern\) in clear contexts, defined over the schema \(S = V_\pattern \cup E_\pattern\). Here, the sets \(V_G\) and \(E_G\) serve as the respective domains for the vertices and edges identified through the matching process. Within this framework, we refer to such a relation as a \emph{Graph Relation}, a construct where all attributes are derived from the domain of a property graph.
 It is essential to recognize that any property graph \(G\) can be conceptualized as a graph relation \(GR^G\), represented by a singular tuple that collectively encompasses all of its vertices and edges. Throughout this paper, we treat the notions of a property graph and a tuple of graph relation as essentially interchangeable terms. In alignment with this perspective, we proceed to elaborate on the \emph{Match} operator as follows.
 
 %The formulation of graph relation inherently positions any graph $G$ as a graph relation consisting of a single tuple that encapsulates the entirety of its vertices and edges.
@@ -116,6 +100,12 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
     \label{def:match}
     The Match Operator, denoted as \(\matching\), is designed to perform graph pattern matching on a given graph relation \(GR\) against a specified pattern graph \(\pattern\). For each graph instance \(g\) within \(GR\), \(\matching\) identifies all subgraphs of \(g\) that are homomorphic to \(\pattern\), and subsequently, aggregates these mappings to construct a comprehensive graph relation. The operation of the Match Operator can be formally articulated as \(\matching(GR, \pattern) = \bigcup_{g \in GR} GR_g^\pattern\).%, where each \(GR_g^\pattern\) represents the subgraph(s) of \(g\) that align with the structure and properties of \(\pattern\).
 \end{definition}
+
+\begin{example}
+    \label{ex:matching}
+    Consider the property graph \(G_1\) derived from the \rgmapping in \refex{rgmapping}. As shown in \reffig{intro-rgmapping-example}, we conceptualize the graph as a graph relation \(GR^{G_1}\) that contains a single tuple, encapsulating all vertices and edges in \(G_1\).
+    Given a pattern graph \(\pattern\), the results of graph pattern matching are subgraphs of \(G_1\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G_1}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
+\end{example}
 
 This definition ensures that the match operator is inherently 'closed' regarding graph relations.
 \modify{Then, it can naturally support nested matching, as outlined in the language opportunities PGQ-079 of SQL/PGQ.}
@@ -153,8 +143,7 @@ Such compatibility is pivotal, facilitating the integration of graph-derived dat
 This paper studies the optimization of \spjm queries in \refeq{spjm}.
 
 
-\todo{give a final example of spjm}
-
+%\todo{give a final example of spjm}
 \begin{figure}
     \centering
     \includegraphics[width=.6\linewidth]{./figures/spjm.png}
@@ -163,22 +152,22 @@ This paper studies the optimization of \spjm queries in \refeq{spjm}.
 \end{figure}
 
 \begin{example}
-    \modify{
-    Given an SPJM query shown in Fig.~\ref{fig:spjm}, this query aims to find two persons who like the same message, one of whom lives in Germany.    
-    Since three relations, i.e., \textbf{Person}, \textbf{Message}, and \textbf{Likes}, are utilized as labels of vertices and edges in the pattern graph, an \rgmapping is defined to map them to a property graph.
-    The details are introduced in Example \ref{example:rgmapping}.
-    }
-
-    As property graph \(G1\) is obtained, it can be conceptualized as graph relation \(GR^{G1}\) as shown in Fig.~\ref{fig:intro-rgmapping-example}.
-    Specifically, \(G1\) consists of a singular tuple that contain all the vertices and edges in \(G1\).
-    Then, the matching operator is applied on \(GR^{G1}\) to find subgraphs homomorphic to the pattern graph.
-    The results are shown in \(GR^M\).
-    This process is equivalent to performing pattern matching on property graph $G1$.
+    Given an SPJM query shown in Fig.~\ref{fig:spjm}, this query aims to find two persons who like the same message, one of whom lives in Germany. \todo{Figure 5 can also be plot in Figure 4. Like rgmapping,
+    the query can also be introduced by a SQL/PGQ statement.}
+    \comment{
+    As shown in \reffig{intro-rgmapping-example}, the property graph $G_1$ obtained from \refex{rgmapping}
+    %Since three relations, i.e., \textbf{Person}, \textbf{Message}, and \textbf{Likes}, are utilized as labels of vertices and edges in the pattern graph, an \rgmapping is defined to map them to a property graph.
+    %The details are introduced in Example \ref{example:rgmapping}.
+    %As property graph \(G1\) is obtained,
+    can be conceptualized as graph relation \(GR^{G_1}\), which consists of a single tuple that contain all the vertices and edges in \(G_1\).
+    Then, the matching operator is applied on \(GR^{G_1}\) to find subgraphs homomorphic to the pattern graph $\pattern$, which are given as  \(GR^\pattern\) in \reffig{intro-rgmapping-example}.
+    %This process is equivalent to performing pattern matching on property graph $G1$.
     The results of pattern matching are those graphs in \(\mathcal{G}\).
     Please note that each graph in \(\mathcal{G}\) corresponds to a row of \(GR^{M}\).
 
     After that, a specialized projection operator is applied to extract attritubes from vertices and the operator returns a relational table.
     Next, the join, selection, and project operator are leveraged in sequence to obtain the results.
+    }
 \end{example}
 
 %is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
