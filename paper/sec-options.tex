@@ -127,11 +127,11 @@ The generated tree is called a decomposition tree and it is actually a logical p
 \modify{Without loss of generality, the left-deep join order is employed on the tree.}
 
 Then, it is crucial to identify which matching operators to treat as MMCs.
-We adopt the definition of \emph{complete star} from \cite{huge} and utilize
-Specifically, suppose $\matching(GR, \mathcal{P})$ is decomposed into $\matching(GR, \mathcal{P}_1)$ $\widehat{\Join}$ $\matching(GR, \mathcal{P}_2)$, $\mathcal{P}_2$ is called a complete star iff $\mathcal{P}_2$ is a star $(v_r; \mathcal{L})$ and $\mathcal{L} \subseteq E_{\mathcal{P}_1}$, where $v_r$ is the root and $\mathcal{L}$ is the set of its leaf vertices.
+We adopt the definition of \emph{complete star} from \cite{huge}.
+Specifically, suppose $\matching(GR, \mathcal{P})$ is decomposed into $\matching(GR, \mathcal{P}_1)$ $\widehat{\Join}$ $\matching(GR, \mathcal{P}_2)$, $\mathcal{P}_2$ is called a complete star iff $\mathcal{P}_2$ is a star $(v_r; \mathcal{H})$, $\mathcal{H} \subseteq E_{\mathcal{P}_1}$, and $|\mathcal{H}| \geq 2$, where $v_r$ is the root and $\mathcal{H}$ is the set of its leaf vertices.
 Inspired by HUGE \cite{huge} and GLogS \cite{GLogS}, matching operators located on the right subtree of the join operator with complete stars as the pattern graphs are the MMCs in this paper.
 
-Besides, a matching operator located on the left subtree of the join oeprator is an MMC iff its pattern graph is an edge (i.e., one edge and its adjacent two vertices).
+Besides, a matching operator located on the left subtree of the join operator is an MMC iff its pattern graph is an edge (i.e., one edge and its adjacent two vertices).
 
 \begin{figure}
     \centering
