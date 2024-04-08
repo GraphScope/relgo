@@ -5,6 +5,17 @@ challenge compared to the \spj problem. We commence with an intuitive, graph-agn
 introducing a more sophisticated technique grounded on the concept of pattern decomposition, which
 is the key to the optimization of graph pattern matching~\cite{huge,GLogS}.
 
+Before proceeding, we introduce the concept of a join pattern between two overlapping patterns, $\pattern_1$ and $\pattern_2$,
+with shared vertices $V_{o} = V_{\pattern_1} \cap V_{\pattern_2}$ and edges $E_{o} = E_{\pattern_1} \cap E_{\pattern_2}$.
+The join pattern $\pattern = \pattern_1 \cup \pattern_2$ incorporates all vertices and edges from both patterns, ensuring connectivity due to the overlap.
+The homomorphism semantics allow us to express the matching of $\pattern$ as:
+
+\begin{equation}
+    \label{eq:join-pattern}
+    \matching(\pattern) = \matching(\pattern_1) \widehat{\Join}_{V_{o}, E_{o}} \matching(\pattern_2),
+\end{equation}
+where $\widehat{\Join}$ is a natural join operator for joining two graph relations based on the common vertices and edges.
+
 %There are already a considerable number of research findings and solutions for the SPJ problem \cite{}.
 %Given that the main difference between SPJM and SPJ lies in the matching operator, in addressing the SPJM problem, solutions from the SPJ problem can be referenced.
 %In this section, we focus on the method to deal with the matching operators.
@@ -14,17 +25,11 @@ is the key to the optimization of graph pattern matching~\cite{huge,GLogS}.
 \subsection{Graph-agnostic Method}
 \label{sec:intuitive-method}
 Graph-agnostic approaches~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB} (\todo{add more references}) simply recast graph match operations
-as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers. Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
+as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers.
 
-\comment{
-and then optimize the query with relational optimizers.
-Specifically, given a matching operator $\mathcal{M}(GR, \mathcal{P})$, according to the \rgmapping, vertices and edges in $\mathcal{P}$ have corresponding relations.
-Then, the matching operator can be converted to a sequence of join operators between these relations.
-Please note a matching operator is always followed by a projection operator $\widehat{\pi}_{attr}$ to extracts specified attributes from the output graph relation.
-After the matching operator is converted to an SPJ query, the projection operation should be modified accordingly to project the output relation onto the corresponding attributes.
-The following lemma indicates that matching operators can always be transformed to SPJ queries losslessly.
-Therefore, this method is applicable across different scenarios.
-}
+%Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
+The following lemma shows the transformation from an \spjm query to an \spj query maintains the integrity of the data and relationships,
+which can ensure a lossless conversion process.
 
 \todo{matching operator with $\widehat{\pi}$}
 \begin{lemma}
@@ -32,32 +37,29 @@ Therefore, this method is applicable across different scenarios.
     An \spjm query given in \refeq{spjm} can be losslessly converted to an \spj query.
 \end{lemma}
 \begin{proof}
-    It suffices to convert the matching operator in \refeq{spjm} into relational operators.
-    The proof is conducted by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges, where $V_{\pattern_0} = \{u\}$ with label $l_u$, and $E_{\pattern_0} = \emptyset$. It's clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_u$. This maps to a relation $\relation{u}$ via \rgmapping, leading to the equality $R_0 = \matching(\pattern_0) = \relation{u}$.
+    It suffices to convert the matching operator in \refeq{spjm} into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
-    We then consider a pattern $\pattern_m$ of $m$ ($m > 1$) edges, where the $i^{th}$ edge is $e_i = (u_{s_i}, u_{t_i})$, and their corresponding relations are $\relation{e_i}$, $\relation{u_{s_i}}$ and $\relation{u_{t_i}}$ according to
-    the \rgmapping. Furthermore, \rgmapping also defines $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$, which map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
-    We define the following join operation, $\Join_{\lambda_{e_i}^s}$, such that
-    \[
-        R_{e_i} \Join_{\lambda_{e_i}^s} R_{u_{s_i}} = \{(t_e, t_s) | t_e \in R_{e_i} \land t_s \in R_{u_{s_i}} \land \lambda_{e_i}^s(t_e) = t_s\}
-    \]
+We define the following join operation, $\Join_{\lambda_{e_i}^s}$, such that:
+\[ R_{e_i} \Join_{\lambda_{e_i}^s} R_{u_{s_i}} = \{(t_e, t_s) | t_e \in R_{e_i} \land t_s \in R_{u_{s_i}} \land \lambda_{e_i}^s(t_e) = t_s\} \]
+The join operation of $\Join_{\lambda_{e_i}^t}$ can be defined analogously.
 
-    In the same way, we can define the join operation of $\Join_{\lambda_{e_i}^t}$.
+The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{u_0}$.
 
-    We induce on $m$. Assume that when $m = k-1$, $\matching(\pattern_{k-1})$ can be losslessly converted to a sequence of relational operators, resulting in the relation of $R_{k-1}$.
+Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching $\pattern_1$ is equivalent to retrieving the edge relation, together with the corresponding source and target vertices. Therefore, we have:
+\[ R_1 = \gproject(M(\pattern_1)) = \relation{u_{s_1}} \Join_{\lambda_{e_1}^s} \relation{e_1} \Join_{\lambda_{e_1}^t} \relation{u_{t_1}} \]
 
-    When $m = k$, we consider $\pattern_{k}$ of $k$ edges that is constructed from $\pattern_{k-1}$ by adding one more
-    edge of $e_k = (u_{s_k}, u_{t_k})$ for $u_{s_k} \in V_{\pattern_{k-1}}$ and $u_{t_k} \not\in V_{\pattern_{k-1}}$
-    without loss of generality. Then, the matching operator $\matching(\pattern_{k})$ can be converted to the following relational operations (\todo{this is not so straightforward, must use the definition of homomorphism as well}):
-    \[
-        \matching(\pattern_{k}) = R_{k-1} \Join \relation{u_{s_k}} \Join_{\lambda_{e_k}^s} \relation{e_k} \Join_{\lambda_{e_k}^t} \relation{u_{t_k}}
-    \]
-
-
-    By induction, denote $R'_i = \relation{u_{s_i}} \Join_{\lambda_{e_i}^s} \relation{e_i} \Join_{\lambda_{e_i}^t} \relation{u_{t_i}}$, we actually have the matching operator losslessly converted to a sequence of relational operators, as
-    \[
-        \matching(\pattern_{k}) = R'_1 \Join R'_2 \Join \cdots \Join R'_{k}.
-    \]
+Assume that when $m = k-1$, $\gproject(\matching(\pattern_{k-1}))$ can be losslessly converted to a sequence of relational operators, resulting in the relation $R_{k-1}$. When $m = k$, we consider $\pattern_{k}$ of $k$ edges that is constructed from $\pattern_{k-1}$ by adding one more edge $e_k = (u_{s_k}, u_{t_k})$. For $\pattern_{k}$ to be connected, it must share at least one common vertex with $\pattern_{k-1}$. According to \refeq{join-pattern}, we have:
+\[ \matching(\pattern_{k}) = \matching(\pattern_{k-1}) \gjoin_{V_o} \matching(\pattern_{e_k}), \]
+where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and $V_o$ is the common vertex shared by $\pattern_{k-1}$ and $\pattern_{e_k}$. Applying $\gproject$ to the above equation, we get:
+\begin{equation*}
+\begin{split}
+R_k &= \gproject(\matching(\pattern_{k})) \\
+    &= \gproject(\matching(\pattern_{k-1})) \Join_{attr_{V_o}} \gproject(\matching(\pattern_{e_k})) \\
+    &= R_{k-1} \Join_{attr_{V_o}} \relation{u_{s_k}} \Join_{\lambda_{e_k}^s} \relation{e_k} \Join_{\lambda_{e_k}^t} \relation{u_{t_k}}
+\end{split}
+\end{equation*}
+By induction, denoting $R'_i = \relation{u_{s_i}} \Join_{\lambda_{e_i}^s} \relation{e_i} \Join_{\lambda_{e_i}^t} \relation{u_{t_i}}$, we have the matching operator losslessly converted to a sequence of relational operators:
+\[ \matching(\pattern_{k}) = R_0 \Join R'_1 \Join R'_2 \Join \cdots \Join R'_{k}. \]
 
 \comment{
     % We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
