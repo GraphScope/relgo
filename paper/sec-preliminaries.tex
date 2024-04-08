@@ -27,7 +27,7 @@ Given a set of vertex relations \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n
 \begin{itemize}
 \item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
 
-\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of relations, determined by \emph{total} functions \(\lambda_s: R_{e_i} \to R_{v_s}\) and \(\lambda_t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e \in E\) is defined, linking vertices that \rgmapping maps from \(\lambda_s(t) \in R_{v_s}\) and \(\lambda_t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
+\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of relations, determined by \emph{total} functions \(\lambda_{e^i}^s: R_{e_i} \to R_{v_s}\) and \(\lambda_{e_i}^t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e \in E\) is defined, linking vertices that \rgmapping maps from \(\lambda_{e_i}^s(t) \in R_{v_s}\) and \(\lambda_{e_i}^t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
 
 \end{itemize}
 \end{definition}
@@ -182,13 +182,10 @@ AND pl.pl_name = 'Germany';
     An SPJM query follows the grammar of SQL/PGQ is shown in \reffig{intro-rgmapping-example}(c) and the corresponding query tree is also presented.
     This query aims to find two persons who like the same message and know each other, one of whom lives in Germany.
 
-    According to the query tree, after the results of the match operator are obtained as described in \refex{matching}, a specialized projection operator is applied to extract attritubes from vertices and this operator returns a relational table (i.e., $R_{M}$ in \reffig{intro-rgmapping-example}(c)).
+    According to the query tree, after the results of the match operator are obtained as described in \refex{matching}, a specialized projection operator is applied to extract attributes from vertices and this operator returns a relational table (i.e., $R_{M}$ in \reffig{intro-rgmapping-example}(c)).
     Next, the join, selection, and projection operators are leveraged in sequence to obtain the final results.
-    Specifically, Tom and Bob know each other and like the same message $m_1$.
-    Besides, Tom is a Germany.
-
-    \todo{Figure 5 can also be plot in Figure 4. Like rgmapping,
-    the query can also be introduced by a SQL/PGQ statement.}
+    Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
+    %Besides, Tom is a Germany.
     \comment{
     As shown in \reffig{intro-rgmapping-example}, the property graph $G_1$ obtained from \refex{rgmapping}
     %Since three relations, i.e., \textbf{Person}, \textbf{Message}, and \textbf{Likes}, are utilized as labels of vertices and edges in the pattern graph, an \rgmapping is defined to map them to a property graph.

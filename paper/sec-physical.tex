@@ -66,7 +66,7 @@ Firstly, if $GR_2$ is not obtained by a matching operator, then the join operato
 where $A_1$ and $A_2$ are lists of all the attributes of vertices and edges in $GR_1$ and $G_2$, respectively.
 
 Secondly, if $GR_2$ is obtained by a matching operator whose pattern graph is an edge, then the join operator is implemented as an \expandvertex~operator. 
-Specifically, denote the matching operator by $\matching(\pattern_e)$ where $\pattern_e$ consists of two vertices $u_s, u_t$ and an edge $e$ connecting them.
+Specifically, denote the matching operator by $\matching(\pattern_e)$, where $\pattern_e$ consists of two vertices $u_s, u_t$ and an edge $e$ connecting them.
 Let $\lambda_s$ and $\lambda_t$ be functions that associate tuples in $\relation{\vlabel{(e)}}$ with those in $\relation{\vlabel(u_s)}$ and $\relation{\vlabel(u_t)}$, respectively.
 Then, the \expandvertex~operator is implemented with 
 \begin{equation*}
@@ -76,7 +76,9 @@ If graph indices have been built on $\relation{\mathcal{L}(e)}$, the joins betwe
 Moreover, if there is no need to retain attributes on $e$ and there are no constraints on $e$, graph indices can be applied to get neighbors of $u_s$ directly without scanning $\relation{\mathcal{L}(e)}$.
 
 Thirdly, if $GR_2$ is obtained by a matching operator whose pattern graph is a complete star, then the join operator is implemented as an \expandintersect~operator.
-
+Denote the matching operator by $\matching(\pattern_s)$, where $\pattern_s = (v_r; \mathcal{H})$ and $\mathcal{H} = \{v_1, \cdots, v_k\}, k \geq 2$.
+Let $e_1, \cdots, e_k$ be the edges connecting $v_1, \cdots, v_k$ and $v_r$, respectively.
+Moreover, let $\lambda^{e_i}_s$
 
 
 
