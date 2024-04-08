@@ -1,20 +1,20 @@
-\section{The Process of Matching Operator}
+\section{Logical Optimization of Matching Operator}
 \label{sec:handling-match-operator}
-In this section, the focus is squarely on the matching operator, distinct in its role within the \spjm
+In this section, the focus is squarely on the logical optimization of the matching operator, distinct in its role within the \spjm
 challenge compared to the \spj problem. We commence with an intuitive, graph-agnostic approach before
 introducing a more sophisticated technique grounded on the concept of pattern decomposition, which
 is the key to the optimization of graph pattern matching~\cite{huge,GLogS}.
 
-Before proceeding, we introduce the concept of a join pattern between two overlapping patterns, $\pattern_1$ and $\pattern_2$,
-with shared vertices $V_{o} = V_{\pattern_1} \cap V_{\pattern_2}$ and edges $E_{o} = E_{\pattern_1} \cap E_{\pattern_2}$.
-The join pattern $\pattern = \pattern_1 \cup \pattern_2$ incorporates all vertices and edges from both patterns, ensuring connectivity due to the overlap.
-The homomorphism semantics allow us to express the matching of $\pattern$ as:
+Before proceeding, we introduce the concept of pattern decomposition that decomposes $\pattern$ into two overlapping patterns, $\pattern_1$ and $\pattern_2$, with shared vertices $V_{o} = V_{\pattern_1} \cap V_{\pattern_2}$ and shared edges $E_{o} = E_{\pattern_1} \cap E_{\pattern_2}$.
+Denote $\pattern = \pattern_1 \cup \pattern_2$. Under the homomorphism semantics, the matching of $\pattern$ can be represented as:
 
 \begin{equation}
     \label{eq:join-pattern}
     \matching(\pattern) = \matching(\pattern_1) \widehat{\Join}_{V_{o}, E_{o}} \matching(\pattern_2),
 \end{equation}
 where $\widehat{\Join}$ is a natural join operator for joining two graph relations based on the common vertices and edges.
+
+It is important to note that \refeq{join-pattern} is also applicable to alternative semantics, including isomorphism and non-repeated-edge~\cite{angles2017foundations}. To support these semantics, a special all-distinct operator can be applied as a filter to remove results that contain duplicate vertices and/or edges. The adoption of the all-distinct operator is compatible with all techniques in this paper.
 
 %There are already a considerable number of research findings and solutions for the SPJ problem \cite{}.
 %Given that the main difference between SPJM and SPJ lies in the matching operator, in addressing the SPJM problem, solutions from the SPJ problem can be referenced.
@@ -33,7 +33,7 @@ which can ensure a lossless conversion process.
 
 \todo{matching operator with $\widehat{\pi}$}
 \begin{lemma}
-    \label{lemma:spjm-to-spj}
+    \label{lem:spjm-to-spj}
     An \spjm query given in \refeq{spjm} can be losslessly converted to an \spj query.
 \end{lemma}
 \begin{proof}
@@ -61,31 +61,7 @@ R_k &= \gproject(\matching(\pattern_{k})) \\
 By induction, denoting $R'_i = \relation{u_{s_i}} \Join_{\lambda_{e_i}^s} \relation{e_i} \Join_{\lambda_{e_i}^t} \relation{u_{t_i}}$, we have the matching operator losslessly converted to a sequence of relational operators:
 \[ \matching(\pattern_{k}) = R_0 \Join R'_1 \Join R'_2 \Join \cdots \Join R'_{k}. \]
 
-\comment{
-    % We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
-    Given a matching operator $\matching(GR, \pattern)$, vertices and edges are called elements in $\pattern$.
-    Then, induction is conducted on the number of elements in $\mathcal{P}$.
-
-    When there is only one element in $\mathcal{P}$, e.g., $\mathcal{P}=(u:\text{Person} \{\cdots\})$, such a matching operator can be expressed with a relation and a selection operator, e.g., $\sigma_d(Person)$.
-    The SPJ query has the same meaning as the matching operator, since all the attributes of vertices labeled $Person$ are contained in the output relation.
-    Please note that if there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
-
-    Suppose a matching operator $\matching(GR, \pattern_x)$, whose pattern graph contains $x$ elements ($x \leq n$), can be expressed with SPJ operators.
-    Denote the sequence of SPJ operators by $\mathcal{E}_{\mathcal{P}_x}$.
-    When there are $n+1$ elements in the pattern graph of a matching operator $\matching(GR, \mathcal{P}_{n+1})$, let $v$ be a vertex in $\mathcal{P}_{n+1}$, and $e_1, \cdots, e_k$ are the edges adjacent to $v$. %connecting $v$ with the other vertices in $\mathcal{P}$.
-    $\mathcal{P}_s$ is the pattern obtained by removing $v$ and $e_1, \cdots, e_k$ from $\mathcal{P}_{n+1}$.
-    $\mathcal{P}_s$ contains $s$ elements and $\matching(GR, \mathcal{P}_s)$ can be expressed with $\mathcal{E}_{\mathcal{P}_s}$.
-    Then, $\matching(GR, \mathcal{P}_{n+1})$ can be expressed with SPJ operators as follows:
-    \begin{equation*}
-        \mathcal{E}_{\mathcal{P}_s} \Join R_{el_1} \Join \cdots \Join R_{el_k} \Join R_{vl},
-    \end{equation*}
-    where $vl$ is the label of $v$, $el_1, \cdots, el_k$ are labels of $e_1, \cdots, e_k$, $R_{l}$ is the relation corresponding to vertices or edges labeled $l$ according to the \rgmapping.
-    In conclusion, adopting the homomorphism semantics, the matching operator can be expressed with SPJ operators.
-
-    Furthermore, when the matching operator adopt other semantics (e.g., isomorphism), it is straightforward to add some constraints on the elements with selection operators.
-    For instance, when the isomorphism semantics is adopted, constraints should be added to ensure that different vertices in the pattern graph match with different vertices in the database.
-    Therefore, the theorem is correct.
-}
+We thus conclude the proof.
 \end{proof}
 
 \comment{
@@ -94,6 +70,7 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
 }
 
 \begin{example}
+    \todo{refine the example according to the proof.}
     For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
     \begin{equation*}
         \pi_A(\sigma_d(\pi_{A'}(Person \Join Likes \Join Message \Join Likes \Join Person) \Join Place))
@@ -101,28 +78,19 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
     Then, this SPJ query can be optimized with relational optimizers.
 \end{example}
 
-\subsection{Decomposition-based Method}
-The straightforward method proposed in Sec.~\ref{sec:intuitive-method} is inefficient, because tables representing vertices and edges are treated equally by relational optimizers and worst-case optimality cannot be guaranteed.
-Besides, in the sequence of join operators, a table representing edges may not be joined with tables representing its adjacent vertices.
-Then, some graph-level optimizations cannot be applied.
+Given that edges may connect to common vertices, it becomes apparent that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins corresponding to the number of vertices and edges in the pattern graph, as illustrated in the above example.
 
-Therefore, in this subsection, we present a decomposition-based method to process matching operators.
-In detail, given a matching operator $\matching(GR, \mathcal{P}_0)$ in an SPJM query, it is decomposed into two new matching operators $\matching(GR, \mathcal{P}_1)$ and $\matching(GR, \mathcal{P}_2)$ connected with a join operator $\widehat{\Join}$, following \cite{huge}.
-Specifically, $\mathcal{P}_1$ and $\mathcal{P}_2$ should satisfy:
-(1) $V_{\mathcal{P}_0} = V_{\mathcal{P}_1} \cup V_{\mathcal{P}_2}$,
-(2) $E_{\mathcal{P}_0} = E_{\mathcal{P}_1} \cup E_{\mathcal{P}_2}$,
-(3) $V_{\mathcal{P}_1} \cap V_{\mathcal{P}_2} \neq \emptyset$,
-(4) $E_{\mathcal{P}_1} \cap E_{\mathcal{P}_2} = \emptyset$.
-Please note that $\widehat{\Join}$ and $\Join$ is almost identical, except for the fact that $\widehat{\Join}$ joins two graph relations and outputs a new graph relation.
+\subsection{Graph-aware Method}
+\label{sec:graph-aware}
+The graph-agnostic method, which converts the matching operator into a sequence of relational operators, is straightforward and easy to implement. However, it may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations, preventing the optimizer from utilizing graph-specific optimization techniques. Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
 
-The new matching operators can be further decomposed.
-To prevent the matching operator from being decomposed indefinitely, it is necessary to define a type of matching operator that cannot be decomposed.
-In this paper, such a matching operator is called a minimum matching component (abbr.~MMC).
+In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The leaf nodes of the decomposition tree are called \emph{Minimum Matching Components} (\mmc), which are matching operators that can be solved with specific physical implementations without further decomposition. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{xx}.
 
-\begin{definition}[Minimum Matching Component, abbr.~MMC]
-    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be further decomposed.
-\end{definition}
+A commonly used \mmc is a single-edge pattern. In~\cite{huge}, the authors also introduce a \emph{complete star} as an \mmc. We denote a star-shaped pattern as $\pattern(u;S)$, where $u$ denotes the root vertex of the star and $S$ is the set of leaf vertices\footnote{The edge directions among $u$ and $S$ are not important, and we assume they  all point from $u$ to $S$.}.
+In a decomposition, $\pattern = \pattern' \cup \pattern(u;S)$, $\pattern(u;S)$ is called a complete star if and only if $S \subseteq V_{\pattern'}$,
+meaning that the leaf vertices of the complete star must all be common vertices for the decomposition. The complete star is a logical representation of the physical operations \expand and \intersection, which are key to implementing worst-case optimal join algorithms for graph pattern matching, as will be discussed in \refsec{xx}.
 
+\comment{
 Therefore, decomposing the matching operators recursively can finally result in a tree, whose leaf nodes are MMCs.
 To ensure worst-case optimality, in the process of decomposition, the pattern graph of each decomposed matching operator should be an induced subgraph of $\mathcal{P}_0$.
 The generated tree is called a decomposition tree and it is actually a logical plan of the matching operator.
@@ -134,6 +102,7 @@ Specifically, suppose $\matching(GR, \mathcal{P})$ is decomposed into $\matching
 Inspired by HUGE \cite{huge} and GLogS \cite{GLogS}, matching operators located on the right subtree of the join operator with complete stars as the pattern graphs are the MMCs in this paper.
 
 Besides, a matching operator located on the left subtree of the join operator is an MMC iff its pattern graph is an edge (i.e., one edge and its adjacent two vertices).
+}
 
 \begin{figure}
     \centering
@@ -143,11 +112,14 @@ Besides, a matching operator located on the left subtree of the join operator is
 \end{figure}
 
 \begin{example}
+    \todo{the sample and figure must all be refined.}
     Given the matching operator in Fig.~\ref{fig:spjm}, it is decomposed into two matching operators as shown in Fig.~\ref{fig:match-decomposition}.
     For the right matching operator, because its pattern is a complete star $(p_1, \{m_1\})$, the operator is an MMC.
     For the left matching operator, as its pattern is an edge pattern, it is also an MMC.
     Therefore, the decomposition tree cannot be further decomposed and is a logical plan.
 \end{example}
+
+\todo{add discussion on the difference of graph-aware and graph-agnostic methods. }
 
 \subsection{Comparision of Search Space}
 \label{sec:compare-search-space}
