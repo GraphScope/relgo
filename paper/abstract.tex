@@ -1,3 +1,9 @@
 \begin{abstract}
+    In order to combine the extensive developments made in SQL queries over the years with the benefits of graph queries, the striking SQL/Property Graph Queries (abbr.~SQL/PGQ) is proposed.
+    Then, it is challenging for existing optimizers in relational databases to optimize SQL/PGQ queries, since both relational queries and graph queries are specified.
+    In this paper, we propose a converged graph relational optimization framework named relgo for SQL/PGQ queries.
+    In detail, since optimizing graph queries with graph optimizers have exponentially better efficiency that than with relational optimizers, relgo optimizes the relational queries and graph queries in SQL/PGQ queries with a relational optimization module and a graph optimization module, respectively.
+    Besides, relgo utilizes optimization rules that optimizes queries across the relational and graph queries (e.g., \filterrule) to further improve the efficiency, and introduces a new operator (i.e., the extend-intersect operator) to speed up queries containing cycles.
+    The experiemntal results demonstrate the superior performance of relgo and show the effectiveness of the optimization rules as well as the extend-intersect operator.
 
 \end{abstract}

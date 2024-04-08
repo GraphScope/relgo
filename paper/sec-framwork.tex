@@ -33,7 +33,7 @@ In the process of optimization, graph matching decomposition and outer query are
 Both rule-based optimizations and cost-based optimizations are utilized in these two modules.
 For the relaional optimization module, we implement it with Calcite and propose two efficient rules specially for SPJM queries.
 These rules push predicates in outer queries to matching operator to filter out the invalid elements early, and the details are introduced in Sec.~\ref{sec:optimizations}.
-For the match optimization module, we implemement it with GLogS, which is one of the state-of-the-art graph optimizers.
+For the match optimization module, we implement it with GLogS, which is one of the state-of-the-art graph optimizers.
 
 As different databases usually support different operators and their physical plans can be greatly varied, it is of critical importance for an optimization framework to be flexible.
 Therefore, we implement a PlanConverter in the framework to ensure the flexibility.
