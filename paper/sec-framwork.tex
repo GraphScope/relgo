@@ -8,7 +8,34 @@
 \end{figure}
 
 
-To optimize SPJM queries efficiently, we propose the converged graph relational optimization framework.
+To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
+Specifically, optimizing SPJM queries with relgo is divided into three stages, i.e., preprocessing, optimizing, and converting.
+In this section, we introduce the three stages of relgo in detail.
+
+\subsection{Preprocessing Stage}
+Given an SPJM query, relgo first parse the query and obtained the corresponding AST (Abstract Syntax Tree).
+Then, the initial logical plan is obtained based on the AST.
+Each node in the logical plan represents an operator, including the selection, projection, join, and scan operaotrs.
+
+Please note that the matching operator does not appear in logical plans, because it can be further decomposed into other operators such as join and selection operators.
+Besides, according to \refdef{matching}, the outputs of the matching logical plan is a graph relation, and after the projection $\widehat{\pi}$ is applied, a relational table $\tilde{R}$ is generated.
+Then, the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable), which is involved in the optimization of the other operators.
+The implementation of ScanMatchTable is called the match scanning plan.
+Since the matching operator is decomposed into a sequence of SPJ operators, the cardinality of the output of matching operator can be estimated, which is also the cardinality of ScanMatchTable.
+After that, the left operators form an SPJ query (called the outer query), and the relational optimizers such as Calcite can be utilized to optimize the query.
+The plan of the outer query is called the outer query plan.
+Therefore, rich optimization strategies for relational databases can be applied.
+
+
+\subsection{Optimizing Stage}
+
+\subsection{Converting Stage}
+
+As different databases usually support different operators and their physical plans can be greatly varied, it is of critical importance for an optimization framework to be flexible.
+Therefore, we implement a PlanConverter in the framework to ensure the flexibility.
+Given the generated optimal physical plan, the PlanConverter transforms the plan to an internal representation (e.g., Substrait \cite{substrait}), and then the internal representation is transformed to the physical plan that can be executed by the target database.
+Finally, the plan is executed and the query results are obtained.
+
 The sketch of the converged graph relational optimization framework is shown in Fig.~\ref{fig:framework-overview}.
 
 Specifically, given an SPJM query with several matching operators, the matching operators are first decomposed and the order of joins to obtain the pattern is optimized.
