@@ -73,12 +73,29 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
 }
 
 \begin{example}
-    \todo{refine the example according to the proof.}
-    For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
+    \modify{
+    Given pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operator $\matching(\pattern)$ can be converted to a sequence of relational operators as follows.}
+
+    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{Person}$.
+    Next, $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_1}, u_m)$, and $e_3 = (u_{p_2}, u_m)$ are added into $\pattern_0$ in sequence, and we have 
     \begin{equation*}
-        \pi_A(\sigma_d(\pi_{A'}(Person \Join Likes \Join Message \Join Likes \Join Person) \Join Place))
+        R'_1 = \relation{Person1} \Join_{person\_id=pid1} \relation{Knows} \Join_{pid2=person\_id} \relation{Person2},
     \end{equation*}
-    Then, this SPJ query can be optimized with relational optimizers.
+    \begin{equation*}
+        R'_2 = \relation{Person1} \Join_{person\_id=pid} \relation{Likes} \Join_{mid=message\_id},
+    \end{equation*}
+    \begin{equation*}
+        R'_3 = \relation{Person2} \Join_{person\_id=pid} \relation{Likes} \Join_{mid=message\_id}.
+    \end{equation*}
+    Then, it is clear that $\gproject(\matching(\pattern)) = R_0 \Join R'_1 \Join R'_2 \Join R'_3$.
+
+    \todo{refine the example according to the proof.}
+    
+    %For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
+    %\begin{equation*}
+    %    \pi_A(\sigma_d(\pi_{A'}(Person \Join Likes \Join Message \Join Likes \Join Person) \Join Place))
+    %\end{equation*}
+    %Then, this SPJ query can be optimized with relational optimizers.
 \end{example}
 
 Given that edges may connect to common vertices, it becomes apparent that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins corresponding to the number of vertices and edges in the pattern graph, as illustrated in the above example.
