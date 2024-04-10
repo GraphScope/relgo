@@ -26,15 +26,17 @@ Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph
 To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
-\begin{definition}[\rgmapping, $\zeta$]
+\begin{definition}[\rgmapping]
 \label{def:rgmapping}
-Given a set of vertex relations \(\vec{R_v} = \{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}\) and edge relations \(\vec{R_e} = \{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}\), an \rgmapping, denoted as \(\zeta: \vec{R_v} \cup \vec{R_e} \to G\), is defined to map the relations to a property graph \(G = (V, E)\). This mapping is elaborated as follows:
+Given two set of relations $\{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}$, and $\{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}$, we define an \rgmapping to map the relations to a property graph $G = (V, E)$, which contains the mappings of $(\zeta_v, \zeta_e, \lambda_{e_1}^s, \lambda_{e_1}^t, \ldots, \lambda_{e_m}^s, \lambda_{e_m}^t)$, elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mapping}: For each relation \(R_{v_i}\) in \(\vec{R_v}\), every tuple \(t\) is mapped to a unique vertex \(v \in V\). This vertex \(v\) is assigned a unique identifier \(\id(v)\), a label \(\lab(v)\) that matches the name of \(R_{v_i}\), and attributes \(v.a_i\) that mirror the attributes \(t.a_i\) of \(t\).
+\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $t \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an identifier $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $t$.
+The relations that are mapped to vertices are referred to as vertex relations.
 
-\item \textbf{Edge Mapping}: For the relations in \(\vec{R_e}\), each relation \(R_{e_i}\) is associated with two subsets of relations, determined by \emph{total} functions \(\lambda_{e^i}^s: R_{e_i} \to R_{v_s}\) and \(\lambda_{e_i}^t: R_{e_i} \to R_{v_t}\), where \(R_{v_s}\) and \(R_{v_t}\) are relations in \(\vec{R_v}\). For each tuple \(t \in R_{e_i}\), a corresponding edge \(e \in E\) is defined, linking vertices that \rgmapping maps from \(\lambda_{e_i}^s(t) \in R_{v_s}\) and \(\lambda_{e_i}^t(t) \in R_{v_t}\) as the source and target vertices, respectively. Similar to vertices, each edge \(e\) receives a label \(\lab(e)\) corresponding to the name of \(R_{e_i}\) and attributes \(e.a_i\) that reflect the attributes of \(t\).
-
+\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $t \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an identifier $\id(e)$,
+a label $\lab(e)$ corresponding to the name of $R_{e_i}$, and attributes $e.attr*$ that reflect the attributes $t.attr*$ of $t$.
+Additionally, we have two vertex relations $R_{v_s}$ and $R_{v_t}$, and the \emph{total} functions: (1) $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$ such that $v_s = \zeta_v(\lambda_{e_i}^s(t))$, and (2) $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$ such that $v_t = \zeta_v(\lambda_{e_i}^t(t))$. The relations that are mapped to edges are referred to as edge relations.
 \end{itemize}
 \end{definition}
 
@@ -88,15 +90,7 @@ CREATE PROPERTY GRAPH G1
 
 \subsection{Matching Operator}
 \label{sec:matching-operator}
-%In this work, we extend the conventional relational algebra to equip it with the capability to handle graph pattern matching, which lies at the core of graph query processing, and is also the most fundamental extension in SQL/PGQ~\cite{sqlpgq}.
-
-\comment{
-Given a property graph $G(V_G, E_G)$, we let $GR$ denote a graph relation over a schema $S = (v_1, v_2, \ldots, v_n, e_1, e_2, \ldots, e_m)$, where the domain of each $v_i$
-is the vertex set $V_G$, and the domain of each $e_j$ is the edge set $E_G$ in $G$, respectively.
-}
- %and facilitating a holistic approach to data management and query
-
-Consider a property graph \(G(V_G, E_G)\), alongside a pattern graph\footnote{Throughout this paper, we deal with \emph{connected} pattern graphs for simple presentation, where each vertex is associated with at least one edge.}, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes.
+Consider a property graph \(G(V_G, E_G)\), alongside a \emph{connected} pattern graph, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes.
 %Graph pattern matching is defined as the task of identifying all subgraphs within a target graph \(G\) that are \emph{homomorphic} to \(\pattern\).
 Graph pattern matching seeks to determine all subgraphs in \(G\) that are \emph{homomorphic} to \(\pattern\).
 Formally, given a subgraph $g \subseteq G$, a homomorphism from \(\pattern\) to \(g\) is a \emph{surjective}, total mapping \(\sigma: V_\pattern \cup E_\pattern \to V_{g} \cup E_{g}\) that satisfy the following conditions: (1) For every vertex \(u \in V_\pattern\), there is a corresponding vertex \(v = \sigma(u) \in V_{g}\) with \(\lab(v) = \lab(u)\)\footnote{As a convention, we will always write $u$ and $v$ for a pattern vertex and a graph vertex, respectively.}; (2) For each edge \(e = (u_s, u_t) \in E_\pattern\), there is a corresponding edge \(\sigma(e) = (v_s, v_t) \in E_{g}\), ensuring that the mapping preserves the edge's the label, as well as its source and target vertices , that is \(\lab(e) = \lab(\sigma(e))\), and \(\sigma(u_s) = v_s\), \(\sigma(u_t) = v_t\). It's important to highlight the homomorphism semantics, as one of the widely used semantics for graph pattern matching~\cite{angles2017foundations}, \modify{does} not require each pattern vertex and edge being uniquely mapped to distinct vertices and edges in the data graph. This facilitates a seamless integration between graph pattern matching and relational operations, but alternative semantics for graph pattern matching such as isomorphism can also be adopted, as will be further discussed in~\refsec{handling-match-operator}.
@@ -158,54 +152,9 @@ The construction makes the resultant relation \(\tilde{R}\) fully compatible wit
 
 In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
 
-\iffalse
-%\todo{give a final example of spjm}
-\begin{figure}
-    \centering
-    \includegraphics[width=.6\linewidth]{./figures/spjm.png}
-    \caption{The operator tree of an SPJM query.}
-    \label{fig:spjm}
-\end{figure}
-
-
-\begin{lstlisting}
-SELECT f.pn1, f.pn2
-FROM GRAPH_TABLE (G1
-    MATCH (p1:Person)-[:Likes]->(m1:Message)<-[:Likes]-(p2:Person),
-        (p1)-[:Knows]->(p2),
-        (p2)-[:Knows]->(p1)
-    COLUMNS (
-        p1.name as pn1,
-        p1.place_id as ppid,
-        p2.name as pn2)
-) f, Place pl
-WHERE f.ppid = pl.place_id
-AND pl.pl_name = 'Germany';
-\end{lstlisting}
-\fi
-
 \begin{example}
-    An SPJM query follows the grammar of SQL/PGQ is shown in \reffig{intro-rgmapping-example}(c) and the corresponding query tree is also presented.
-    This query aims to find two persons who like the same message and know each other, one of whom lives in Germany.
-
-    According to the query tree, after the results of the match operator are obtained as described in \refex{matching}, a specialized projection operator is applied to extract attributes from vertices and this operator returns a relational table (i.e., $R_{M}$ in \reffig{intro-rgmapping-example}(c)).
-    Next, the join, selection, and projection operators are leveraged in sequence to obtain the final results.
-    Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
-    %Besides, Tom is a Germany.
-    \comment{
-    As shown in \reffig{intro-rgmapping-example}, the property graph $G_1$ obtained from \refex{rgmapping}
-    %Since three relations, i.e., \textbf{Person}, \textbf{Message}, and \textbf{Likes}, are utilized as labels of vertices and edges in the pattern graph, an \rgmapping is defined to map them to a property graph.
-    %The details are introduced in Example \ref{example:rgmapping}.
-    %As property graph \(G1\) is obtained,
-    can be conceptualized as graph relation \(GR^{G_1}\), which consists of a single tuple that contain all the vertices and edges in \(G_1\).
-    Then, the matching operator is applied on \(GR^{G_1}\) to find subgraphs homomorphic to the pattern graph $\pattern$, which are given as  \(GR^\pattern\) in \reffig{intro-rgmapping-example}.
-    %This process is equivalent to performing pattern matching on property graph $G1$.
-    The results of pattern matching are those graphs in \(\mathcal{G}\).
-    Please note that each graph in \(\mathcal{G}\) corresponds to a row of \(GR^{M}\).
-
-    After that, a specialized projection operator is applied to extract attritubes from vertices and the operator returns a relational table.
-    Next, the join, selection, and project operator are leveraged in sequence to obtain the results.
-    }
+    \reffig{intro-rgmapping-example}(c) illustrates an example of an \spjm query, along with its corresponding SQL/PGQ expression. The query's objective is to identify pairs of persons who like the same message, know each other, and where one of them resides in Germany. As per the query, once the results of the matching operator are obtained (as described in \refex{matching}), a $\gproject$ operator is applied to extract attributes from all vertices, forming a relational table. Subsequently, the join, selection, and projection operators are employed to compute the final results.
+    %Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
 \end{example}
 
 %is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.

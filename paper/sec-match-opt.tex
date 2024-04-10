@@ -38,8 +38,8 @@ Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. Accor
 
 \begin{equation} \label{eq:ev-join}
 \begin{split}
-R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \\
-& \{(t_e, t_s) | t_e \in R_{\lab(e)} \land t_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(t_e) = t_s\}.
+R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \{(t_e, t_s) | \\
+  &  t_e \in R_{\lab(e)} \land t_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(t_e) = t_s\}.
 \end{split}
 \end{equation}
 
@@ -86,29 +86,19 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
 }
 
 \begin{example}
-    Given pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operator $\matching(\pattern)$ can be converted to a sequence of relational operators as follows.
-    Please note that to differentiate between the relations corresponding to $u_{p_1}$ and $u_{p_2}$, we denote the relations by $\relation{Person1}$ and $\relation{Person2}$, perspectively.
-    Analogously, let $\relation{Knows1}$ and $\relation{Knows2}$ correspond to $e_1$ and $e_2$, $\relation{Likes1}$ and $\relation{Likes2}$ correspond to $e_3$ and $e_4$, respectively.
-
-    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{\text{Person1}}$.
-    Next, $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, p_1)$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ are sequentially added into $\pattern_0$ , and we have
-    \begin{equation*}
-      \begin{split}
-        R'_1 = \relation{\text{Person1}} \Join_{person\_id=pid1} \relation{\text{Knows1}} \Join_{pid2=person\_id} \relation{\text{Person2}}, \\
-        R'_2 = \relation{\text{Person2}} \Join_{person\_id=pid2} \relation{\text{Knows2}} \Join_{pid1=person\_id} \relation{\text{Person1}}, \\
-        R'_3 = \relation{\text{Person1}} \Join_{person\_id=pid} \relation{\text{Likes1}} \Join_{mid=message\_id} \relation{\text{Message}}, \\
-        R'_4 = \relation{\text{Person2}} \Join_{person\_id=pid} \relation{\text{Likes2}} \Join_{mid=message\_id} \relation{\text{Message}}.
-      \end{split}
+  Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operator $\matching(\pattern)$ can be converted to a sequence of relational operators as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
+  Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, u_{p_1})$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
+  \begin{equation*}
+    \begin{split}
+    R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relationx{1}{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
+    R'_2 &= \relationx{2}{\text{Person}} \Join_{\text{person\_id}=\text{pid2}} \relationx{2}{\text{Knows}} \Join_{\text{pid1}=\text{person\_id}} \relationx{1}{\text{Person}}, \\
+    R'_3 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{1}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}, \\
+    R'_4 &= \relationx{2}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{2}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}.
+    \end{split}
     \end{equation*}
-    \todo{Must refine the cases of Person1 and Person2, which may not be correct.}
-    We finally have $\gproject(\matching(\pattern)) = R'_4 \Join R'_3 \Join R'_2 \Join R'_1 \Join R_0$.
 
+    Finally, we have $\gproject(\matching(\pattern)) = R'_4 \Join R'_3 \Join R'_2 \Join R'_1 \Join \relation{0}$.
 
-    %For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
-    %\begin{equation*}
-    %    \pi_A(\sigma_d(\pi_{A'}(Person \Join Likes \Join Message \Join Likes \Join Person) \Join Place))
-    %\end{equation*}
-    %Then, this SPJ query can be optimized with relational optimizers.
 \end{example}
 
 Given that edges may connect to common vertices, it becomes apparent that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins corresponding to the number of vertices and edges in the pattern graph, as illustrated in the above example.
@@ -188,7 +178,7 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
     It is obvious that the obtained number is a lower bound of the total number of possible logical plans.
 
     We start from the condition where $ST$ is a path.
-    Then, denote the number of logical plans corresponding to a spanning tree which is a path of length $k$ by $c_p(k)$, we have 
+    Then, denote the number of logical plans corresponding to a spanning tree which is a path of length $k$ by $c_p(k)$, we have
     \begin{equation*}
         \begin{split}
             c_p(k) & = 2 * (c_p(0)c_p(k-1) + c_p(1)c_p(k-2) + \cdots + c_p(k-1)c_p(0)) \\
@@ -205,7 +195,7 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
     \end{equation*}
 
     Subsequently, we proceed to examine a more general scenario in which $ST$ does not necessarily represent a path, and denote the number of logical plans corresponding to $ST$ by $c(ST)$.
-    Without loss of generality, suppose there are $k$ edges in $ST$. 
+    Without loss of generality, suppose there are $k$ edges in $ST$.
     Denote the longest path in the tree by $p_1$, and its length is $P_1 = |p_1|$.
     By removing edges in $p_1$ from $ST$, a new subgraph $ST_1$ is obtained.
     Analogously, denote the longest path in $ST_1$ that intersects with the already removed paths (i.e., $p_1$) by $p_2$ with $P_2 = |p_2|$.
@@ -475,12 +465,18 @@ As shown in \reffig{graph-index}, given the three relations $\relation{\text{Per
 
 \[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
 
-GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join. The first kind of index, called EV-index, as shown in \reffig{graph-index}(a), is constructed by appending an extra column named ``\text{pid\_rowid}'' to the table $\relation{\text{Likes}}$, corresponding to the row number in the table $\relation{\text{Person}}$. When conducting the join, the row number helps quickly route a tuple of $\relation{\text{Likes}}$ to the joinable tuple of $\relation{\text{Person}}$ without the extra maintenance of a hash table in a hash-join or sorting in a merge-sort-join implementation. Similarly, the ``\text{mid\_rowid}'' column is added to efficiently join $\relation{\text{Likes}}$ with $\relation{\text{Message}}$.
+GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the edge table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row number of the corresponding tuple in the source vertex table $\relation{\text{Person}}$, denoted as $\rowid(t_{p})$, where $t_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row number of the corresponding tuple in the target vertex table $\relation{\text{Message}}$, denoted as $\rowid(t_{m})$, where $t_{m} \in \relation{\text{Message}}$. These row numbers help quickly route a tuple $t_{l} \in \relation{\text{Likes}}$ to the joinable tuples $t_{p}$ and $t_{m}$ without the need for additional data structures like hash tables or sorting.
 
-The second kind of index, called VE-index, as shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. Specifically, for each person, the VE-index records the row numbers of the tuples in $\relation{\text{Likes}}$ and the corresponding $\relation{\text{Message}}$ that are joinable with the person. In the graph view, the VE-index essentially maintains adjacent edges and vertices of each person if viewing ``Person-[Likes]->Messages'' as an edge of a property graph. The VE-index used in GrainDB is organized in the structure of Compressed-Sparse-Row (CSR).
+The VE-index, shown in \reffig{graph-index}(b), is created on the source vertex table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $t_{p} \in \relation{\text{Person}}$, the VE-index records the row numbers of the tuples $t_{l} \in \relation{\text{Likes}}$ and the corresponding $t_{m} \in \relation{\text{Message}}$ that are joinable with $t_{p}$. In the graph view, the VE-index maintains the adjacent edges and vertices of each person, treating ``Person-[Likes]->Messages'' as an edge of a property graph. GrainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure.
 
+It's straightforward to construct the graph indexes during the \rgmapping process using the \lstinline{CREATE PROPERTY GRAPH} statement. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $t_e \in R_e$ by including $\rowid(\lambda_e^s(t_e))$ and $\rowid(\lambda_e^t(t_e))$, which are the row numbers of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $t_{v_s} \in R_{v_s}$ by including the row numbers of all tuples $t_e \in R_e$ such that $\lambda_e^s(t_e) = t_{v_s}$, along with the row numbers of the corresponding tuples $t_{v_t} \in R_{v_t}$ such that $\lambda_e^t(t_e) = t_{v_t}$.
+The construction of VE-index on $R_{v_t}$ is analogous.
 
-\subsubsection{Physical Implementation}
+\begin{remark}
+  Several alternative approaches exist for handling the \rgmapping process. One such approach, proposed in~\cite{gart}, involves directly materializing the property graph using an additional graph store, rather than simply building graph indexes on the relational data. While this method may enable more efficient graph processing, it comes with the trade-off of requiring extra storage space and incurring higher maintenance costs. Moreover, \spjm queries often involve a combination of graph and relational operations, which may not be fully supported by the graph store alone.
+\end{remark}
+
+\subsubsection{Implementing Matching Operator}
 \label{sec:join-matching-operator}
 In implementing a logical matching plans, the inputs of join operators are two relations, i.e., $R_1 \Join R_2$, where $\theta$ is the join condition.
 The join operators can be divided into three categories based on $R_2$.
