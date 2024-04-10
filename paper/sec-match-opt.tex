@@ -166,46 +166,52 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
 
 \begin{proof}
     \todo{refine the proof.}
-    The search space refers to the number of join orders that are explored to ascertain the optimal final join order.
-    To estimate the search space, we first construct a graph with these $n + m$ relations.
-    Specifically, each relation corresponds to a vertex in this graph, and if there is a join condition w.r.t.~two relations, there is an edge between the corresponding vertices.
-    To avoid cross product, for each explored join order, everytime two relations are joined together, there should be join conditions between them.
-    Therefore, each explored join order forms a spanning tree in the graph.
-    By computing the number of physical plans can be generated according to each spanning tree, the total number of physical plans can be obtained.
+    To obtain the search space, we first estimate the number of possible join orders, and each join order is a logical plan of join operators.
+    Then, the search space refers to the number of physical plans corresponding to these logical plans.
+    To avoid cross production, for each explored logical plan, everytime two relations are joined together, there should be join conditions between them.
 
-    In this proof, we compute the number of physical plans for one spanning tree, and this number is a lower bound of the number of physical plans that can be generated.
+    Given $n + m$ relations, we first construct a graph $\mathbb{G}$.
+    Specifically, each relation corresponds to a vertex in $\mathbb{G}$, and if there is a join condition between two relations, there is an edge between their corresponding vertices.
+    Then, each possible logical plan forms a spanning tree in $\mathbb{G}$, and different logical plans may form the same tree.
+    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\mathbb{G}$.
 
-    We start with a spanning tree with $k$ edges ($k \geq 1$), which has only one leaf node (i.e., it is a path).
-    Then, the number of logical plans corresponding to the spanning tree is
+    We consider the case that there is only one spanning tree $ST$ in $\mathbb{G}$ with $k$ edges.
+    When there are more than one spanning trees in $\mathbb{G}$, only the number of logical plans corresponding to one of these trees is computed.
+    It is obvious that the obtained number is a lower bound of the total number of possible logical plans.
+
+    We start from the condition where $ST$ is a path.
+    Then, denote the number of logical plans corresponding to a spanning tree which is a path of length $k$ by $c_p(k)$, we have 
     \begin{equation*}
         \begin{split}
-            c_l(k) & = 2 * (c(0)c(k-1) + c(1)c(k-2) + \cdots + c(k-1)c(0)) \\
-            & = 2\Sigma_{i=0}^{i=k-1}c(i)c(k-1-i), \\
-            & \text{where } c_l(0) = 1.
+            c_p(k) & = 2 * (c_p(0)c_p(k-1) + c_p(1)c_p(k-2) + \cdots + c_p(k-1)c_p(0)) \\
+            & = 2\Sigma_{i=0}^{i=k-1}c_p(i)c_p(k-1-i), \\
+            & \text{where } c_p(0) = 1.
         \end{split}
     \end{equation*}
     With the generating function, it is obtained that
     \begin{equation*}
         \begin{split}
-            c_l(k) & = \frac{2^k}{k+1}C(2k, k) \geq \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
+            c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
             & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
         \end{split}
     \end{equation*}
 
-    For any spanning tree $T$ with $k = m + n - 1$ edges, denote the longest path in the tree by $p_1$, and its length is $P_1 = |p_1|$.
-    By removing the path (i.e., edges in $p_1$) from $T$, we can obtain a new subgraph $T_1$.
-    Similarly, the longest path in $T_1$ that intersects with the already removed paths (i.e., $p_1$) is obtained and denoted by $p_2$, with $P_2 = |p_2|$.
-    After that, $p_2$ is removed from $T_1$ and subgraph $T_2$ is obtained.
-    For $p_1$ and $p_2$, since they are both paths, the numbers of logical plans corresponding to them are $c_l(P_1)$ and $c_l(P_2)$, respectively.
-    Without loss of generality, suppose $p_1$ and $p_2$ intersects at vertex $v_i$, and then, $v_i$ appears in each logical plan corresponding to $p_1$.
-    Then, by replacing $v_i$ with the plans corresponding to $p_2$, respectively, $c(p_1 \cup p_2) \geq c_l(P_1)c_l(P_2)$ plans are obtained, where $c(t)$ is the number of logical plans corresponding to tree $t$ and $c(t) = c_l(k)$ when $t$ is a path with $k$ edges.
+    Subsequently, we proceed to examine a more general scenario in which $ST$ does not necessarily represent a path, and denote the number of logical plans corresponding to $ST$ by $c(ST)$.
+    Without loss of generality, suppose there are $k$ edges in $ST$. 
+    Denote the longest path in the tree by $p_1$, and its length is $P_1 = |p_1|$.
+    By removing edges in $p_1$ from $ST$, a new subgraph $ST_1$ is obtained.
+    Analogously, denote the longest path in $ST_1$ that intersects with the already removed paths (i.e., $p_1$) by $p_2$ with $P_2 = |p_2|$.
+    Then, edges in $p_2$ are removed from and subgraph $ST_2$ is obtained.
+    Since $p_1$ and $p_2$ are both paths, the number of logical plans corresponding to them are $c_p(P_1)$ and $c_p(P_2)$, respectively.
+    Suppose $p_1$ and $p_2$ intersect at vertex $v_i$, and then the operator that scans $v_i$ appears in each logical plan corresponding to $p_1$.
+    By replacing these scanning operators with the plans corresponding to $p_2$, respectively, $c(p_1 \cup p_2)$ plans are obtained, satisifying $c(p_1 \cup p_2) \geq c_p(p_1)c_p(p_2)$ because the relations corresponding to vertices in $p_1$ and those in for $p_2$ can be joined in an interleaved fashion, which is overlooked by multipling $c_p(p_1)$ and $c_p(p_2)$.
 
-    As $T$ is a tree, by repeatedly finding and removing the paths as above, all the edges in $T$ are finally removed.
+    As $ST$ is a tree, by repeatedly finding and removing the paths as above, all the edges in $ST$ are finally removed.
     Let the number of paths removed be $s$, we have
     \begin{equation*}
         \begin{split}
-            c(T) & = c(p_1 \cup \cdots \cup p_s) \geq c_l(P_1) \cdots c_l(P_s) \\
-            & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{m + n - 1}}{2^s} \geq 2^{m+n-1}.
+            c(ST) & = c(p_1 \cup \cdots \cup p_s) \geq c_p(P_1) \cdots c_p(P_s) \\
+            & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{k}}{2^s} \geq 2^{k}.
         \end{split}
     \end{equation*}
 
@@ -214,8 +220,8 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
     %    \frac{2^{m+n-1}}{m+n}C(2m+2n-2, m+n-1) \geq \frac{4^{m+n-1}}{m+n}.
     %\end{equation*}
 
-
-    Thus, the number of physical plans is at least $2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
+    Since there are $m + n$ vertices in $\mathbb{G}$, the number of the edges in the spanning tree should be $k = m + n - 1$.
+    Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
 
     In conclusion, Theorem \refthm{complexity-of-volcano} is correct.
 \end{proof}
