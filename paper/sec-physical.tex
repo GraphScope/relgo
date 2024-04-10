@@ -1,11 +1,12 @@
-\section{Physical Implementation of Logical Operators}
+\section{Physical Graph Operations}
+\label{sec:physical-operators}
 
 Given an SPJM query, the selection, projection, and join operators are performed on relations and have the same physical implementations as those in relational databases.
 The main difference lies in the physical implementation of matching operators.
 In detail, if the graph-agnostic method in \refsec{solve-spjm-problem} is applied, the obtained logical matchings plans consist of selection, projection, and join operators.
 Otherwise, if the graph-aware method is applied, the logical matching plans additionally include matching operators.
 In this section, we focus on the physical implementions of the operators in logical matching plans.
-Specifically, we focus on the join operators and matching operators in logical matching plans, because there can be many variations in the physical implementation of these two operators and the query performance varies greatly among different implementations. 
+Specifically, we focus on the join operators and matching operators in logical matching plans, because there can be many variations in the physical implementation of these two operators and the query performance varies greatly among different implementations.
 In this section, we first propose the concept of graph indices and then present the physical implementations of join and matching operators.
 
 \begin{figure}
@@ -20,8 +21,8 @@ In this section, we first propose the concept of graph indices and then present 
 
 In a property graph, the adjacency relationships between vertices and edges are obvious and the adjacent edges of a vertex can be obtained directly.
 Moreover, a tuple in a relation corresponds to a vertex or an edge in the property graph according to the \rgmapping.
-Therefore, by maintaining the relationships between vertices and edges via indices, the join operator can be markedly accelerated. 
-This improvement is achieved because for each tuple within a relation, the indices have pre-stored the tuples that are joinable with it. 
+Therefore, by maintaining the relationships between vertices and edges via indices, the join operator can be markedly accelerated.
+This improvement is achieved because for each tuple within a relation, the indices have pre-stored the tuples that are joinable with it.
 As a result, it eliminates the necessity to iterate through every tuple of the counterpart relation, thereby enhancing the efficiency of the join process.
 As this index structure mimics the adjacency relationship between vertices and edges, it is called a graph index.
 
@@ -59,15 +60,15 @@ This information can be quickly ascertained through the graph index.
 In implementing a logical matching plans, the inputs of join operators are two relations, i.e., $R_1 \Join R_2$, where $\theta$ is the join condition.
 The join operators can be divided into three categories based on $R_2$.
 
-Firstly, if $R_2$ is not obtained by a matching operator, then the join operator is implemented with 
+Firstly, if $R_2$ is not obtained by a matching operator, then the join operator is implemented with
 \begin{equation*}
     R_1 \Join R_2.
 \end{equation*}
 
-Secondly, if $R_2$ is obtained by a matching operator whose pattern graph is an edge, then the join operator is implemented as an \expandvertex~operator. 
+Secondly, if $R_2$ is obtained by a matching operator whose pattern graph is an edge, then the join operator is implemented as an \expandvertex~operator.
 Specifically, denote the matching operator by $\matching(\pattern_e)$, where $\pattern_e$ consists of two vertices $u_s, u_t$ and an edge $e$ connecting them.
 Let $\lambda^s_e$ and $\lambda^t_e$ be functions that associate tuples in $\relation{\vlabel{(e)}}$ with those in $\relation{\vlabel(u_s)}$ and $\relation{\vlabel(u_t)}$, respectively.
-Then, the $\expandvertex(R_1, \pattern_e)$ is implemented with 
+Then, the $\expandvertex(R_1, \pattern_e)$ is implemented with
 \begin{equation*}
     R_1 \Join (\relation{\vlabel{(u_s)}} \Join_{\lambda^{s}_{e}} \relation{\vlabel{(e)}} \Join_{\lambda^{t}_{e}} \relation{\vlabel{(u_t)}}).
 \end{equation*}
@@ -85,7 +86,7 @@ These tuples are joined together if and only if they have the same values on att
 Denote the matching operator by $\matching(\pattern_s)$, where $\pattern_s = (v_r; \mathcal{H})$ and $\mathcal{H} = \{v_1, \cdots, v_k\}, k \geq 2$.
 Let $e_1, \cdots, e_k$ be the edges connecting $v_1, \cdots, v_k$ and $v_r$, respectively.
 Moreover, we have $\lambda^s_{e_i}$ and $\lambda^t_{e_i}$ mapping tuples from $\relation{\lab(e_i)}$ to $\relation{\lab(v_i)}$, and from $\relation{\lab(e_i)}$ to $\relation{\lab(v_r)}$, respectively.
-Then, the $\expandintersect$($\relation{1}$, $\pattern_s$)~operator is implemented as 
+Then, the $\expandintersect$($\relation{1}$, $\pattern_s$)~operator is implemented as
 \begin{equation*}
     \intersect(\{v_r\}, \{\expandvertex(R_1, \pattern_{v_1}), \cdots, \expandvertex(R_1, \pattern_{v_k})\}),
 \end{equation*}
