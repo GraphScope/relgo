@@ -90,7 +90,7 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
     Please note that to differentiate between the relations corresponding to $u_{p_1}$ and $u_{p_2}$, we denote the relations by $\relation{Person1}$ and $\relation{Person2}$, perspectively.
     Analogously, let $\relation{Knows1}$ and $\relation{Knows2}$ correspond to $e_1$ and $e_2$, $\relation{Likes1}$ and $\relation{Likes2}$ correspond to $e_3$ and $e_4$, respectively.
 
-    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{\text{Person1}}$. 
+    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{\text{Person1}}$.
     Next, $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, p_1)$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ are sequentially added into $\pattern_0$ , and we have
     \begin{equation*}
       \begin{split}
@@ -452,66 +452,27 @@ Therefore, it is possible to leverage relational databases to process matching o
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
-\comment{
-Given an SPJM query, the selection, projection, and join operators are performed on relations and have the same physical implementations as those in relational databases.
-The main difference lies in the physical implementation of matching operators.
-In detail, if the graph-agnostic method in \refsec{solve-spjm-problem} is applied, the obtained logical matchings plans consist of selection, projection, and join operators.
-Otherwise, if the graph-aware method is applied, the logical matching plans additionally include matching operators.
-In this section, we focus on the physical implementions of the operators in logical matching plans.
-Specifically, we focus on the join operators and matching operators in logical matching plans, because there can be many variations in the physical implementation of these two operators and the query performance varies greatly among different implementations.
-In this section, we first propose the concept of graph indices and then present the physical implementations of join and matching operators.
-}
-
-In the graph view, given a vertex $v$, it supposes to be efficient to obtain its adjacent edges and neighbors.
-However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations,
-and join operations must be performed to obtain the adjacency relationships.
-
+In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations. Instead, EV-join operations (\refeq{ev-join}) must be performed to obtain these adjacency relationships. In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we consider it as a \emph{graph index} in this paper.
 
 \begin{figure}
     \centering
     \includegraphics[width=.8\linewidth]{./figures/graph-index-likes.pdf}
-    \caption{A graph index on edges labeled ``Likes'' on $G_1$ in \reffig{intro-rgmapping-example}.}
+    \caption{The graph index constructed among relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$
+    and $\relation{\text{Message}}$ in \reffig{intro-rgmapping-example}(a).}
     \label{fig:graph-index}
 \end{figure}
 
 \subsubsection{Graph Index}
 \label{sec:graph-index}
 
-In a property graph, the adjacency relationships between vertices and edges are obvious and the adjacent edges of a vertex can be obtained directly.
-Moreover, a tuple in a relation corresponds to a vertex or an edge in the property graph according to the \rgmapping.
-Therefore, by maintaining the relationships between vertices and edges via indices, the join operator can be markedly accelerated.
-This improvement is achieved because for each tuple within a relation, the indices have pre-stored the tuples that are joinable with it.
-As a result, it eliminates the necessity to iterate through every tuple of the counterpart relation, thereby enhancing the efficiency of the join process.
-As this index structure mimics the adjacency relationship between vertices and edges, it is called a graph index.
+As shown in \reffig{graph-index}, given the three relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$, and $\relation{\text{Message}}$, the complete information of ``Person likes messages'' can be obtained by conducting the join:
 
-Join operators that leverage graph indices are called predefined joins by GrainDB \cite{graindb}.
-Specifically, an example of the graph index instantiated in GrainDB is shown in \reffig{graph-index}.
-In detail, the graph index is built on edges labeled ``Likes'' in property graph $G_1$ of \reffig{intro-rgmapping-example}(a) and records the adjacency relationships of the vertices labeled ``Person'' and the edges labeled ``Likes''.
-That is, according to the \rgmapping, for each tuple $t_p$ in $\relation{Person}$, the tuples in $\relation{Likes}$ that can be joined with $t_p$ can be directly obtained with the graph index and vice versa.
+\[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
 
-In detail, the graph index consists of two parts as shown in \reffig{graph-index}.
-The first part in \reffig{graph-index}(a) is designed for efficiently accessing tuples in $\relation{Person}$ that can be joined with tuples in $\relation{Likes}$.
-Specifically, a new column named ``pid\_rowid'' is added to $\relation{Person}$ and the new relation with more columns is called $\grelation{Person}$.
-For each tuple $t \in \grelation{Person}$, $t.pid\_rowid$ is the row number of $t_p \in \relation{Person}$, where $t_p.person\_id = t.pid$.
-Note that row numbers start from 0.
-Take the first tuple in $\grelation{Likes}$ (denoted as $t_l$) as an example.
-Because $t_l.pid = p_1$ and the tuple $t_p$ at row number 0 in $\relation{Person}$ satisfies $t_p.person\_id = p_1 = t_l.pid$, we have $t_l.pid\_rowid = 0$.
-With this graph index, given a tuple $t$ in $\grelation{Likes}$, the tuple in $\relation{Person}$ that are joinable with $t$ can be retrieved without scanning $\relation{Person}$.
+GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join. The first kind of index, called EV-index, as shown in \reffig{graph-index}(a), is constructed by appending an extra column named ``\text{pid\_rowid}'' to the table $\relation{\text{Likes}}$, corresponding to the row number in the table $\relation{\text{Person}}$. When conducting the join, the row number helps quickly route a tuple of $\relation{\text{Likes}}$ to the joinable tuple of $\relation{\text{Person}}$ without the extra maintenance of a hash table in a hash-join or sorting in a merge-sort-join implementation. Similarly, the ``\text{mid\_rowid}'' column is added to efficiently join $\relation{\text{Likes}}$ with $\relation{\text{Message}}$.
 
-However, given a tuple $t_p$ in $\relation{Person}$, we cannot leverage the graph index in \reffig{graph-index}(a) to directly access tuples in $\grelation{Likes}$ joinable with $t_p$, because it is unknown which rows of $\grelation{Likes}$ contain $pid$ values equal to $t_p.person\_id$.
-Therefore, the adjacency list in \reffig{graph-index}(b) is constructed to solve this problem.
-To elaborate, the first column contains the row numbers in $\relation{Person}$.
-For example, row number 1 represents the second tuple in $\relation{Person}$ with $person\_id = p_2$ (denoted by $t_{p_2}$) and this tuple corresponds to $v_{p_2}$ in $G_1$.
-The second column records the row numbers in $\grelation{Likes}$.
-With this column, the edges adjacent to a given vertex can be retrieved efficiently.
-For example, the edges adjacent to $v_{p_2}$ (i.e., $e_{l_2}$ and $e_{l_3}$ in $G_1$) are stored at row 1 and row 2 of $\grelation{Likes}$.
-It means that the second and third tuples in $\grelation{Likes}$ can be joined with $t_{p_2}$.
+The second kind of index, called VE-index, as shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. Specifically, for each person, the VE-index records the row numbers of the tuples in $\relation{\text{Likes}}$ and the corresponding $\relation{\text{Message}}$ that are joinable with the person. In the graph view, the VE-index essentially maintains adjacent edges and vertices of each person if viewing ``Person-[Likes]->Messages'' as an edge of a property graph. The VE-index used in GrainDB is organized in the structure of Compressed-Sparse-Row (CSR).
 
-If the adjacent relationships between vertices labeled ``Message'' and edges labeled ``Likes'' are also recorded in this index, the third column in \reffig{graph-index} is added.
-With this column, the neighbors of given vertices can be quickly accessed.
-It means that given a tuple $t_p$ in $\relation{Person}$, let $T_{Likes}$ be the set of tuples in $\relation{Likes}$ which can be joined with $t_p$, and then the tuples in $\relation{Message}$ which can be joined with a tuple in $\relation{Likes}$ can be quickly obtained.
-For example, the neighbors connected to $v_{p_2}$, connected through edges labeled ``Likes'', include $v_{m_1}$ and $v_{m_2}$, whose corresponding tuples are at row 0 and row 1 in $\relation{Message}$.
-This information can be quickly ascertained through the graph index.
 
 \subsubsection{Physical Implementation}
 \label{sec:join-matching-operator}
