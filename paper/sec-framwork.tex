@@ -8,33 +8,59 @@
 \end{figure}
 
 
-To optimize SPJM queries efficiently, we propose the converged graph relational optimization framework.
-The sketch of the converged graph relational optimization framework is shown in Fig.~\ref{fig:framework-overview}.
+To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
+Specifically, optimizing SPJM queries with relgo is divided into three stages, i.e., preprocessing, optimizing, and converting.
+In this section, we introduce the three stages of relgo in detail.
 
-Specifically, given an SPJM query with several matching operators, the matching operators are first decomposed and the order of joins to obtain the pattern is optimized.
-After graph matching decomposition, a logical plan is generated simultaneously, which is called the matching logical plan.
-The operators that can be utilized in this plan include selection, projection, join, and matching operators.
-Specifically, the matching operators should be minimum matching components.
+\subsection{Preprocessing Stage}
+Given an SPJM query, relgo first parse the query and obtained the corresponding AST (Abstract Syntax Tree).
+Then, the initial logical plan is obtained based on the AST.
+Each node in the logical plan represents an operator, including the selection, projection, join, and scan operators.
 
-Please note that the outputs of the matching logical plan is a graph relation, and after the selection $\widehat{\pi}$ is applied, a relational table $\widehat{R}$ is generated.
-Then, the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable), which is involved in the optimization of the other operators.
-The implementation of ScanMatchTable is called the match scanning plan.
-Since the matching operator is decomposed into a sequence of SPJ operators, the cardinality of the output of matching operator can be estimated, which is also the cardinality of ScanMatchTable.
-After that, the left operators form an SPJ query (called the outer query), and the relational optimizers such as Calcite can be utilized to optimize the query.
-The plan of the outer query is called the outer query plan.
-Therefore, rich optimization strategies for relational databases can be applied.
+Please note that the matching operator does not appear in logical plans, because it can be further decomposed into other operators such as join and selection operators.
+Besides, according to \refdef{matching}, the output of the matching operator is a graph relation, and it is always followed by a projection operator $\widehat{\pi}$.
+The output of $\widehat{\pi}$ is a relation and the matching operator as well as $\widehat{\pi}$ are considered as a whole as an implementation of the scan operator (named ScanMatchTable).
 
-In the process of optimization, graph matching decomposition and outer query are optimized by the match optimization module and relational optimization module, respectively.
-Both rule-based optimizations and cost-based optimizations are utilized in these two modules.
-For the relaional optimization module, we implement it with Calcite and propose two efficient rules specially for SPJM queries.
-These rules push predicates in outer queries to matching operator to filter out the invalid elements early, and the details are introduced in Sec.~\ref{sec:optimizations}.
-For the match optimization module, we implement it with GLogS, which is one of the state-of-the-art graph optimizers.
+In the preprocessing stage, some universally effective optimizations can be applied to refine the plan in advance.
+A typical optimization is \filterrule.
+
+This rule is inspired by FilterPushdownRule in relational optimizer, which can push down the predicates to the scan operators to filter out invalid elements earlier.
+Specifically, as the ScanMatchTable corresponding to $\matching(\pattern)$ is a physical implementation of the scan operator which acts like scanning a table obtained by matching $\pattern$, it is reasonable to integrate some filtering criteria into the ScanMatchTable operator.
+Specifically, \filterrule finds predicates on the properties of elements in $\pattern$ and push them down into ScanMatchTable, so that invalid elements can be dropped earlier.
+An example of applying \filterrule is given in Example \ref{example:push_down}.
+
+Formally, the equation rule w.r.t.~\filterrule is as follows:
+\begin{equation}
+    \begin{split}
+        & \pi_A(\sigma_{d}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}) \\
+        & \hspace*{2em} \equiv \pi_A(\sigma_{d_0}(R_1 \Join \cdots \Join R_m \Join \widetilde{R}_{d_1})), \\
+        & \hspace*{4em} \text{where } \widetilde{R} = \widehat{\pi}_{attr*}(\mathcal{M}(\mathcal{P})) \\
+        & \hspace*{4em} \text{and } \widetilde{R}_{d_1} = \widehat{\pi}_{attr*}(\mathcal{M}(\mathcal{P}_{d_1}))
+    \end{split}
+\end{equation}
+where $d_1$ is a subset of $d$ with the constraints related to $\widetilde{R}$ and $d_0$ is obtained by removing $d_1$ from $d$.
+Besides, $\mathcal{P}_{d_1}$ is obtained by adding constraints in $d_1$ to $\mathcal{P}$.
+
+\subsection{Optimizing Stage}
+
+Given a logical plan of a SPJM query, relgo optimizes the plan in the optimizing stage.
+Specifically, the operations that appear in logical plans of SPJM queries often also appear in the logical plans of relational databases.
+Therefore, typical relational optimizers, e.g., Calcite \cite{calcite}, can be employed to optimize this plan.
+
+Besides, to optimize the implementation of ScanMatchTable, the matching plans are optimized with graph-aware methods.
+Studies that optimize graph pattern matching can be utilized as the graph-aware methods, and when implementing \name, we leverage GLogS \cite{GLogS} to optimize matching plans.
+Moreover, if graph indices are available, join operators in \expandvertex and \expandintersect can be implemented as predefined joins to further improve the efficiency. 
+
+
+\subsection{Converting Stage}
 
 As different databases usually support different operators and their physical plans can be greatly varied, it is of critical importance for an optimization framework to be flexible.
 Therefore, we implement a PlanConverter in the framework to ensure the flexibility.
 Given the generated optimal physical plan, the PlanConverter transforms the plan to an internal representation (e.g., Substrait \cite{substrait}), and then the internal representation is transformed to the physical plan that can be executed by the target database.
 Finally, the plan is executed and the query results are obtained.
-The above process of query processing is illustrated with the following example.
+
+
+The introduction of the framework is concluded with an example.
 
 
 \begin{figure}
