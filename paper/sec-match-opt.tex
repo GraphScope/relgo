@@ -34,6 +34,18 @@ It is important to note that \refeq{join-pattern} is also applicable to alternat
 Graph-agnostic methods~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB} (\todo{add more references}) simply recast graph match operations
 as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers.
 
+Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. According to the definition of the matching operator (\refsec{matching-operator}), the graph edges and vertices that can be matched with $e$ must have the labels $\lab(e)$, $\lab(u_s)$, and $\lab(u_t)$. We further denote the relations corresponding to these edges and vertices via \rgmapping as $R_{\lab(e)}$, $R_{\lab(u_s)}$, and $R_{\lab(u_t)}$, respectively. Moreover, there must be total functions $\lambda_{\lab(e)}^s$ and $\lambda_{\lab(e)}^t$ for mapping tuples from $R_{\lab(e)}$ to $R_{\lab(u_s)}$ and $R_{\lab(u_t)}$, respectively. We define the following EV-join operation regarding $\lambda_{\lab(e)}^s$ as:
+
+\begin{equation} \label{eq:ev-join}
+\begin{split}
+R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \\
+& \{(t_e, t_s) | t_e \in R_{\lab(e)} \land t_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(t_e) = t_s\}.
+\end{split}
+\end{equation}
+
+The EV-join regarding $\lambda_{\lab(e)}^t$ is defined analogously. Note that the EV-join is associative, meaning that the order of the edge and vertex relations is not important.
+
+
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 The following lemma shows that there exists a logically equivalent transformation from an \spjm query to an \spj query.
 
@@ -42,16 +54,12 @@ The following lemma shows that there exists a logically equivalent transformatio
     With \rgmapping, an \spjm query given in \refeq{spjm} can be losslessly converted to an \spj query.
 \end{lemma}
 \begin{proof}
-    It suffices to convert the matching operator in \refeq{spjm} into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
+    It suffices to convert the matching operator in \refeq{spjm} into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
-We define the following join operation, $\Join_{\lambda_{e_i}^s}$, such that:
-\[ R_{e_i} \Join_{\lambda_{e_i}^s} R_{u_{s_i}} = \{(t_e, t_s) | t_e \in R_{e_i} \land t_s \in R_{u_{s_i}} \land \lambda_{e_i}^s(t_e) = t_s\} \]
-The join operation of $\Join_{\lambda_{e_i}^t}$ can be defined analogously.
-
-The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{u_0}$.
+The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
 
 Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching $\pattern_1$ is equivalent to retrieving the edge relation, together with the corresponding source and target vertices. Therefore, we have:
-\[ R_1 = \gproject(M(\pattern_1)) = \relation{u_{s_1}} \Join_{\lambda_{e_1}^s} \relation{e_1} \Join_{\lambda_{e_1}^t} \relation{u_{t_1}} \]
+\[ R_1 = \gproject(M(\pattern_1)) = \relation{\lab(u_{s_1})} \evjoin \relation{\lab(e_1)} \evjoin \relation{\lab(u_{t_1})} \]
 
 Assume that when $m = k-1$, $\gproject(\matching(\pattern_{k-1}))$ can be losslessly converted to a sequence of relational operators, resulting in the relation $R_{k-1}$. When $m = k$, we consider $\pattern_{k}$ of $k$ edges that is constructed from $\pattern_{k-1}$ by adding one more edge $e_k = (u_{s_k}, u_{t_k})$. For $\pattern_{k}$ to be connected, it must share at least one common vertex $V_o$ with $\pattern_{k-1}$. According to \refeq{join-pattern}, we have:
 \[ \matching(\pattern_{k}) =  \matching(\pattern_{e_k}) \gjoin_{V_o} \matching(\pattern_{k-1}), \]
@@ -60,10 +68,10 @@ where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and 
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
     &= \gproject(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \gproject(\matching(\pattern_{k-1})) \\
-    &= \relation{u_{s_k}} \Join_{\lambda_{e_k}^s} \relation{e_k} \Join_{\lambda_{e_k}^t} \relation{u_{t_k}} \Join_{attr_{V_o}} R_{k-1}
+    &= \relation{\lab(u_{s_k})} \evjoin \relation{\lab(e_k)} \evjoin \relation{\lab(u_{t_k})} \Join_{attr_{V_o}} R_{k-1}
 \end{split}
 \end{equation*}
-By induction, denoting $R'_i = \relation{u_{s_i}} \Join_{\lambda_{e_i}^s} \relation{e_i} \Join_{\lambda_{e_i}^t} \relation{u_{t_i}}$, we have the matching operator losslessly converted to a sequence of relational operators:
+By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e_i)} \evjoin \relation{\lab(u_{t_i})}$, we have the matching operator losslessly converted to a sequence of relational operators:
 \begin{equation}
     \label{eq:graph-agnostic}
     \gproject(\matching(\pattern_{k})) = R'_k \Join R'_{k-1} \Join \cdots \Join R'_1 \Join R_0.
@@ -109,7 +117,7 @@ Given that edges may connect to common vertices, it becomes apparent that there 
 \label{sec:graph-aware}
 The graph-agnostic method, which converts the matching operator into a sequence of relational operators, is straightforward and easy to implement. However, it may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations, preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
 
-In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each \emph{intermediate} node is an \emph{induced} sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$ has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
+In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is an \emph{induced} sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
 The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to indivisible patterns directly solvable with specific physical operations
 as will be introduced in~\refsec{xx}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
@@ -447,9 +455,10 @@ Therefore, it is possible to leverage relational databases to process matching o
 \fi
 
 
-\subsection{Physical Graph Operations}
+\subsection{Physical Implementation}
 \label{sec:physical-operators}
 
+\comment{
 Given an SPJM query, the selection, projection, and join operators are performed on relations and have the same physical implementations as those in relational databases.
 The main difference lies in the physical implementation of matching operators.
 In detail, if the graph-agnostic method in \refsec{solve-spjm-problem} is applied, the obtained logical matchings plans consist of selection, projection, and join operators.
@@ -457,6 +466,12 @@ Otherwise, if the graph-aware method is applied, the logical matching plans addi
 In this section, we focus on the physical implementions of the operators in logical matching plans.
 Specifically, we focus on the join operators and matching operators in logical matching plans, because there can be many variations in the physical implementation of these two operators and the query performance varies greatly among different implementations.
 In this section, we first propose the concept of graph indices and then present the physical implementations of join and matching operators.
+}
+
+In the graph view, given a vertex $v$, it supposes to be efficient to obtain its adjacent edges and neighbors.
+However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations,
+and join operations must be performed to obtain the adjacency relationships.
+
 
 \begin{figure}
     \centering
@@ -504,7 +519,7 @@ It means that given a tuple $t_p$ in $\relation{Person}$, let $T_{Likes}$ be the
 For example, the neighbors connected to $v_{p_2}$, connected through edges labeled ``Likes'', include $v_{m_1}$ and $v_{m_2}$, whose corresponding tuples are at row 0 and row 1 in $\relation{Message}$.
 This information can be quickly ascertained through the graph index.
 
-\subsubsection{Physical Implementation of Join and Matching Operators}
+\subsubsection{Physical Implementation}
 \label{sec:join-matching-operator}
 In implementing a logical matching plans, the inputs of join operators are two relations, i.e., $R_1 \Join R_2$, where $\theta$ is the join condition.
 The join operators can be divided into three categories based on $R_2$.

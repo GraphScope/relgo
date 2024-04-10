@@ -8,7 +8,7 @@ A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attribu
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
 Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\), or \(t.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\).
 
-We define a \emph{Property Graph} as $G = (V_G, E_G)$\footnote{In the rest of the paper, when the context is clear, we may directly write $G=(V, E)$  for simplicity. },
+We define a \emph{Property Graph} as $G = (V_G, E_G)$,
 where
 \begin{itemize}
     \item $V$ stands for the set of vertices.
@@ -17,7 +17,11 @@ where
     \item For any graph element $\epsilon$ that is either a vertex or an edge, we denote $\id(\epsilon)$ and $\lab(\epsilon)$ as the globally unique identifier and the label of $\epsilon$, respectively. Given an attribute $a_i$, $\attr(\epsilon, a_i)$, or $\epsilon.a_i$, denotes the value of the attribute $a$ of $\epsilon$.
 \end{itemize}
 
-Considering two property graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph of \(G_1\), symbolized as \(G_2 \subseteq G_1\), if and only if \(V_{G_2} \subseteq V_{G_1}\), and \(E_{G_2} \subseteq (E_{G_1}\)). Furthermore, \(G_2\) qualifies as an induced subgraph of \(G_1\) under the condition that \(G_2\) is already a subgraph of \(G_1\), and for every pair of vertices in \(G_2\), any edge \(e\) that exists between them in \(G_1\) must also present in \(G_2\).
+
+Given a vertex $v$, we denote its adjacent edges as $\adj_G^E(v) = \{e = (v, v_t) | e \in E\}$ and its adjacent vertices (i.e., neighbors) as $\adj_G(v) = \{v_t | (v, v_t) \in E\}$. It is important to note that the adjacent edges and vertices can be defined for both directions of an edge $e = (v_s, v_t)$, i.e., when $v = v_s$ or $v = v_t$. However, for simplicity, we only define one direction in this notation. In the actual semantics of the paper, both directions may be considered.
+In the rest of the paper, when the context is clear, we may remove $G$ from the subscript for simplicity, for example $G=(V, E)$.
+
+Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph of \(G_1\), symbolized as \(G_2 \subseteq G_1\), if and only if \(V_{G_2} \subseteq V_{G_1}\), and \(E_{G_2} \subseteq (E_{G_1}\)). Furthermore, \(G_2\) qualifies as an induced subgraph of \(G_1\) under the condition that \(G_2\) is already a subgraph of \(G_1\), and for every pair of vertices in \(G_2\), any edge \(e\) that exists between them in \(G_1\) must also present in \(G_2\).
 
 To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
@@ -83,7 +87,7 @@ CREATE PROPERTY GRAPH G1
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
 \subsection{Matching Operator}
-\label{sec:graph-relational-algebra}
+\label{sec:matching-operator}
 %In this work, we extend the conventional relational algebra to equip it with the capability to handle graph pattern matching, which lies at the core of graph query processing, and is also the most fundamental extension in SQL/PGQ~\cite{sqlpgq}.
 
 \comment{
