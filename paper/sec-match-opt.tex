@@ -79,18 +79,21 @@ Two typical products include Apache Age \cite{apache-age} and DuckPGQ \cite{Duck
 
 \begin{example}
     Given pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operator $\matching(\pattern)$ can be converted to a sequence of relational operators as follows.
+    Please note that to differentiate between the relations corresponding to $u_{p_1}$ and $u_{p_2}$, we denote the relations by $\relation{Person1}$ and $\relation{Person2}$, perspectively.
+    Analogously, let $\relation{Knows1}$ and $\relation{Knows2}$ correspond to $e_1$ and $e_2$, $\relation{Likes1}$ and $\relation{Likes2}$ correspond to $e_3$ and $e_4$, respectively.
 
-    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{\text{Person}}$.
-    Next, $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_1}, u_m)$, and $e_3 = (u_{p_2}, u_m)$ are sequentially added into $\pattern_0$ , and we have
+    Without loss of generality, we start from $\pattern_0$ with only $u_{p_1}$, and we have $\relation{0} = \relation{\text{Person1}}$. 
+    Next, $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, p_1)$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ are sequentially added into $\pattern_0$ , and we have
     \begin{equation*}
       \begin{split}
-        R'_1 = \relation{\text{Person}} \Join_{person\_id=pid1} \relation{\text{Knows}} \Join_{pid2=person\_id} \relation{\text{Person}}, \\
-        R'_2 = \relation{\text{Person}} \Join_{person\_id=pid} \relation{\text{Likes}} \Join_{mid=message\_id} \relation{\text{Message}}, \\
-        R'_3 = \relation{\text{Person}} \Join_{person\_id=pid} \relation{\text{Likes}} \Join_{mid=message\_id} \relation{\text{Message}}.
+        R'_1 = \relation{\text{Person1}} \Join_{person\_id=pid1} \relation{\text{Knows1}} \Join_{pid2=person\_id} \relation{\text{Person2}}, \\
+        R'_2 = \relation{\text{Person2}} \Join_{person\_id=pid2} \relation{\text{Knows2}} \Join_{pid1=person\_id} \relation{\text{Person1}}, \\
+        R'_3 = \relation{\text{Person1}} \Join_{person\_id=pid} \relation{\text{Likes1}} \Join_{mid=message\_id} \relation{\text{Message}}, \\
+        R'_4 = \relation{\text{Person2}} \Join_{person\_id=pid} \relation{\text{Likes2}} \Join_{mid=message\_id} \relation{\text{Message}}.
       \end{split}
     \end{equation*}
     \todo{Must refine the cases of Person1 and Person2, which may not be correct.}
-    We finally have $\gproject(\matching(\pattern)) = R_0 \Join R'_1 \Join R'_2 \Join R'_3$.
+    We finally have $\gproject(\matching(\pattern)) = R'_4 \Join R'_3 \Join R'_2 \Join R'_1 \Join R_0$.
 
 
     %For the SPJM query shown in Fig.~\ref{fig:spjm}, it can be transformed to the SPJ query as follows:
@@ -108,7 +111,7 @@ The graph-agnostic method, which converts the matching operator into a sequence 
 
 In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each \emph{intermediate} node is an \emph{induced} sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$ has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
 The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to indivisible patterns directly solvable with specific physical operations
-as will be introduced in~\refsec{xx}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{xx}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
+as will be introduced in~\refsec{xx}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
 We follow~\cite{huge} to use a single-edge pattern as well as a \emph{complete star} as an \mmc. We denote a star-shaped pattern as $\pattern(u;S)$, where $u$ denotes the root vertex of the star and $S$ is the set of leaf vertices\footnote{The edge directions among $u$ and $S$ are not important, and we assume they  all point from $u$ to $S$.}.
 In the decomposition tree, given $\pattern' = \pattern'' \cup \pattern(u;S)$, $\pattern(u;S)$ is called a complete star if and only if it is a right child and $S \subseteq V_{\pattern'}$, indicating that the leaf vertices of the complete star must all be common vertices for the decomposition. The complete star is a logical representation of the physical operations of \expand and \intersection, which are key to the implementation worst-case optimal join algorithm~\cite{mhedhbi2019optimizing} for graph pattern matching, as will be discussed in \refsec{xx}.
@@ -129,17 +132,18 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \begin{figure}
     \centering
-    \includegraphics[width=.8\linewidth]{./figures/match-decompose.png}
-    \caption{Decomposion of the match operator in the SPJM query shown in Fig.~\ref{fig:spjm}.}
+    \includegraphics[width=.8\linewidth]{./figures/decomposition-example.pdf}
+    \caption{Example of decomposition trees and the corresponding logical plans.}
     \label{fig:match-decomposition}
 \end{figure}
 
 \begin{example}
     \todo{the sample and figure must all be refined.}
-    Given the matching operator in Fig.~\ref{fig:spjm}, it is decomposed into two matching operators as shown in Fig.~\ref{fig:match-decomposition}.
-    For the right matching operator, because its pattern is a complete star $(p_1, \{m_1\})$, the operator is an MMC.
-    For the left matching operator, as its pattern is an edge pattern, it is also an MMC.
-    Therefore, the decomposition tree cannot be further decomposed and is a logical plan.
+    \modify{
+    As shown in \reffig{match-decomposition}, $T_1$ and $T_2$ are two possible decomposition trees formed by recursively decomposing $\pattern_{0}$.
+    Specifically, $\pattern_{1,1}$, $\pattern_{1,3}$, $\pattern_{1,4}$, $\pattern_{2,2}$, $\pattern_{2,3}$, and $\pattern_{2,4}$ are \mmcs. Among these \mmcs, $\pattern_{1,1}$, $\pattern_{1,3}$, $\pattern_{2,3}$, $\pattern_{2,4} are $single-edge patterns, while $\pattern_{1,4}$ and $\pattern_{2,2}$ are complete stars.
+    Please note that $\pattern_{2,1}$ is not an \mmc, because it is not the right child of $\pattern_{0}$.
+    }
 \end{example}
 
 Upon initial examination, the logical plan generated by the decomposition tree, particularly when all the \mmcs are single-edge patterns,
@@ -162,10 +166,11 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
 
 \begin{proof}
     \todo{refine the proof.}
-    We first construct a graph with these $n + m$ relations.
+    The search space refers to the number of join orders that are explored to ascertain the optimal final join order.
+    To estimate the search space, we first construct a graph with these $n + m$ relations.
     Specifically, each relation corresponds to a vertex in this graph, and if there is a join condition w.r.t.~two relations, there is an edge between the corresponding vertices.
-    To avoid cross product, everytime two relations are joined together, there should be join conditions between them.
-    Therefore, the join order can be represented as a spanning tree in the graph.
+    To avoid cross product, for each explored join order, everytime two relations are joined together, there should be join conditions between them.
+    Therefore, each explored join order forms a spanning tree in the graph.
     By computing the number of physical plans can be generated according to each spanning tree, the total number of physical plans can be obtained.
 
     In this proof, we compute the number of physical plans for one spanning tree, and this number is a lower bound of the number of physical plans that can be generated.
