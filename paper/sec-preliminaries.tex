@@ -5,8 +5,8 @@
 \label{sec:data-model}
 
 A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
-A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(t = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(t\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
-Moreover, for any tuple \(t\) in the relation \(R\), the notation \(\attr(t, a_i) = d_i\), or \(t.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(t\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
+A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(\tau = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(\tau\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
+Moreover, for any tuple \(\tau\) in the relation \(R\), the notation \(\attr(\tau, a_i) = d_i\), or \(\tau.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(\tau\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
 
 We define a \emph{Property Graph} as $G = (V_G, E_G)$,
 where
@@ -28,15 +28,18 @@ To formalize the integration of graph syntax within the realm of relational data
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
 \begin{definition}[\rgmapping]
 \label{def:rgmapping}
-Given two set of relations $\{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}$, and $\{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}$, we define an \rgmapping to map the relations to a property graph $G = (V, E)$, which contains the mappings of $(\zeta_v, \zeta_e, \lambda_{e_1}^s, \lambda_{e_1}^t, \ldots, \lambda_{e_m}^s, \lambda_{e_m}^t)$, elaborated as follows:
+Given two set of relations $\{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}$, and $\{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}$, we define an \rgmapping to map the relations to a property graph $G = (V, E)$, %which contains the mappings of $(\zeta_v, \zeta_e, \lambda_{e_1}^s, \lambda_{e_1}^t, \ldots, \lambda_{e_m}^s, \lambda_{e_m}^t)$,
+which are elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $t \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an identifier $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $t$.
+\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an identifier $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
 The relations that are mapped to vertices in the graph are referred to as vertex relations.
 
-\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $t \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an identifier $\id(e)$,
-a label $\lab(e)$ corresponding to the name of $R_{e_i}$, and attributes $e.attr*$ that reflect the attributes $t.attr*$ of $t$.
-Additionally, we have two corresponding vertex relations $R_{v_s}$ and $R_{v_t}$, and the \emph{total} functions: (1) $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$ such that $v_s = \zeta_v(\lambda_{e_i}^s(t))$, and (2) $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$ such that $v_t = \zeta_v(\lambda_{e_i}^t(t))$. The relations that are mapped to edges in the graph are referred to as edge relations.
+\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an identifier $\id(e)$,
+a label $\lab(e)$ corresponding to the name of $R_{e_i}$, and attributes $e.attr*$ that reflect the attributes $\tau.attr*$ of $\tau$.
+For each edge relation $R_{e_i}$, there are two corresponding vertex relations $R_{v_s}$ and $R_{v_t}$. We further define two total functions: (1) $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_s \in R_{v_s}$; (2) $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_t \in R_{v_t}$.
+The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function $\zeta_v$, i.e., $v_s = \zeta_v(\lambda_{e_i}^s(\tau))$ and $v_t = \zeta_v(\lambda_{e_i}^t(\tau))$.
+The relations $R_{e_i}$ that are mapped to edges in the graph are referred to as edge relations.
 \end{itemize}
 \end{definition}
 
@@ -81,8 +84,8 @@ CREATE PROPERTY GRAPH G1
     )
     \end{lstlisting}
     \fi
-    The described \rgmapping involves assigning tuples from vertex relations, such as $\relation{Person}$ and $\relation{Message}$, to graph vertices. For instance, the vertex $v_{p_1}$ is associated with the tuple $t_{p_1}$ in $\relation{Person}$, and thus assigned the label ``Person'' and the name attribute ``Tom''. Similarly, edge relations $\relation{Likes}$ and $\relation{Knows}$ correspond to graph edges.
-    To further elaborate on the mapping process, especially for the source and target vertex mappings of an edge, let's consider the edge $e_{l_1}$. This edge originates from the tuple $t_{l_1}$ in the $\relation{Likes}$ relation. The source vertex $v_{p_1}$ of $e_{l_1}$ is linked to the tuple $t_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the condition ``$t_{l_1}.pid = t_{p_1}.\text{person\_id}$''. Similarly, the target vertex $v_{m_1}$ is associated with the tuple $t_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following the condition ``$t_{l_1}.mid = t_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
+    The described \rgmapping involves assigning tuples from vertex relations, such as $\relation{Person}$ and $\relation{Message}$, to graph vertices. For instance, the vertex $v_{p_1}$ is associated with the tuple $\tau_{p_1}$ in $\relation{Person}$, and thus assigned the label ``Person'' and the name attribute ``Tom''. Similarly, edge relations $\relation{Likes}$ and $\relation{Knows}$ correspond to graph edges.
+    To further elaborate on the mapping process, especially for the source and target vertex mappings of an edge, let's consider the edge $e_{l_1}$. This edge originates from the tuple $\tau_{l_1}$ in the $\relation{Likes}$ relation. The source vertex $v_{p_1}$ of $e_{l_1}$ is linked to the tuple $\tau_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the condition ``$\tau_{l_1}.pid = \tau_{p_1}.\text{person\_id}$''. Similarly, the target vertex $v_{m_1}$ is associated with the tuple $\tau_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following the condition ``$\tau_{l_1}.mid = \tau_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
 \end{example}
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.

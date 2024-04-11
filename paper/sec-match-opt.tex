@@ -38,8 +38,8 @@ Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. Accor
 
 \begin{equation} \label{eq:ev-join}
 \begin{split}
-R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \{(t_e, t_s) \;|\; \\
-  &  t_e \in R_{\lab(e)} \land t_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(t_e) = t_s\}.
+R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \{(\tau_e, \tau_s) \;|\; \\
+  &  \tau_e \in R_{\lab(e)} \land \tau_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(\tau_e) = \tau_s\}.
 \end{split}
 \end{equation}
 
@@ -448,7 +448,7 @@ Therefore, it is possible to leverage relational databases to process matching o
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
-In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations. Instead, \EVjoin operations (\refeq{ev-join}) must be performed to obtain these adjacency relationships. In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we consider it as a \emph{graph index} in this paper.
+In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations, but has to be computed via the \EVjoin operations (\refeq{ev-join}). In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we consider it as \emph{graph index} in this paper.
 
 \begin{figure}
     \centering
@@ -465,64 +465,53 @@ As shown in \reffig{graph-index}, given the three relations $\relation{\text{Per
 
 \[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
 
-GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the edge table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row number of the corresponding tuple in the source vertex table $\relation{\text{Person}}$, denoted as $\rowid(t_{p})$, where $t_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row number of the corresponding tuple in the target vertex table $\relation{\text{Message}}$, denoted as $\rowid(t_{m})$, where $t_{m} \in \relation{\text{Message}}$. These row numbers help quickly route a tuple $t_{l} \in \relation{\text{Likes}}$ to the joinable tuples $t_{p}$ and $t_{m}$ without the need for additional data structures like hash tables or sorting.
+GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row number of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row number of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row numbers help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
 
-The VE-index, shown in \reffig{graph-index}(b), is created on the source vertex table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $t_{p} \in \relation{\text{Person}}$, the VE-index records the row numbers of the tuples $t_{l} \in \relation{\text{Likes}}$ and the corresponding $t_{m} \in \relation{\text{Message}}$ that are joinable with $t_{p}$. In the graph view, the VE-index maintains the adjacent edges and vertices of each person, treating ``Person-[Likes]->Messages'' as an edge of a property graph. GrainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure.
+The VE-index, shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row numbers of the tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person. GrainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure that is widely used for maintain adjacency lists in graph store.
 
-It's straightforward to construct the graph indexes during the \rgmapping process using the \lstinline{CREATE PROPERTY GRAPH} statement. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $t_e \in R_e$ by including $\rowid(\lambda_e^s(t_e))$ and $\rowid(\lambda_e^t(t_e))$, which are the row numbers of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $t_{v_s} \in R_{v_s}$ by including the row numbers of all tuples $t_e \in R_e$ such that $\lambda_e^s(t_e) = t_{v_s}$, along with the row numbers of the corresponding tuples $t_{v_t} \in R_{v_t}$ such that $\lambda_e^t(t_e) = t_{v_t}$.
+It's straightforward to construct the graph indexes during the \rgmapping process. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $\tau_e \in R_e$ by including $\rowid(\lambda_e^s(\tau_e))$ and $\rowid(\lambda_e^t(\tau_e))$, which are the row numbers of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $\tau_{v_s} \in R_{v_s}$ by including the row numbers of all tuples $\tau_e \in R_e$ such that $\lambda_e^s(\tau_e) = \tau_{v_s}$, along with the row numbers of the corresponding tuples $\tau_{v_t} \in R_{v_t}$ such that $\lambda_e^t(\tau_e) = \tau_{v_t}$.
 The construction of VE-index on $R_{v_t}$ is analogous.
 
 \begin{remark}
   Several alternative approaches exist for handling the \rgmapping process. One such approach, proposed in~\cite{gart}, involves directly materializing the property graph using an additional graph store, rather than simply building graph indexes on the relational data. While this method may enable more efficient graph processing, it comes with the trade-off of requiring extra storage space and incurring higher maintenance costs. Moreover, \spjm queries often involve a combination of graph and relational operations, which may not be fully supported by the graph store alone.
 \end{remark}
 
-With the graph indices constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join} for both directions. When transforming the matching operator using the graph-agnostic method in \refeq{graph-agnostic} and optimizing the entire \spj query using a relational optimizer, we can replace all the remaining \EVjoin operations with GrainDB's pre-defined joins to leverage the graph indices. This approach serves as the baseline solution, which we refer to as GrainDB in our experiments.
-However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indices. Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal.
+With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
+When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
+However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
 
 \subsubsection{The Graph-Aware Execution Plan}
 \label{sec:join-matching-operator}
-We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree, and it selection is determined by the underlying optimizer (\refsec{optimizer}).
+We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree, and its selection is determined by the underlying optimizer (\refsec{optimizer}).
 
- The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex along with its id and label. There are several ways to assign the vertex identifier, but the simplest approach is to directly use the row number of the tuple in the relation. To ensure globally unique identifiers, we can encode the name of the relation as a prefix of the identifier, which can be easily implemented via bit shifting, while the name is encoded as an integer. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
+ The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its id and label (mandatory) and necessary attributes (\todo{refer to the FieldTrimmer}). There are several ways to assign the vertex identifier, but the simplest approach is to directly use the row number of the tuple in the relation.
+  To ensure globally unique identifiers, we can encode the name of the relation as a prefix of the identifier, which can be easily implemented via bit shifting, while the name is encoded as an integer. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
 
 The plan is then constructed in a bottom-up manner, with the matching of $\pattern$ being the last stage. As shown in \reffig{match-decomposition}, there are three fundamental cases to consider when implementing the plan.
 
-Case I: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$, where $\pattern'_e$ is a single-edge pattern, and
-$u_s$ is the source vertex\footnote{The expansion of edge can also be performed from the target vertex $u_t$, where the process is analogous.} in  $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible that both $u_s$ and $u_t$ are in $\pattern'_l$, as it violates the fact that either $\pattern'_l$ is a single vertex or it is an induced sub-pattern.
+Case I: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_o, E_o} \matching(\pattern'_r)$, where $\pattern_l'$ and $\pattern'_r$ are both intermediate patterns in the decomposition tree. The implementation of such a join is similar to a conventional relational join. The join is constrained to a natural join, where the join condition is simply the equality of the common vertices $V_o$ and edges $E_o$ between $\pattern_l'$ and $\pattern_r'$. During the implementation of the join, the identifiers of the vertices and edges can serve as the keys for comparison. Note that the input and output of the join are both graph relations, which will not
+be projected into relational tuples until the last stage that obtain the results $\matching(\pattern')$.
 
-%Taking a graph relation $\matching(\pattern'_l)$ as input, we devise the \expandx{vtag}{dir}{label} physical operator for computing the above join, with \kk{vtag} refers to the vertex
-%in the graph relation $\matching(\pattern'_l)$ from which the edge can be expanded, \kk{dir} and \kk{label}
-%denote the direction and label of the edge, respectively.
+Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
+
+When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab{e}} \evjoin R_{\lab(u_t)}$, following the encoding of vertex tuples into vertex objects and edge tuples into edge objects.
+This case is then reduced to Case I, where a join operation is performed between $\matching(\pattern'_l)$ and the computed $\matching(\pattern_e)$.
+
+When there exists a graph index, the implementation is handled via the physical \expandx{$u_s$}{$\lab(e)$} operator. For all $\tau \in \matching(\pattern'_l)$, recall that $\tau.u_s$ must record some graph vertex $v_s$ that matches $u_s$ in the pattern $\pattern'_l$. The process is as follows:
+\begin{enumerate}
+\item The \expand operator first locates the VE-index corresponding to $v_s$. From this index, it can obtain a list of row numbers corresponding to the edges incident to $v_s$. For example, if we are looking at the person $p_1$ in \reffig{graph-index}(b), the list $[1, 2]$ can be obtained. The row numbers of the target vertex tables are also obtained from the VE-index.
+\item Using these row numbers, a list of adjacent edge/vertex tuples, e.g. $\{(e_{l_1}, v_{m_0}), (e_{l_2}, v_{m_1})\}$, can be computed.
+\item The output tuples regarding the input $\tau$ are obtained by attaching each edge/vertex tuple to $\tau$, e.g. $((\tau, e_{l_1}, v_{m_0}), (\tau, e_{l_2}, v_{m_1}))$.
+\end{enumerate}
+
+Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_o, E_o} \matching(\pattern(u;S))$, where $\pattern(u;S)$ is a complete star. When there is no graph index, solving case II is simply a continuous joining of $|S|$ single-edge patterns.
+When graph indexes are available, the implementation is handled via the physical \expandintersect~operator.
 
 
-Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_o, E_o} \matching(\pattern(u:S))$, where $\pattern(u:S)$ is a complete star.
-
-
-Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_o, E_o} \matching(\pattern'_r)$, where $\pattern_l'$ and $\pattern'_r$ are both intermediate patterns in the decomposition tree. The implementation of such a join is similar to a conventional relational join. The join is constrained to a natural join, where the join condition is simply the equality of the common vertices $V_o$ and edges $E_o$ between $\pattern_l'$ and $\pattern_r'$. During the implementation of the join, the identifiers of the vertices and edges can serve as the keys for comparison. Note that the input and output of the join are both graph relations, which will not
-be projected into relational relations until the last stage that obtain the results $\matching(\pattern')$.
 
 
 
 
-
-
-In implementing a logical matching plans, the inputs of join operators are two relations, i.e., $R_1 \Join R_2$, where $\theta$ is the join condition.
-The join operators can be divided into three categories based on $R_2$.
-
-Firstly, if $R_2$ is not obtained by a matching operator, then the join operator is implemented with
-\begin{equation*}
-    R_1 \Join R_2.
-\end{equation*}
-
-Secondly, if $R_2$ is obtained by a matching operator whose pattern graph is an edge, then the join operator is implemented as an \expandvertex~operator.
-Specifically, denote the matching operator by $\matching(\pattern_e)$, where $\pattern_e$ consists of two vertices $u_s, u_t$ and an edge $e$ connecting them.
-Let $\lambda^s_e$ and $\lambda^t_e$ be functions that associate tuples in $\relation{\vlabel{(e)}}$ with those in $\relation{\vlabel(u_s)}$ and $\relation{\vlabel(u_t)}$, respectively.
-Then, the $\expandvertex(R_1, \pattern_e)$ is implemented with
-\begin{equation*}
-    R_1 \Join (\relation{\vlabel{(u_s)}} \Join_{\lambda^{s}_{e}} \relation{\vlabel{(e)}} \Join_{\lambda^{t}_{e}} \relation{\vlabel{(u_t)}}).
-\end{equation*}
-If graph indices have been built on $\relation{\mathcal{L}(e)}$, the joins between $\relation{\mathcal{L}(u_s)}$, $\relation{\mathcal{L}(e)}$, and $\relation{\mathcal{L}(u_t)}$ can be implemented more efficiently by leveraging the graph indices.
-Moreover, if there is no need to retain attributes on $e$ and there are no constraints on $e$, graph indices can be applied to get neighbors of $u_s$ directly without scanning $\relation{\mathcal{L}(e)}$.
 
 Thirdly, if $R_2$ is obtained by a matching operator whose pattern graph is a complete star, then the join operator is implemented as an \expandintersect~operator.
 Before the \expandintersect~operator is defined, we first propose the $\intersect(alist, rlist)$~operator.
@@ -534,7 +523,7 @@ These tuples are joined together if and only if they have the same values on att
 
 Denote the matching operator by $\matching(\pattern_s)$, where $\pattern_s = (v_r; \mathcal{H})$ and $\mathcal{H} = \{v_1, \cdots, v_k\}, k \geq 2$.
 Let $e_1, \cdots, e_k$ be the edges connecting $v_1, \cdots, v_k$ and $v_r$, respectively.
-Moreover, we have $\lambda^s_{e_i}$ and $\lambda^t_{e_i}$ mapping tuples from $\relation{\lab(e_i)}$ to $\relation{\lab(v_i)}$, and from $\relation{\lab(e_i)}$ to $\relation{\lab(v_r)}$, respectively.
+Moreover, we have $\lambda^s_{e_i}$ and $\lambda^\tau_{e_i}$ mapping tuples from $\relation{\lab(e_i)}$ to $\relation{\lab(v_i)}$, and from $\relation{\lab(e_i)}$ to $\relation{\lab(v_r)}$, respectively.
 Then, the $\expandintersect$($\relation{1}$, $\pattern_s$)~operator is implemented as
 \begin{equation*}
     \intersect(\{v_r\}, \{\expandvertex(R_1, \pattern_{v_1}), \cdots, \expandvertex(R_1, \pattern_{v_k})\}),
