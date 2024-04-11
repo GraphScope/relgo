@@ -35,56 +35,77 @@ The details of the dataset statistics are summarized in Table \ref{table:experim
 
 \noindent\textbf{Compared Systems. }
 We compare \name against two state-of-art baseline systems: DuckDB~\cite{duckdb} as a representative of $Rel$ optimizers, and GrainDB~\cite{graindb} as a representative of $Rel^+$ optimizers.
-For fair comparison, we use the backend of GrainDB, which integrated pre-built graph indices, as a common backend for all compared systems.
-As the latest released GrainDB is based on an old version of DuckDB, which may miss out the latest optimizations developed in DuckDB, we upgrade the integrated DuckDB (in GrainDB) to v0.9.2.
-Meanwhile, when compared with DuckDB, we also use the same version.
-The difference between DuckDB and GrainDB lies in the optimizer, where DuckDB's optimizer will not consider the graph indices in query optimization, such that all queries will be executed with hash joins (even when graph indices are available),
- while GrainDB will leverage the graph indices, and replace some hash joins with sip joins (or merge sip joins) to improve the efficiency of the plans.
-For \name, we further implement extend-intersect operators in the backend (as discussed in \refsec{physical-operators}), which not only leverage the graph indices, but also has an optimized worst-case optimal join implementation for \intersect.
+For fair comparison, we use DuckDB as the underlying relational engine for all compared systems.
+To facilitate the evaluation of further optimizations brought by GrainDB and \name, 
+we integrate pre-built graph indices into the backend storage, and we implement the extend-intersect operators in the backend DuckDB engine.
+We use the latest version of DuckDB to leverage the latest developed optimizations, and since GrainDB is based on an older version of DuckDB, we upgrade the integrated DuckDB in GrainDB to the latest version as well.
+In details, the difference between the compared systems lies in the optimizer: DuckDB's optimizer will not consider the graph indices in query optimization, such that all queries will be executed with hash joins (even when graph indices are available);
+GrainDB will leverage the graph indices, and replace some hash joins with sip joins (or merge sip joins) to improve the efficiency of the plans;
+and \name will further consider converged optimizations across relational and graph queries, and leverage the optimized implementation for extend-intersect operators.
 Therefore, all the generate plans can be executed on the same backend, and the efficiency of the plans obtained by varied optimizers can be compared fairly.
 Note that codegen techniques can be employed to facilitate the transformation of the physical plans into executable code.
 For simplicity, in the following, when there is no ambiguity, the optimizers of DuckDB and GrainDB are shortened to DuckDB and GrainDB, respectively.
 
+% We compare \name against two state-of-art baseline systems: DuckDB~\cite{duckdb} as a representative of $Rel$ optimizers, and GrainDB~\cite{graindb} as a representative of $Rel^+$ optimizers.
+% For fair comparison, we use the backend of GrainDB, which integrated pre-built graph indices, as a common backend for all compared systems.
+% As the latest released GrainDB is based on an old version of DuckDB, which may miss out the latest optimizations developed in DuckDB, we upgrade the integrated DuckDB (in GrainDB) to v0.9.2.
+% Meanwhile, when compared with DuckDB, we also use the same version.
+% The difference between DuckDB and GrainDB lies in the optimizer, where DuckDB's optimizer will not consider the graph indices in query optimization, such that all queries will be executed with hash joins (even when graph indices are available),
+%  while GrainDB will leverage the graph indices, and replace some hash joins with sip joins (or merge sip joins) to improve the efficiency of the plans.
+% For \name, we further implement extend-intersect operators in the backend (as discussed in \refsec{physical-operators}), which not only leverage the graph indices, but also has an optimized worst-case optimal join implementation for \intersect.
+% Therefore, all the generate plans can be executed on the same backend, and the efficiency of the plans obtained by varied optimizers can be compared fairly.
+% Note that codegen techniques can be employed to facilitate the transformation of the physical plans into executable code.
+% For simplicity, in the following, when there is no ambiguity, the optimizers of DuckDB and GrainDB are shortened to DuckDB and GrainDB, respectively.
+
 \noindent\textbf{Configurations. }
 Our experiments were conducted on a server equipped with an Intel Xeon E5-2682 CPU running at 2.50GHz and 251GB of RAM, with parallelism restricted to a single thread.
-As previously mentioned, all queries were executed on the same backend (i.e., the backend used by GRainDB, with the extend-intersect operator implemented), and we adhered to the same procedures for data processing and graph index construction in the backend storage as outlined in~\cite{graindb}.
+As previously mentioned, all queries were executed on the relational execution engine of DuckDB with pre-built graph indices integrated.
+We adhered to the same procedures for data processing and graph index construction in the storage as outlined in~\cite{graindb}.
 For a comprehensive performance analysis, each query from the LDBC benchmark was run 50 times using the official parameters, while each query from the JOB benchmark was executed 10 times. We report the average execution time for each query to mitigate potential biases.
 We imposed a timeout limit of \todo{1 hour} for each query, and queries that fail to finish within the timeout are marked as \ot.
 
 \subsection{Micro Benchmarks on Graph Optimizers}
 \label{sec:experiment-opt}
-In this subsection, we conduct some micro benchmarks to evaluate the effectiveness of the optimization techniques in \name.
+In this subsection, we conduct three micro benchmarks to evaluate the effectiveness of \name, 
+including evaluating the optimization time cost versus a volcano optimizer, testing the advanced optimization strategies adopted in \name, and comparing the efficiency of join order optimization between \name, GrainDB, and DuckDB.
 
-% \noindent\textbf{Optimization Efficiency Evaluation.}
-% In this subsection, experiments are conducted to compare the optimization time cost of \name and Apache Calcite, which is a well-known data management framework widely used in various projects such as Hive and Kylin.
-% Please note that the codes of \name and Calcite are both written in Java.
-% In detail, we test the optimization time of \name and Calcite on SNB-M and JOB benchmarks, and VolcanoPlanner of Calcite with default rules is leveraged.
-% If optimization for a query is not finished in 10 minutes, the process is early stopped and the time cost of such optimization is recorded as 10 minutes.
-% The results are shown in Fig.~\ref{fig:exp-optimization}.
+\noindent\textbf{Optimization Efficiency Evaluation.}
+As we discussed in \refsec{handling-match-operator}, \name is \todo{exponentially faster} than traditional volcano-style optimizers in optimization cost in theoretical analysis.
+To validate this, we designed an experiment to compare the optimization time cost of \name against Apache Calcite, a widely used data management framework that incorporates a volcano-style query optimizer, with its default optimization rules.
+Besides measuring the time cost of optimization, we evaluated the execution time for the query plans generated by both \name and Calcite. This approach allowed us to assess the practical quality of the optimizations rendered by each system
+To ensure a broad comparison, we also included GrainDB in our analysis. Although it is not volcano-style optimizer and generally employs a greedy plan optimization approach,
+comparing the performance of \name and GrainDB provides insights into whether the optimization time invested by \name is justified.
+We omit the results of DuckDB, since its optimization time align with GrainDB, but its execution efficiency generally lags behind GrainDB in most scenarios.
+We select a subset of the LDBC queries and JOB queries without loss of generality, and conduct the experiments on $G_{sf30}$ and IMDB datasets respectively.
+The results are shown in Fig.~\ref{fig:exp-optimization}.
 
-% \begin{figure*}[ht]
-%     \centering
-%     \begin{subfigure}[b]{0.3\linewidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf10.pdf}
-%         \caption{Optimization Time Cost on $G_{sf10}$.}
-%         \label{fig:exp-optimization-sf10}
-%     \end{subfigure}
-%     \begin{subfigure}[b]{0.3\linewidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
-%         \caption{Optimization Time Cost on $G_{sf30}$.}
-%         \label{fig:exp-optimization-sf30}
-%     \end{subfigure}
-%     \begin{subfigure}[b]{0.3\linewidth}
-%         \centering
-%         \includegraphics[width=\linewidth]{./figures/exp/optimization_job.pdf}
-%         \caption{Optimization Time Cost on IMDB.}
-%         \label{fig:exp-optimization-job}
-%     \end{subfigure}
-%     \caption{Experiments on the time cost of optimization.}
-%     \label{fig:exp-optimization}
-% \end{figure*}
+The experimental results demonstrate that \name's optimization time cost is significantly less than that of Calcite, with query plans optimized by \name also executing faster than those by Calcite.
+For example, in the case of $IC[1-3]$, the optimization time cost of \name is about an order of magnitude faster than that of Calcite, and the execution time of the plans optimized by \name is more than \todo{xx} faster.
+This is more obvious on the JOB benchmark, where all the queries optimized by Calcite exceed the timeout limit (so we omit it in \reffig{exp-opt-job}), while \name can optimize efficiently.
+Comparing with GrainDB, \name demonstrates a slightly higher optimization time cost. This outcome is expected to some extent, given GrainDB's design focuses on greedy, faster optimization methods.
+Nevertheless, the quality and execution efficiency of \name's optimized plans are superior, which outperforms GrainDB by \todo{a$\times$ and b$\times$} on average on the $G_{sf30}$ and IMDB datasets, respectively.
+%This gap could be more obvious when the dataset scales up (comparing $G_{sf10}$ and $G_{sf30}$), since the optimization time cost is fixed, but a better plan will achieve more efficiency when the dataset scales up.
+These findings suggest that \name's optimization time cost is justified, as it generates high-quality plans that are more efficient in execution.
+
+\todo{\reffig{exp-opt-ldbc} has a log scale on the y-axis, this, may not be a good idea. Besides, fill in values for calcite exec. time.}
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/opt_exe_ldbc.pdf}
+        \caption{Opt. and Exe. Time on $G_{sf30}$.}
+        \label{fig:exp-opt-ldbc}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/opt_exe_job.pdf}
+        \caption{Opt. and Exe. Time on IMDB.}
+        \label{fig:exp-opt-job}
+    \end{subfigure}
+    \caption{Experiments on the time cost of optimization and execution.}
+    \label{fig:exp-optimization}
+\end{figure}
 
 % In the experiments, optimizing all the queries with \name can be finished in 10 minutes, while optimizing some queries with Calcite exceeds the 10-minute limit.
 % For example, when JOB benchmark is utilized, the time cost of optimizing all the queries with Calcite is longer than 10 minutes.
