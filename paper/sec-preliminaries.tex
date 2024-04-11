@@ -13,8 +13,8 @@ where
 \begin{itemize}
     \item $V$ stands for the set of vertices.
     \item Let $E \subseteq V \times V$ denote the set of edges in the graph. An edge $e \in E$ is represented as an ordered pair $e = (v_s, v_t)$, where $v_s \in V$ is the source vertex and $v_t \in V$ is the target vertex, indicating that the edge $e$ connects from $v_s$ to $v_t$.
-    %we use $\id(e)$ and $\lab(e)$ to denote the globally unique identifier and label of $e$, and $\attr(e, a_i)$, or $e.a_i$, to denote the value of the attribute $a_i$ of $e$.
-    \item For any graph element $\epsilon$ that is either a vertex or an edge, we denote $\id(\epsilon)$ and $\lab(\epsilon)$ as the globally unique identifier and the label of $\epsilon$, respectively. Given an attribute $a_i$, $\attr(\epsilon, a_i)$, or $\epsilon.a_i$, denotes the value of the attribute $a$ of $\epsilon$.
+    %we use $\id(e)$ and $\lab(e)$ to denote the globally unique id and label of $e$, and $\attr(e, a_i)$, or $e.a_i$, to denote the value of the attribute $a_i$ of $e$.
+    \item For any graph element $\epsilon$ that is either a vertex or an edge, we denote $\id(\epsilon)$ and $\lab(\epsilon)$ as the globally unique ID and the label of $\epsilon$, respectively. Given an attribute $a_i$, $\attr(\epsilon, a_i)$, or $\epsilon.a_i$, denotes the value of the attribute $a$ of $\epsilon$.
 \end{itemize}
 
 
@@ -32,13 +32,13 @@ Given two set of relations $\{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}$, and $\{R_{e_
 which are elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an identifier $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
+\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an ID $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
 The relations that are mapped to vertices in the graph are referred to as vertex relations.
 
-\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an identifier $\id(e)$,
+\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an ID $\id(e)$,
 a label $\lab(e)$ corresponding to the name of $R_{e_i}$, and attributes $e.attr*$ that reflect the attributes $\tau.attr*$ of $\tau$.
-For each edge relation $R_{e_i}$, there are two corresponding vertex relations $R_{v_s}$ and $R_{v_t}$. We further define two total functions: (1) $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_s \in R_{v_s}$; (2) $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_t \in R_{v_t}$.
-The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function $\zeta_v$, i.e., $v_s = \zeta_v(\lambda_{e_i}^s(\tau))$ and $v_t = \zeta_v(\lambda_{e_i}^t(\tau))$.
+For each edge relation $R_{e_i}$, there are two corresponding vertex relations $R_{v_s}$ and $R_{v_t}$. We further define two total functions: $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$ and $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_s \in R_{v_s}$ and a tuple $\tau_t \in R_{v_t}$, respectively.
+The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function $\zeta_v$, i.e., $v_s = \zeta_v(\tau_s)$ and $v_t = \zeta_v(\tau_t)$.
 The relations $R_{e_i}$ that are mapped to edges in the graph are referred to as edge relations.
 \end{itemize}
 \end{definition}
@@ -145,10 +145,10 @@ where
 \[
 \widetilde{R} = \widehat{\pi}_{attr*}\matching_G(\pattern).
 \]
-In this formulation, \(\widehat{\pi}_{attr*}(GR)\) (\todo{$\gproject$ can be further explained/simplified.}) denotes a specialized projection operator to extract attributes (including the id and label)
+In this formulation, \(\widehat{\pi}_{attr*}(GR)\) (\todo{$\gproject$ can be further explained/simplified.}) denotes a specialized projection operator to extract attributes (including the ID and label)
 from vertices and edges within a graph relation $GR$.
 This process helps ``flatten'' graph elements into relational tuples.
-For example, a vertex represented as \(\{\id=0, \lab=Person, age=18, name=Tom\}\) becomes a tuple of \((0, Person, 18, Tom)\).
+For example, a vertex represented as \(\{ID:0, label:Person, age:18, name:Tom\}\) becomes a tuple of \((0, Person, 18, Tom)\).
 In fact, the projection operation is designed to selectively retrieve specific attributes from vertices and edges as required, but for simplicity, we assume that all attributes are extracted if otherwise specified.
 The construction makes the resultant relation \(\tilde{R}\) fully compatible with original relational operations.
 
