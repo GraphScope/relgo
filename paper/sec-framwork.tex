@@ -52,6 +52,8 @@ In \refsec{join-matching-operator}, we discussed the physical implementation of 
 
 In the absence of a graph index, hash-join is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
 
+
+
 \comment{
 To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
 Specifically, optimizing SPJM queries with relgo is divided into three stages, i.e., preprocessing, optimizing, and converting.
