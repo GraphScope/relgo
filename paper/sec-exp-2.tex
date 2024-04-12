@@ -79,11 +79,16 @@ We omit the results of DuckDB, since its optimization time align with GrainDB, b
 We select a subset of the LDBC queries and JOB queries without loss of generality, and conduct the experiments on $G_{sf30}$ and IMDB datasets respectively.
 The results are shown in Fig.~\ref{fig:exp-optimization}.
 
-The experimental results demonstrate that \name's optimization time cost is significantly less than that of Calcite, with query plans optimized by \name also executing faster than those by Calcite.
-For example, in the case of $IC[1-3]$, the optimization time cost of \name is about an order of magnitude faster than that of Calcite, and the execution time of the plans optimized by \name is more than \todo{xx} faster.
-This is more obvious on the JOB benchmark, where all the queries optimized by Calcite exceed the timeout limit (so we omit it in \reffig{exp-opt-job}), while \name can optimize efficiently.
-Comparing with GrainDB, \name demonstrates a slightly higher optimization time cost. This outcome is expected to some extent, given GrainDB's design focuses on greedy, faster optimization methods.
-Nevertheless, the quality and execution efficiency of \name's optimized plans are superior, which outperforms GrainDB by \todo{a$\times$ and b$\times$} on average on the $G_{sf30}$ and IMDB datasets, respectively.
+The experimental results reveal that the optimization time for \name is significantly less than that of Calcite. 
+Furthermore, the execution times of the query plans optimized by \name are either faster or comparable to those produced by Calcite.
+For example, in the LDBC queries ($IC[7]$ excluded) shown in \reffig{exp-opt-ldbc}, the optimization time cost of \name is about two orders of magnitude faster than that of Calcite, and the execution time of the plans optimized by \name is more than 52$\times$ faster, on average.
+It is worth noting that with query $IC[7]$ and all queries in the JOB benchmark, the optimization time incurred by Calcite exceeds the timeout threshold (thus we omit the results of Calcite in \reffig{exp-opt-job}).
+On the contrary, \name shows an efficient optimization process for these queries. 
+This stark contrast accentuates \name's capability to efficiently generate optimized plans, demonstrating its superior optimization performance compared to traditional volcano-style optimizers like Calcite.
+
+Then we move on the comparison between \name with GrainDB. Compared with GrainDB, \name demonstrates a slightly higher optimization time cost. This outcome is expected to some extent, given GrainDB's design focuses on greedy, faster optimization methods.
+Nevertheless, the quality of \name's optimized plans are superior. This can be observed in the execution time results, where \name outperforms GrainDB by $9.5\times$ and $2.8\times$ on average on the $G_{sf30}$ and IMDB datasets, respectively.
+For the total time cost of optimization and execution, \name still achieves $5.9\times$ and $1.6\times$ \todo{this can be updated when the opt time is updated.} speedup over GrainDB on average, on the $G_{sf30}$ and IMDB datasets, respectively.
 %This gap could be more obvious when the dataset scales up (comparing $G_{sf10}$ and $G_{sf30}$), since the optimization time cost is fixed, but a better plan will achieve more efficiency when the dataset scales up.
 These findings suggest that \name's optimization time cost is justified, as it generates high-quality plans that are more efficient in execution.
 

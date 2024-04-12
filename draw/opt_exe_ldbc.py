@@ -6,13 +6,13 @@ methods = ['RelGo', 'Calcite', 'GrainDB']
 
 compile_times = np.array([
     [91, 15, 60, 26], # compilation time of RelGo
-    [10201, 394, 25839, 60000], # Calcite, todo: this is a placeholder
+    [10201, 394, 25839, 60000], # Calcite
     [1.04, 0.69, 1.61, 0.96], # GrainDB
 ])
 
 execution_times = np.array([
     [376.78, 374.47, 64.15, 39.51], # execution time of RelGo
-    [500, 500, 500, 500], # Calcite, todo: this is a placeholder
+    [259.75, 11217.25, 1398.20, 1], # Calcite, ic1-3 may not good enough; 1 is a placeholder
     [1073.82, 395.16, 286.14, 1172.55], # GrainDB
 ])
 
