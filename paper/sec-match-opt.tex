@@ -1,5 +1,5 @@
 
-\section{Perspectives of Optimizing Matching Operator}
+\section{Optimizing Matching Operator}
 In this section, we focus specifically on handling the matching operator, which plays a distinct role
 within the \spjm queries compared to the \spj queries. We discuss two main perspectives of optimizing
 the matching operator: logical transformation and physical implementation. Logical transformation is
@@ -154,8 +154,8 @@ may appear similar to the graph-agnostic method presented in \refsec{intuitive-m
 In this section, we demonstrate the superiority of the graph-aware method by theoretically proving that the time complexity employed by the graph-aware method is significantly smaller than that of the graph-agnostic method for optimizing the matching operator in an \spjm query.
 Consider a pattern $\pattern$ consisting of $n$ vertices and $m$ edges.
 
-For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia} for the graph-agnostic method, which is one of the most widely utilized relational optimizer. 
-The original paper introducing the volcano optimizer~\cite{columbia} provided only an upper bound for the search space. 
+For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia} for the graph-agnostic method, which is one of the most widely utilized relational optimizer.
+The original paper introducing the volcano optimizer~\cite{columbia} provided only an upper bound for the search space.
 \modify{It is difficult to precisely compute the time complexity of optimizing with the volcano optimizer due to the fact that it reduces the search space using heuristics and cost estimate.
 Therefore, in this work, we focus on the worst case when all the heuristic strategies fail and almost all the possible plans are visited.
 In this case, we consider the lower bound of time complexity to be approximately equal to that of the search space and compare it to the upper bound of the graph-aware method, thereby enhancing the constructiveness of the comparison. Although there may exist other relational optimizers~\cite{xx} that exhibit greater efficiency in terms of search space, our study remains sound within a generic context.}
@@ -230,12 +230,12 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
 \end{proof}
 
 
-\modify{Subsequently, we analyze the time complexity of optimization when the graph-aware method is applied, which is equivalent to that of determining the optimal decomposition tree given a pattern $\pattern$}. Although numerous works have been proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the complexity of the optimization problem has not been thoroughly analyzed. To address this, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ \modify{as well as an empty graph $\pattern_{\emptyset}$. 
+\modify{Subsequently, we analyze the time complexity of optimization when the graph-aware method is applied, which is equivalent to that of determining the optimal decomposition tree given a pattern $\pattern$}. Although numerous works have been proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the complexity of the optimization problem has not been thoroughly analyzed. To address this, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ \modify{as well as an empty graph $\pattern_{\emptyset}$.
 We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
 An edge exists from a larger\footnote{A pattern is considered larger if it contains more vertices.} sub-pattern $\pattern_1$ to a smaller sub-pattern $\pattern_2$ if it is possible for $\pattern_2$ to be the child of $\pattern_1$ in any decomposition tree. Each edge has a weight representing the cost of extending graphs matching $\pattern_2$ to those matching $\pattern_1$.
 Moreover, there are edges weighted 0 from sub-patterns in $V_1$ to $\pattern_{\emptyset}$.}
 
-Determining the exact number of edges in $\searchgraph_\pattern$ for an arbitrary pattern is non-trivial. However, since we are studying the upper bound, we can consider the worst-case scenario. Given a sub-pattern $\pattern'$ consisting of $1 < i < n$ vertices, \modify{the number of induced subgraphs of $\pattern'$ is at most $\Sigma_{1 \leq j \leq i - 1}\binom{i}{j} = 2^i - 2$}, which constrains the maximum number of edges that $\pattern'$ can connect to. 
+Determining the exact number of edges in $\searchgraph_\pattern$ for an arbitrary pattern is non-trivial. However, since we are studying the upper bound, we can consider the worst-case scenario. Given a sub-pattern $\pattern'$ consisting of $1 < i < n$ vertices, \modify{the number of induced subgraphs of $\pattern'$ is at most $\Sigma_{1 \leq j \leq i - 1}\binom{i}{j} = 2^i - 2$}, which constrains the maximum number of edges that $\pattern'$ can connect to.
 \modify{Besides, the number of edges that $\pattern' \in V_1$ can connect to is always 1.}
 With this in mind, we can prove the following theorem:
 
@@ -247,16 +247,16 @@ The time complexity for determining the optimal decomposition tree for pattern $
     \todo{refine the proof.}
     Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\empty}$ in $\searchgraph_\pattern(V, E)$.
     According to Dijkstra's algorithm, the time complexity of the shortest path query problem is $O(|E|)$.
-    
-    As the number of edges from patterns in $V_i$ is at most 
+
+    As the number of edges from patterns in $V_i$ is at most
     \begin{equation*}
         \sum\limits_{\pattern_i}(2^i - 2) = \binom{n}{i}(2^i - 2),
-    \end{equation*} 
+    \end{equation*}
     the upper bound of the number of edges in $\searchgraph_\pattern$ is
     \begin{equation*}
         \begin{split}
             \sum\limits_{i=2}^{i=n}\binom{n}{i}(2^i - 2) + n
-            < \sum\limits_{i=0}^{i=n}\binom{n}{i}2^i = (2+1)^n 
+            < \sum\limits_{i=0}^{i=n}\binom{n}{i}2^i = (2+1)^n
              = 3^n.
         \end{split}
     \end{equation*}

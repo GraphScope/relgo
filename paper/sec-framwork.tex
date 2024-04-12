@@ -25,8 +25,8 @@ The relational-only solution is straightforward: it applies the graph-agnostic m
 \end{itemize}
 
 \subsection{The Graph/Relation Converged Solution}
-The workflow of \name optimization framework is illustrated in \reffig{framework-overview}. The framework consists of two primary components: the \emph{graph optimizer} and the \emph{postposition converged optimizer}, which
-are applied sequentially to an \spjm query, for producing the optimized execution plan.
+As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two main components: a \emph{graph optimizer} and a \emph{postposition relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query. Once the matching operator has been optimized, the postposition relational optimizer takes over to optimize the remaining relational operators in the query.
+%In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
 \subsubsection{The Graph Optimizer}
 The graph optimizer focuses on optimizing the matching operator, leveraging the graph-aware method introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}, which is the state-of-the-art graph optimizer that considers real-life graph pattern matching in a property graph.
@@ -45,12 +45,22 @@ where $\Phi_l$ and $\Phi_r$ are the execution plans for computing $\matching(\pa
 
 In \refsec{join-matching-operator}, we discussed the physical implementation of three types of join operators: hash-join, \expand, and \expandintersect. When a graph index is available, we can compute the cost of the $\gjoin$ operator, denoted as $\cost(\gjoin)$, based on the specific implementation used, as described in [18]. The cost calculation differs for each case:
 \begin{itemize}
-\item When $\gjoin$ is implemented as a hash-join, the cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
+\item When $\gjoin$ is implemented as a \hashjoin, the cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \item If $\gjoin$ is implemented using the \expand~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
 \item When $\gjoin$ is implemented using the \expandintersect~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average intersection size of the neighbors of the vertices being intersected, which is maintained on the corresponding edge from $P'_l$ to $\pattern'_l$ in \glogue.
 \end{itemize}
 
-In the absence of a graph index, hash-join is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
+In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
+
+\subsubsection{Postposition Relational Optimizer}
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The postposition relational optimizer is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
+
+It's important to note that before $\matching(\pattern)$ can be integrated with the remaining \spj component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
+
+The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the postposition relational optimizer, \scangraphtable~ behaves like a standard \scan operator, providing a relational interface to the matched results. This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
+
+\subsubsection{Preposition Optimizer}
+
 
 
 
