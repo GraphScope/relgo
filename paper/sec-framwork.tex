@@ -1,4 +1,11 @@
-\section{Converged Graph Relational Optimization Framework}
+\section{The Converged Optimizations Framework}
+\label{sec:optimizations}
+
+This section presents \name, a converged relational/graph optimization framework designed to optimize the query
+processing of \spjm queries. We begin by introducing a naive relational-only solution built upon the graph-agnostic
+method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
+
+
 
 \begin{figure}
     \centering
@@ -8,6 +15,44 @@
 \end{figure}
 
 
+\subsection{Relational-Only Solution}
+\label{sec:relational-only}
+The relational-only solution is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
+
+\begin{itemize}
+\item The plan for solving the matching operator reflects a naive method of edge-based join plan, which is not worst-case optimal~\cite{lai2019distributed,mhedhbi2019optimizing}.
+\item After the matching operator has been transformed, the relational optimizer may treat vertex and edge relations as regular relations. Consequently, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
+\end{itemize}
+
+\subsection{The Graph/Relation Converged Solution}
+The workflow of \name optimization framework is illustrated in \reffig{framework-overview}. The framework consists of two primary components: the \emph{graph optimizer} and the \emph{postposition converged optimizer}, which
+are applied sequentially to an \spjm query, for producing the optimized execution plan.
+
+\subsubsection{The Graph Optimizer}
+The graph optimizer focuses on optimizing the matching operator, leveraging the graph-aware method introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}, which is the state-of-the-art graph optimizer that considers real-life graph pattern matching in a property graph.
+
+According to~\cite{GLogS}, a data structure called \glogue~ is constructed, which is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the G\glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Given that computing $|\matching(\pattern')|$ directly on the original graph is costly, \glogs proposes to first sparsify the graph as $G'$ and then use $|\matching_{G'}(\pattern')|$ as an estimate value. In this work, for computing \glogue, we randomly
+sample a set of vertex and edge relations during \rgmapping, and use the techniques in~\cite{gart}
+to construct the sparsified graph.
+
+Let the cost of an execution plan $\Phi$ for computing $\matching(\pattern)$ be $\cost_\Phi(\pattern)$. The graph optimizer aims to find an optimal execution plan such that $\cost_\Phi(\pattern)$ is minimized. Clearly, this can be solved using dynamic programming~\cite{GLogS}.
+
+Consider an execution plan $\Phi$ where $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ is computed. We must have:
+\[
+\cost_{\Phi}(\pattern') = \cost_{\Phi_l}(\pattern'_l) + \cost_{\Phi_r}(\pattern'_r) + \cost(\gjoin),
+\]
+where $\Phi_l$ and $\Phi_r$ are the execution plans for computing $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, respectively, and $\cost(\gjoin)$ is the cost of the join operation. In this case, finding the optimal execution plans for $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$ are the optimal subproblems.
+
+In \refsec{join-matching-operator}, we discussed the physical implementation of three types of join operators: hash-join, \expand, and \expandintersect. When a graph index is available, we can compute the cost of the $\gjoin$ operator, denoted as $\cost(\gjoin)$, based on the specific implementation used, as described in [18]. The cost calculation differs for each case:
+\begin{itemize}
+\item When $\gjoin$ is implemented as a hash-join, the cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
+\item If $\gjoin$ is implemented using the \expand~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
+\item When $\gjoin$ is implemented using the \expandintersect~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average intersection size of the neighbors of the vertices being intersected, which is maintained on the corresponding edge from $P'_l$ to $\pattern'_l$ in \glogue.
+\end{itemize}
+
+In the absence of a graph index, hash-join is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
+
+\comment{
 To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
 Specifically, optimizing SPJM queries with relgo is divided into three stages, i.e., preprocessing, optimizing, and converting.
 In this section, we introduce the three stages of relgo in detail.
@@ -49,7 +94,7 @@ Therefore, typical relational optimizers, e.g., Calcite \cite{calcite}, can be e
 
 Besides, to optimize the implementation of ScanMatchTable, the matching plans are optimized with graph-aware methods.
 Studies that optimize graph pattern matching can be utilized as the graph-aware methods, and when implementing \name, we leverage GLogS \cite{GLogS} to optimize matching plans.
-Moreover, if graph indices are available, join operators in \expandvertex and \expandintersect can be implemented as predefined joins to further improve the efficiency. 
+Moreover, if graph indices are available, join operators in \expandvertex and \expandintersect can be implemented as predefined joins to further improve the efficiency.
 
 
 \subsection{Converting Stage}
@@ -127,11 +172,11 @@ The above process of query processing is illustrated with the following example.
             & \textit{Department = (\underline{dept\_id}, dept\_name)}, \\
         \end{split}
     \end{equation*}
-    suppose we are going to find three persons satisfying: 
+    suppose we are going to find three persons satisfying:
     (1) These three persons know each other;
     (2) At least two of them are from the department of computer science.
     The SPJM query can be illustrated as shown in Fig.~\ref{fig:example-operator-tree}.
-    
+
     In relational matching algebra, the SPJM query can be expressed as follows:
     Firstly, to obtain the triangles, the pattern $\mathcal{P}_{\triangle}$ is
     \begin{lstlisting}
@@ -139,7 +184,7 @@ The above process of query processing is illustrated with the following example.
         (p2)-[:Knows]-(p3:Person),
         (p1)-[:Knows]-(p3)
     \end{lstlisting}
-    Then, to get the relational table that records the three person and their departments, the algebra expression is 
+    Then, to get the relational table that records the three person and their departments, the algebra expression is
     \begin{equation*}
         \begin{split}
             \widehat{R}_{graph} = & \pi_{p1.name\rightarrow pn1, p1.dept\_id \rightarrow dept1,p2.name\rightarrow pn2, p2.dept\_id \rightarrow dept2,} \\
@@ -153,15 +198,15 @@ The above process of query processing is illustrated with the following example.
     \begin{equation*}
         \begin{split}
         \pi_{pn1, pn2, pn3}
-        (& \sigma_{dept.dept\_name = \text{`Computer Science'}}( \\ 
+        (& \sigma_{dept.dept\_name = \text{`Computer Science'}}( \\
         & dept \Join_{dept1=dept.dept\_id \land dept2=dept.dept\_id} \widehat{R}_{graph})).
         \end{split}
     \end{equation*}
 
     Based on the above algebra expressions, the match scanning plan is shown in Fig.~\ref{fig:converged-logical-plan-graph} and the outer query plan is shown in Fig.~\ref{fig:converged-logical-plan-relational}.
-    
+
     Then, optimization modules in the optimization layer are applied to optimize the plans.
     The optimized plans are shown in Fig.~\ref{fig:relational-plan-optimized} and Fig.~\ref{fig:graph-plan-optimized}.
     Moreover, the finally obtained optimal physical plan is shown in Fig.~\ref{fig:physical-plan-optimized}.
 \end{example}
-
+}

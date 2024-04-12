@@ -47,14 +47,14 @@ The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Note that th
 
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
-The following lemma shows that there exists a logically equivalent transformation from an \spjm query to an \spj query.
+The following lemma shows that there exists a logically equivalent transformation from a matching operator to an \spj query.
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
-    With \rgmapping, an \spjm query given in \refeq{spjm} can be losslessly converted to an \spj query.
+    With \rgmapping, a matching operator can be losslessly converted to an \spj query.
 \end{lemma}
 \begin{proof}
-    It suffices to convert the matching operator in \refeq{spjm} into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
+    It suffices to convert the matching operator into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
 The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
 

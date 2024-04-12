@@ -1,5 +1,6 @@
 \section{Introduction}
 
+\comment{
 Relational databases have been a research hotspot for a long time, and the related achievements are applied in various scenarios such as finance, healthcare, and online services.
 In order to manage data in relational databases conveniently and efficiently, Structured Query Language (abbr.~SQL) is presented.
 Various relational database management systems implement their own versions of SQL.
@@ -31,12 +32,12 @@ Such an SQL expression is intricate and inconvenient to write.
 Indeed, the conditions specified within this SQL statement collectively establish the structure of a pattern graph.
 As shown in Fig.~\ref{fig:intro-pattern}, there are four vertices representing four persons, and these four persons form a complete graph.
 Therefore, this SQL query can be expressed as a graph query.
-The corresponding expression following the grammar of Cypher \cite{opencypher} is as follows: 
+The corresponding expression following the grammar of Cypher \cite{opencypher} is as follows:
 \begin{lstlisting}
     MATCH (p1:Person)-[:Knows]-(p2:Person)-[:Knows]-(p3:Person)-[:Knows]-(p4:Person),
         (p1)-[:Knows]-(p3), (p2)-[:Knows]-(p4)
     RETURN p1.id, p2.id, p3.id, p4.id;
-\end{lstlisting} 
+\end{lstlisting}
 This graph query expression is much more concise and understandable than that in SQL.
 It suggests that SQL is not always the optimal choice, and sometimes employing graph queries is more advantageous.
 Then, in order to combine the extensive developments made in SQL queries over the years with the benefits of graph queries, it would be helpful for SQL to support both relational and graph queries.
@@ -114,7 +115,7 @@ The stages of query optimization that these four types of solution are involved 
     \label{fig:catagory}
 \end{figure*}
 
-\textbf{Solution 1 ($Rel$)}. 
+\textbf{Solution 1 ($Rel$)}.
 The most direct solution is to transform graph queries to relational ones, and then optimize the new queries with relational optimizers.
 Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB} are typical examples.
 However, methods of this type only take effect in the stage of logical optimization and degrade into relational optimizers.
@@ -159,7 +160,7 @@ An example is shown as follows.
 \begin{example}
     Given four tables as shown in Fig.~\ref{fig:intro-order-case}, a SQL/PGQ query is as follows:
     \begin{lstlisting}
-        SELECT contr_id, repo_name 
+        SELECT contr_id, repo_name
         FROM GRAPH_TABLE (graph_view
             MATCH (p2:Contributor)-[f:Follows]->(p1:Contributor {contr_id: 1})-[c:Contribute]->(r:Repository)
             COLUMNS (p2.contr_id as contr_id,
@@ -169,17 +170,17 @@ An example is shown as follows.
     %\begin{lstlisting}
     %    SELECT p2.contr_id, repo_name
     %    FROM Contributor p1, Follows f, Contributor p2, Contribute c, Repository p
-    %    WHERE p1.contr_id = 1 
-    %    AND p1.contr_id = f.contr2_id 
+    %    WHERE p1.contr_id = 1
+    %    AND p1.contr_id = f.contr2_id
     %    AND p2.contr_id = f.contr1_id
-    %    AND p1.contr_id = c.contr_id 
+    %    AND p1.contr_id = c.contr_id
     %    AND c.repo_id = r.repo_id;
     %\end{lstlisting}
     From the perspecitve of a relational database (e.g., DuckDB), the best join order can be \textbf{p1$\rightarrow$f$\rightarrow$p2$\rightarrow$c$\rightarrow$r}, since tables \textbf{Follows} and \textbf{Contributor} have much smaller cardinalities than table \textbf{Contribute}.
     Then, by replacing the join operators with getNeighbor, the finally obtained execution plan is \textbf{p1$\xrightarrow{\textit{getNeighbor}}$p2$\xrightarrow{\textit{getNeighbor}}$r}.
 
     However, as $v_1$ has much fewer neighbors in table \textbf{Repository} than in table \textbf{Contributor}, join order \textbf{p1$\xrightarrow{\textit{getNeighbor}}$r$\xrightarrow{\textit{getNeighbor}}$p2} would be more efficient from the perspective of graph databases.
-    Therefore, it suggests that 
+    Therefore, it suggests that
     replacing relational operators with graph operators after optimization with relational optimizers can miss optimial execution plans.
 
     Besides, given the relationships among the tuples as shown in Fig.~\ref{fig:intro-order-case2}, the best join order from the perspective of a relational database like DuckDB can be \textbf{p1$\rightarrow$f$\rightarrow$c$\rightarrow$p2$\rightarrow$r}.
@@ -202,7 +203,7 @@ An example about this limitation is presented.
     \label{example:push_down}
     Suppose we are going to find persons that know John and the query expression is as follows:
     \begin{lstlisting}
-        SELECT p FROM GRAPH_TABLE (friendship_graph 
+        SELECT p FROM GRAPH_TABLE (friendship_graph
             MATCH (p1:Person)-[:Knows]-(p2:Person)
             COLUMNS (p1.name as p, p2.name as p2)
         )
@@ -213,7 +214,7 @@ An example about this limitation is presented.
     Please note that the condition ``p2 = 'John''' in the relational query can be pushed down into the graph query, so that the graph query only returns persons that know John.
     The optimized query is as follows.
     \begin{lstlisting}
-        SELECT p FROM GRAPH_TABLE (friendship_graph 
+        SELECT p FROM GRAPH_TABLE (friendship_graph
             MATCH (p1:Person)-[:Knows]-(p2:Person {name: 'John'})
             COLUMNS (p1.name as p)
         );
@@ -242,7 +243,7 @@ The output of ScanGraphTable is a relational table and it bridges the gap betwee
 % Specifically, the extendIntersect operator is helpful in supporting worst-case optimality.
 
 (4) Theoretical analysis on the complexity of the optimization framework is conducted.
-The obtained theorems prove that for graph queries, the join order optimization with a graph optimizer can be exponentially faster than that with a relational optimizer. 
+The obtained theorems prove that for graph queries, the join order optimization with a graph optimizer can be exponentially faster than that with a relational optimizer.
 It theoretically confirms that relational optimizer is usually not suitable for graph queries, and it is indispensable for the existence of a converged optimization framework.
 
 (5) Extensive experiments are conducted to show the efficiency of the proposed converged query optimization framework.
@@ -254,3 +255,4 @@ The rest of this paper is organized as follows.
 The existing methods for optimizing the SPJM queries can be divided into four categories.
 The main difference between these methods lies in the approach to handling the matching operator.
 Before the details of these methods are introduced, concepts about graph structure and graph matching decomposition are proposed as follows.
+}

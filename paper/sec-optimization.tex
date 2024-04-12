@@ -1,10 +1,11 @@
-\section{Optimizations}
+\section{The Converged Optimizations Framework}
 \label{sec:optimizations}
 
-The relational optimization module and match optimization module optimize the outer query and the process of graph match decomposition, respectively.
-In this subsection, we present the details of the optimization strategies utilized in these two modules. 
+This section presents \name, a converged relational/graph optimization framework designed to optimize the query
+processing of \spjm queries. We begin by introducing a naive relational-only solution built upon the graph-agnostic
+method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
 
-\subsection{Optimization Strategies in Relational Optimization Module}
+\subsection{Relational-Only Solution}
 
 Like most relational optimizers, the relational optimization module applies both Rule-based Optimization (abbr.~RBO) and Cost-based Optimization (abbr.~CBO) strategies on relational subplans for a better physical plan.
 In detail, in terms of RBO, commonly used optimizations such as filter pushdown, join order optimization, and removal of unused columns are employed in the converged optimizer.
@@ -12,7 +13,7 @@ In terms of CBO, the costs of plans are estimated based on the low-order statist
 
 Besides, since a new implementation of the scan operator, i.e., ScanMatchTable, is added for relational optimizer, it is possible to perform some optimization across the outer query plan and match scanning plan.
 
-\filterrule. 
+\filterrule.
 Inspired by FilterPushdownRule in relational optimizer, which can push down the predicates to the scan operator to filter out invalid elements earlier, we propose \filterrule.
 As the ScanMatchTable is a physical implementation of the scan operator which acts like scanning a table obtained by matching specific patterns on the database, it is reasonable to integrate the filtering criteria into the ScanMatchTable operator.
 Specifically, \filterrule seeks to push predicates on properties of graph elements from the outer query to matching operators, so that invalid graph elements can be dropped earlier.
@@ -37,14 +38,14 @@ Besides, $\mathcal{P}_{1,\theta_1}$ is obtained by adding constraints in $\theta
 
 \subsection{Optimization Strategies in Match Optimization Module}
 
-In the match optimization module, we formulate a specific rule set to capitalize on optimization potential in graph matching decomposition. 
+In the match optimization module, we formulate a specific rule set to capitalize on optimization potential in graph matching decomposition.
 Both RBO and CBO strategies are included in the rule set.
 
 In terms of RBO strategies, two frequently utilized key rules, i.e., \trimrule and \fusionrule, are presented in this subsection.
 
-\trimrule. 
-The \trimrule~ is a well-established relational optimization strategy that removes superfluous data at intermediary stages of query processing. 
-Two particular instances where trimming helps include: 
+\trimrule.
+The \trimrule~ is a well-established relational optimization strategy that removes superfluous data at intermediary stages of query processing.
+Two particular instances where trimming helps include:
 Firstly, \trimrule~ can eliminate intermediate results with aliases that are not required and reduce computations.
 Secondly, it involves discarding unneeded vertex and edge properties.
 This is accomplished by adding projection operators to the match scanning plans.
@@ -53,21 +54,21 @@ Formally, an example of applying \trimrule is as follows:
     \begin{split}
         \mathcal{M}(GR, \mathcal{P}) & \Rightarrow \cdots \Join \mathcal{M}(GR, \mathcal{P}_{sub}) \Join \cdots \\
         & \Rightarrow \cdots \Join \pi_{u_1, \cdots, u_k}(\mathcal{M}(GR, \mathcal{P}_{sub})) \Join \cdots,
-    \end{split} 
+    \end{split}
 \end{equation}
 where $\mathcal{M}(GR, \mathcal{P}_{sub})$ is a minimum matching component and $u_1, \cdots, u_k$ are necesary properties.
 
-\fusionrule. 
-The \fusionrule~ is a graph-centric rule. 
-In a match scanning plan, when intermediate results are joined with a table representing edges and subsequently with a table representing vertices, the availability of graph indices allows the \fusionrule~ to integrate these two join operations. 
+\fusionrule.
+The \fusionrule~ is a graph-centric rule.
+In a match scanning plan, when intermediate results are joined with a table representing edges and subsequently with a table representing vertices, the availability of graph indices allows the \fusionrule~ to integrate these two join operations.
 This consolidation creates a single join operation that leverages graph indices to directly retrieve the neighboring vertices.
-Nonetheless, whether the join operators can be merged is context-dependent. 
+Nonetheless, whether the join operators can be merged is context-dependent.
 For example, if some properties of the edges are needed, fusion might not be feasible.
 This rule evaluates such factors to ensure query optimization without compromising result integrity.
 
 
 
-In terms of CBO, we adopt a cost model similar to GLogS, which considers both the communication costs of intermediate result transfer in distributed environments and the computational costs of physical plan operators. 
+In terms of CBO, we adopt a cost model similar to GLogS, which considers both the communication costs of intermediate result transfer in distributed environments and the computational costs of physical plan operators.
 Specifically, the computational costs for joins and extend-intersection are defined.
 They are estimated with pattern frequencies, which are higher-order statistics in graphs.
 Leveraging this cost model enhances the likelihood of identifying superior match scanning plans.
