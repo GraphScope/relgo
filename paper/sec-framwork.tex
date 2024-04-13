@@ -25,34 +25,40 @@ The relational-only solution is straightforward: it applies the graph-agnostic m
 \end{itemize}
 
 \subsection{The Graph/Relation Converged Solution}
-As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two main components: a \emph{graph optimizer} and a \emph{postposition relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query. Once the matching operator has been optimized, the postposition relational optimizer takes over to optimize the remaining relational operators in the query.
+As illustrated in Figure 4, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an SPJM query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
+The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
+In addition to the core workflow, our analysis of real-life querying scenarios has revealed the need for a \emph{preposition optimizer}. This component is applied prior to the core workflow and is designed to apply heuristic rules.
+
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
 \subsubsection{The Graph Optimizer}
-The graph optimizer focuses on optimizing the matching operator, leveraging the graph-aware method introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}, which is the state-of-the-art graph optimizer that considers real-life graph pattern matching in a property graph.
+The graph optimizer leverages the graph-aware method for transforming the matching operator, as introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
-According to~\cite{GLogS}, a data structure called \glogue~ is constructed, which is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the G\glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Given that computing $|\matching(\pattern')|$ directly on the original graph is costly, \glogs proposes to first sparsify the graph as $G'$ and then use $|\matching_{G'}(\pattern')|$ as an estimate value. In this work, for computing \glogue, we randomly
-sample a set of vertex and edge relations during \rgmapping, and use the techniques in~\cite{gart}
-to construct the sparsified graph.
+\stitle{\glogue~Construction.} \glogs's optimization techniques are grounded on a data structure called \glogue. Essentially, \glogue~ is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the \glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Computing $|\matching(\pattern')|$ directly on the original graph can be computationally expensive, especially for large graphs. To address this issue, \glogs proposes a sparsification technique that constructs a smaller, representative subgraph $G'$. Instead of computing $|\matching(\pattern')|$, \glogs estimates the frequency of the pattern using $|\matching_{G'}(\pattern')|$, which is computed on the smaller sparsified graph $G'$.
 
-Let the cost of an execution plan $\Phi$ for computing $\matching(\pattern)$ be $\cost_\Phi(\pattern)$. The graph optimizer aims to find an optimal execution plan such that $\cost_\Phi(\pattern)$ is minimized. Clearly, this can be solved using dynamic programming~\cite{GLogS}.
+In our work, we adapt this sparsification technique to construct the \glogue. However, since we are dealing with relational data, we don't have a graph that can be directly sparsified. Instead, we sample a subset of vertex and edge relations during the \rgmapping process. Once the subset of relations is obtained, they can serve as the input tables to the techniques presented in~\cite{gart} for constructing the sparsified graph.
 
-Consider an execution plan $\Phi$ where $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ is computed. We must have:
+\stitle{Cost Calculation.} The optimization process is essentially searching for the execution plan that incurs the minimal cost. Let the cost of an execution plan $\Phi$ for computing $\matching(\pattern)$ be $\cost_\Phi(\pattern)$. %The graph optimizer aims to find an optimal execution plan such that $\cost_\Phi(\pattern)$ is minimized. Clearly, this can be solved using dynamic programming~\cite{GLogS}.
+
+Consider $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ as an intermediate computation in an execution plan. We have:
 \[
 \cost_{\Phi}(\pattern') = \cost_{\Phi_l}(\pattern'_l) + \cost_{\Phi_r}(\pattern'_r) + \cost(\gjoin),
 \]
-where $\Phi_l$ and $\Phi_r$ are the execution plans for computing $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, respectively, and $\cost(\gjoin)$ is the cost of the join operation. In this case, finding the optimal execution plans for $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$ are the optimal subproblems.
+where $\Phi_l$ and $\Phi_r$ are the execution plans for computing $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, respectively, and $\cost(\gjoin)$ is the cost of the join operation.
 
-In \refsec{join-matching-operator}, we discussed the physical implementation of three types of join operators: hash-join, \expand, and \expandintersect. When a graph index is available, we can compute the cost of the $\gjoin$ operator, denoted as $\cost(\gjoin)$, based on the specific implementation used, as described in [18]. The cost calculation differs for each case:
+When a graph index is available, there are three physical implementations of $\gjoin$, depending on the type of $\pattern'_r$, and the calculation of $\cost(\gjoin)$ differs accordingly:
 \begin{itemize}
-\item When $\gjoin$ is implemented as a \hashjoin, the cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
-\item If $\gjoin$ is implemented using the \expand~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
-\item When $\gjoin$ is implemented using the \expandintersect~ operator, the cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average intersection size of the neighbors of the vertices being intersected, which is maintained on the corresponding edge from $P'_l$ to $\pattern'_l$ in \glogue.
+\item If $\pattern'_r$ is a single-edge pattern, $\gjoin$ is implemented using the \expand~ operator. The cost is calculated based on the cardinality of $\matching(\pattern'_l)$ (can be looked up in the \glogue) and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
+\item If $\pattern'_r$ is a complete star, $\gjoin$ is implemented using the \expandintersect~ operator. The cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average intersection size of the neighbors of the vertices being intersected, which is maintained on the corresponding edge from $P'$ to $\pattern'_l$ in \glogue.
+\item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
 
 In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
 
-\subsubsection{Postposition Relational Optimizer}
+\stitle{Plan Computation.} Searching for the optimal execution plan remains the same as in \glogs. The optimal execution plan is obtained by traversing the \glogue~ from the queried pattern $\pattern$ in a top-down manner.
+Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained.
+
+\subsubsection{The Relational Optimizer}
 Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The postposition relational optimizer is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
 
 It's important to note that before $\matching(\pattern)$ can be integrated with the remaining \spj component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
