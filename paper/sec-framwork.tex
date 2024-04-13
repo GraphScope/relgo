@@ -5,6 +5,8 @@ This section presents \name, a converged relational/graph optimization framework
 processing of \spjm queries. We begin by introducing a naive relational-only solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
 
+\todo{add a comprehensive figure to include: framework overview, naive workflow, converged workflow}
+
 
 
 \begin{figure}
@@ -25,9 +27,11 @@ The relational-only solution is straightforward: it applies the graph-agnostic m
 \end{itemize}
 
 \subsection{The Graph/Relation Converged Solution}
-As illustrated in Figure 4, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an SPJM query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
+As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
-In addition to the core workflow, our analysis of real-life querying scenarios has revealed the need for a \emph{preposition optimizer}. This component is applied prior to the core workflow and is designed to apply heuristic rules.
+In addition to the core workflow, we further explore heuristic rules that highlight the non-trivial interplay between the relational and graph components in an \spjm query.
+
+ %our analysis of real-life querying scenarios has revealed the need for a \emph{preposition optimizer}. This component is applied prior to the core workflow and is designed to apply heuristic rules.
 
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
@@ -59,15 +63,29 @@ In the absence of a graph index, \hashjoin~ is used for the entire plan, where t
 Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained.
 
 \subsubsection{The Relational Optimizer}
-Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The postposition relational optimizer is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimizer is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
 
 It's important to note that before $\matching(\pattern)$ can be integrated with the remaining \spj component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
 
-The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the postposition relational optimizer, \scangraphtable~ behaves like a standard \scan operator, providing a relational interface to the matched results. This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
+The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the relational optimizer, \scangraphtable~ behaves like a standard \scan operator, providing a relational interface to the matched results. This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
 
-\subsubsection{Preposition Optimizer}
+\subsubsection{Heuristic Optimization Rules}
+We explore heuristic rules to address the non-trivial interplay between the relational and graph components in an \spjm query.
 
+\todo{other rules?}
 
+\stitle{\filterrule.} To elaborate the rule, we redefine a pattern $(\pattern, \Omega)$, introducing constraints within $\Omega$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
+
+Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
+\[
+\sigma_{d'{v_a}} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching(\pattern)
+\]
+The predicate $d'{v_a}$ defines a predicate in terms of an attribute of the pattern vertex that is projected by $\widehat{\pi}$ from the matched results. There is wasteful computation if the selection is applied after the costly pattern matching. A more efficient approach is to push the selection predicate down into the matching operator. An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans. The \filterrule is formally defined as:
+\begin{equation*}
+\sigma{\Omega} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching(\pattern) \\
+\equiv \sigma{\Omega'} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching((\pattern, \{d_v\})),
+\end{equation*}
+where $\Omega' = \Omega \setminus \{d'{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
 
 \comment{
