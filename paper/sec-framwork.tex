@@ -78,14 +78,14 @@ We explore heuristic rules to address the non-trivial interplay between the rela
 
 Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
 \[
-\sigma_{d'{v_a}} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching(\pattern)
+\sigma_{d'_{v_a}} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern))
 \]
-The predicate $d'{v_a}$ defines a predicate in terms of an attribute of the pattern vertex that is projected by $\widehat{\pi}$ from the matched results. There is wasteful computation if the selection is applied after the costly pattern matching. A more efficient approach is to push the selection predicate down into the matching operator. An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans. The \filterrule is formally defined as:
+The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pattern vertex that is projected by $\widehat{\pi}$ from the matched results. There is wasteful computation if the selection is applied after the costly pattern matching. A more efficient approach is to push the selection predicate down into the matching operator. An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans. The \filterrule is formally defined as:
 \begin{equation*}
-\sigma{\Omega} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching(\pattern) \\
-\equiv \sigma{\Omega'} \widehat{\pi}{v.a \rightarrow v_a, \ldots} \matching((\pattern, \{d_v\})),
+\sigma_{\Omega} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern)) \\
+\equiv \sigma_{\Omega'} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching((\pattern, \{d_v\}))),
 \end{equation*}
-where $\Omega' = \Omega \setminus \{d'{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
+where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
 
 \comment{

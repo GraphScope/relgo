@@ -146,11 +146,16 @@ where
 \[
 \widetilde{R} = \widehat{\pi}_{attr*}\matching_G(\pattern).
 \]
-In this formulation, \(\widehat{\pi}_{attr*}(GR)\) (\todo{$\gproject$ can be further explained/simplified.}) denotes a specialized projection operator to extract attributes (including the ID and label)
+In this formulation, \(\widehat{\pi}_{attr*}(GR)\) denotes a specialized projection operator to extract attributes (including the ID and label)
 from vertices and edges within a graph relation $GR$.
 This process helps ``flatten'' graph elements into relational tuples.
-For example, a vertex represented as \(\{ID:0, label:Person, age:18, name:Tom\}\) becomes a tuple of \((0, Person, 18, Tom)\).
-In fact, the projection operation is designed to selectively retrieve specific attributes from vertices and edges as required, but for simplicity, we assume that all attributes are extracted if otherwise specified.
+For example, given a graph relation $GR$ that contains a vertex of \{ID:0, label:Person, name:``Tom''\}, the
+following projection
+\[
+\widehat{\pi}_{\id(v) \rightarrow \text{v\_id}, \lab(v) \rightarrow \text{v\_label}, v.name \rightarrow \text{v\_name}}(GR)
+\]
+turns the vertex into a tuple of (0, Person, ``Tom'').
+The projection operation is designed to selectively retrieve specific attributes from vertices and edges as required, but for simplicity, we assume that all attributes are extracted if otherwise specified.
 The construction makes the resultant relation \(\tilde{R}\) fully compatible with original relational operations.
 
 In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
