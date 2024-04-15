@@ -2,7 +2,7 @@
 \label{sec:optimizations}
 
 This section presents \name, a converged relational/graph optimization framework designed to optimize the query
-processing of \spjm queries. We begin by introducing a naive relational-only solution built upon the graph-agnostic
+processing of \spjm queries. We begin by introducing a naive solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
 
 \todo{add a comprehensive figure to include: framework overview, naive workflow, converged workflow}
@@ -12,21 +12,21 @@ method for solving the matching operator. We then delve into the converged workf
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{./figures/framework.png}
-    \caption{Overview of the Converged Graph Relational Optimization Framwork.}
+    \caption{Overview of the Converged Graph Relational Optimization Framework.}
     \label{fig:framework-overview}
 \end{figure}
 
 
-\subsection{Relational-Only Solution}
+\subsection{Graph-Agnostic Solution}
 \label{sec:relational-only}
-The relational-only solution is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
+The graph-agnostic solution is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
 
 \begin{itemize}
 \item The plan for solving the matching operator reflects a naive method of edge-based join plan, which is not worst-case optimal~\cite{lai2019distributed,mhedhbi2019optimizing}.
 \item After the matching operator has been transformed, the relational optimizer may treat vertex and edge relations as regular relations. Consequently, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
 \end{itemize}
 
-\subsection{The Graph/Relation Converged Solution}
+\subsection{The Converged Solution}
 As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
 In addition to the core workflow, we further explore heuristic rules that highlight the non-trivial interplay between the relational and graph components in an \spjm query.

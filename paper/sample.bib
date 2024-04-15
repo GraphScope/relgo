@@ -1369,11 +1369,6 @@ year = {2003},
   pages        = {1465--1477},
   publisher    = {{ACM}},
   year         = {2021},
-  url          = {https://doi.org/10.1145/3448016.3452821},
-  doi          = {10.1145/3448016.3452821},
-  timestamp    = {Sat, 30 Sep 2023 09:56:34 +0200},
-  biburl       = {https://dblp.org/rec/conf/sigmod/QiuWYLWZ21.bib},
-  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
 
 @misc{substrait,
@@ -1542,6 +1537,243 @@ journal = {Proc. VLDB Endow.},
 month = {jun},
 pages = {1099–1112},
 numpages = {14}
+}
+
+<<<<<<< HEAD
+@inproceedings{chamberlin1974sequel,
+author = {Chamberlin, Donald D. and Boyce, Raymond F.},
+title = {SEQUEL: A structured English query language},
+year = {1974},
+isbn = {9781450374156},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+booktitle = {Proceedings of the 1974 ACM SIGFIDET (Now SIGMOD) Workshop on Data Description, Access and Control},
+pages = {249–264},
+numpages = {16},
+location = {Ann Arbor, Michigan},
+series = {SIGFIDET '74}
+}
+
+@inproceedings{Chaudhuri98,
+author = {Chaudhuri, Surajit},
+title = {An overview of query optimization in relational systems},
+year = {1998},
+isbn = {0897919963},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+booktitle = {Proceedings of the Seventeenth ACM SIGACT-SIGMOD-SIGART Symposium on Principles of Database Systems},
+pages = {34–43},
+numpages = {10},
+series = {PODS '98}
+}
+
+@article{IbarakiK84,
+author = {Ibaraki, Toshihide and Kameda, Tiko},
+title = {On the optimal nesting order for computing N-relational joins},
+year = {1984},
+issue_date = {Sept. 1984},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {9},
+number = {3},
+issn = {0362-5915},
+journal = {ACM Trans. Database Syst.},
+month = {sep},
+pages = {482–502},
+numpages = {21}
+}
+
+@inproceedings{ChatterjiEGY02,
+author = {Chatterji, S. and Evani, S. S. K. and Ganguly, S. and Yemmanuru, M. D.},
+title = {On the complexity of approximate query optimization},
+year = {2002},
+isbn = {1581135076},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+booktitle = {Proceedings of the Twenty-First ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems},
+pages = {282–292},
+numpages = {11},
+location = {<conf-loc>, <city>Madison</city>, <state>Wisconsin</state>, </conf-loc>},
+series = {PODS '02}
+}
+
+@article{Haffnerjoinorder,
+author = {Haffner, Immanuel and Dittrich, Jens},
+title = {Efficiently Computing Join Orders with Heuristic Search},
+year = {2023},
+issue_date = {May 2023},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {1},
+number = {1},
+journal = {Proc. ACM Manag. Data},
+month = {may},
+articleno = {73},
+numpages = {26},
+keywords = {join ordering, query optimization, query planning}
+}
+
+@inproceedings{chenjoinorder,
+author = {Chen, Jin and Ye, Guanyu and Zhao, Yan and Liu, Shuncheng and Deng, Liwei and Chen, Xu and Zhou, Rui and Zheng, Kai},
+title = {Efficient Join Order Selection Learning with Graph-based Representation},
+year = {2022},
+isbn = {9781450393850},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+booktitle = {Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+pages = {97–107},
+numpages = {11},
+keywords = {join order, graph representation, database},
+location = {Washington DC, USA},
+series = {KDD '22}
+}
+
+@inproceedings{10.1145/375663.375706,
+author = {Goldstein, Jonathan and Larson, Per-\r{A}ke},
+title = {Optimizing queries using materialized views: a practical, scalable solution},
+year = {2001},
+isbn = {1581133324},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/375663.375706},
+doi = {10.1145/375663.375706},
+abstract = {Materialized views can provide massive improvements in query processing time, especially for aggregation queries over large tables. To realize this potential, the query optimizer must know how and when to exploit materialized views. This paper presents a fast and scalable algorithm for determining whether part or all of a query can be computed from materialized views and describes how it can be incorporated in transformation-based optimizers. The current version handles views composed of selections, joins and a final group-by. Optimization remains fully cost based, that is, a single “best” rewrite is not selected by heuristic rules but multiple rewrites are generated and the optimizer chooses the best alternative in the normal way. Experimental results based on an implementation in Microsoft SQL Server show outstanding performance and scalability. Optimization time increases slowly with the number of views but remains low even up to a thousand.},
+booktitle = {Proceedings of the 2001 ACM SIGMOD International Conference on Management of Data},
+pages = {331–342},
+numpages = {12},
+keywords = {materialized views, query optimization, view matching},
+location = {Santa Barbara, California, USA},
+series = {SIGMOD '01}
+}
+
+@article{goldsteinheuristics,
+author = {Goldstein, Jonathan and Larson, Per-\r{A}ke},
+title = {Optimizing queries using materialized views: a practical, scalable solution},
+year = {2001},
+issue_date = {June 2001},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {30},
+number = {2},
+issn = {0163-5808},
+bstract = {Materialized views can provide massive improvements in query processing time, especially for aggregation queries over large tables. To realize this potential, the query optimizer must know how and when to exploit materialized views. This paper presents a fast and scalable algorithm for determining whether part or all of a query can be computed from materialized views and describes how it can be incorporated in transformation-based optimizers. The current version handles views composed of selections, joins and a final group-by. Optimization remains fully cost based, that is, a single “best” rewrite is not selected by heuristic rules but multiple rewrites are generated and the optimizer chooses the best alternative in the normal way. Experimental results based on an implementation in Microsoft SQL Server show outstanding performance and scalability. Optimization time increases slowly with the number of views but remains low even up to a thousand.},
+journal = {SIGMOD Rec.},
+month = {may},
+pages = {331–342},
+numpages = {12},
+keywords = {materialized views, query optimization, view matching}
+}
+
+@article{Chaudhuri99heuristics,
+author = {Chaudhuri, Surajit and Shim, Kyuseok},
+title = {Optimization of queries with user-defined predicates},
+year = {1999},
+issue_date = {June 1999},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {24},
+number = {2},
+issn = {0362-5915},
+journal = {ACM Trans. Database Syst.},
+month = {jun},
+pages = {177–228},
+numpages = {52},
+keywords = {dynamic programming, query optimization, user-defined predicates}
+}
+
+@article{ullmann1976algorithm,
+  title     = {An algorithm for subgraph isomorphism},
+  author    = {Ullmann, Julian R},
+  journal   = {Journal of the ACM (JACM)},
+  volume    = {23},
+  number    = {1},
+  pages     = {31--42},
+  year      = {1976},
+  publisher = {ACM New York, NY, USA}
+}
+
+@article{shang2008quicksi,
+  author     = {Shang, Haichuan and Zhang, Ying and Lin, Xuemin and Yu, Jeffrey Xu},
+  title      = {Taming Verification Hardness: An Efficient Algorithm for Testing Subgraph Isomorphism},
+  year       = {2008},
+  issue_date = {August 2008},
+  publisher  = {VLDB Endowment},
+  volume     = {1},
+  number     = {1},
+  issn       = {2150-8097},
+  url        = {https://doi.org/10.14778/1453856.1453899},
+  doi        = {10.14778/1453856.1453899},
+  abstract   = {Graphs are widely used to model complicated data semantics in many applications. In this paper, we aim to develop efficient techniques to retrieve graphs, containing a given query graph, from a large set of graphs. Considering the problem of testing subgraph isomorphism is generally NP-hard, most of the existing techniques are based on the framework of filtering-and-verification to reduce the precise computation costs; consequently various novel feature-based indexes have been developed. While the existing techniques work well for small query graphs, the verification phase becomes a bottleneck when the query graph size increases. Motivated by this, in the paper we firstly propose a novel and efficient algorithm for testing subgraph isomorphism, QuickSI. Secondly, we develop a new feature-based index technique to accommodate QuickSI in the filtering phase. Our extensive experiments on real and synthetic data demonstrate the efficiency and scalability of the proposed techniques, which significantly improve the existing techniques.},
+  journal    = {Proc. VLDB Endow.},
+  month      = {aug},
+  pages      = {364–375},
+  numpages   = {12}
+}
+
+@inproceedings{han13turbo,
+  author    = {Han, Wook-Shin and Lee, Jinsoo and Lee, Jeong-Hoon},
+  title     = {Turboiso: Towards Ultrafast and Robust Subgraph Isomorphism Search in Large Graph Databases},
+  year      = {2013},
+  isbn      = {9781450320375},
+  publisher = {Association for Computing Machinery},
+  address   = {New York, NY, USA},
+  url       = {https://doi.org/10.1145/2463676.2465300},
+  doi       = {10.1145/2463676.2465300},
+  abstract  = {Given a query graph q and a data graph g, the subgraph isomorphism search finds all occurrences of q in g and is considered one of the most fundamental query types for many real applications. While this problem belongs to NP-hard, many algorithms have been proposed to solve it in a reasonable time for real datasets. However, a recent study has shown, through an extensive benchmark with various real datasets, that all existing algorithms have serious problems in their matching order selection. Furthermore, all algorithms blindly permutate all possible mappings for query vertices, often leading to useless computations. In this paper, we present an efficient and robust subgraph search solution, called TurboISO, which is turbo-charged with two novel concepts, candidate region exploration and the combine and permute strategy (in short, Comb/Perm). The candidate region exploration identifies on-the-fly candidate subgraphs (i.e, candidate regions), which contain embeddings, and computes a robust matching order for each candidate region explored. The Comb/Perm strategy exploits the novel concept of the neighborhood equivalence class (NEC). Each query vertex in the same NEC has identically matching data vertices. During subgraph isomorphism search, Comb/Perm generates only combinations for each NEC instead of permutating all possible enumerations. Thus, if a chosen combination is determined to not contribute to a complete solution, all possible permutations for that combination will be safely pruned. Extensive experiments with many real datasets show that TurboISO consistently and significantly outperforms all competitors by up to several orders of magnitude.},
+  booktitle = {Proceedings of the 2013 ACM SIGMOD International Conference on Management of Data},
+  pages     = {337–348},
+  numpages  = {12},
+  keywords  = {neighborhood equivalence class, candidate region exploration, combine and permute strategy, subgraph isomorphism},
+  location  = {New York, New York, USA},
+  series    = {SIGMOD '13}
+}
+
+@inproceedings{bi2016efficient,
+  title     = {Efficient subgraph matching by postponing cartesian products},
+  author    = {Bi, Fei and Chang, Lijun and Lin, Xuemin and Qin, Lu and Zhang, Wenjie},
+  booktitle = {Proceedings of the 2016 International Conference on Management of Data},
+  pages     = {1199--1214},
+  year      = {2016}
+}
+
+@article{lai2015scalable,
+  title     = {Scalable subgraph enumeration in mapreduce},
+  author    = {Lai, Longbin and Qin, Lu and Lin, Xuemin and Chang, Lijun},
+  journal   = {Proceedings of the VLDB Endowment},
+  volume    = {8},
+  number    = {10},
+  pages     = {974--985},
+  year      = {2015},
+  publisher = {VLDB Endowment}
+}
+
+
+@article{ammar2018distributed,
+  author     = {Ammar, Khaled and McSherry, Frank and Salihoglu, Semih and Joglekar, Manas},
+  title      = {Distributed Evaluation of Subgraph Queries Using Worst-Case Optimal Low-Memory Dataflows},
+  year       = {2018},
+  issue_date = {February 2018},
+  publisher  = {VLDB Endowment},
+  volume     = {11},
+  number     = {6},
+  issn       = {2150-8097},
+  url        = {https://doi.org/10.14778/3184470.3184473},
+  doi        = {10.14778/3184470.3184473},
+  journal    = {Proc. VLDB Endow.},
+  month      = {oct},
+  pages      = {691–704},
+  numpages   = {14}
+}
+
+@article{ngo2018worst,
+  title     = {Worst-case optimal join algorithms},
+  author    = {Ngo, Hung Q and Porat, Ely and R{\'e}, Christopher and Rudra, Atri},
+  journal   = {Journal of the ACM (JACM)},
+  volume    = {65},
+  number    = {3},
+  pages     = {1--40},
+  year      = {2018},
+  publisher = {ACM New York, NY, USA}
 }
 
 @inproceedings{protobuf,
