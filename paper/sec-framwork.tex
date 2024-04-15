@@ -90,10 +90,15 @@ where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the correspond
 
 \stitle{\joinfuserule.}
 The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
-However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential. 
-For example, if subsequent relational operations do not require any vertex properties output by \getvertex~ (e.g., no property projection or filtering), the vertex properties can be trimmed.
-In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
-Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
+However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the edge properties output by \expandedge~ are essential.
+If subsequent relational operations do not require any edge properties output by \getvertex~ (e.g., no property projection or filtering), the edge properties can be trimmed.
+In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, which can directly retrieve the neighboring vertices when the graph indices are available.
+%
+% The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
+% However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential. 
+% For example, if subsequent relational operations do not require any vertex properties output by \getvertex~ (e.g., no property projection or filtering), the vertex properties can be trimmed.
+% In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
+% Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
 \subsection{System Implementation}
 \todo{align with the converged framework}
