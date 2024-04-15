@@ -36,6 +36,7 @@ In addition to the core workflow, we further explore heuristic rules that highli
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
 \subsubsection{The Graph Optimizer}
+\label{sec:graph-optimizer}
 The graph optimizer leverages the graph-aware method for transforming the matching operator, as introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
 \stitle{\glogue~Construction.} \glogs's optimization techniques are grounded on a data structure called \glogue. Essentially, \glogue~ is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the \glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Computing $|\matching(\pattern')|$ directly on the original graph can be computationally expensive, especially for large graphs. To address this issue, \glogs proposes a sparsification technique that constructs a smaller, representative subgraph $G'$. Instead of computing $|\matching(\pattern')|$, \glogs estimates the frequency of the pattern using $|\matching_{G'}(\pattern')|$, which is computed on the smaller sparsified graph $G'$.
@@ -86,6 +87,13 @@ The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pat
 \equiv \sigma_{\Omega'} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching((\pattern, \{d_v\}))),
 \end{equation*}
 where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
+
+\stitle{\joinfuserule.}
+The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
+However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential. 
+For example, if subsequent relational operations do not require any vertex properties output by \getvertex~ (e.g., no property projection or filtering), the vertex properties can be trimmed.
+In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
+Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
 
 \comment{
