@@ -1,10 +1,9 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 # matplotlib.rcParams.update({'font.size': 22})
 
-xlabel = ['QP[1]', 'QP[2]', 'QP[3]']
+xlabel = ['QC[1]', 'QC[2]', 'QC[3]']
 
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
