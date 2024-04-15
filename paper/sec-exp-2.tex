@@ -87,7 +87,7 @@ This stark contrast accentuates \name's capability to efficiently generate optim
 
 Then we move to the comparison between \name with GrainDB. Compared with GrainDB, \name demonstrates a slightly higher optimization cost. This outcome is expected to some extent, given GrainDB's design focuses on greedy, faster optimization methods.
 Nevertheless, the quality of \name's optimized plans are usually superior. This can be observed in the execution time results, where \name outperforms GrainDB by $9.5\times$ and $2.8\times$ on average on the $G_{sf30}$ and IMDB datasets, respectively.
-For the total time cost of optimization and execution, \name still achieves $5.9\times$ and $1.6\times$ \todo{this can be updated when the opt time is updated.} speedup over GrainDB on average, on the $G_{sf30}$ and IMDB datasets, respectively.
+For the total time cost of optimization and execution, \name still achieves $6.5\times$ and $2.2\times$ speedup over GrainDB on average, on the $G_{sf30}$ and IMDB datasets, respectively.
 %This gap could be more obvious when the dataset scales up (comparing $G_{sf10}$ and $G_{sf30}$), since the optimization time cost is fixed, but a better plan will achieve more efficiency when the dataset scales up.
 These findings suggest that \name's optimization cost is justified, as it generates high-quality plans that are more efficient than those optimized by GrainDB in execution.
 To ensure a fair comparison, in the subsequent experiments, we evaluate the efficiency of different systems by considering the total time for both optimization and execution.

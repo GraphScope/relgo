@@ -5,7 +5,7 @@ queries = ['IC[1-3]', 'IC[2]', 'IC[4]', 'IC[7]']
 methods = ['RelGo', 'Calcite', 'GrainDB']
 
 compile_times = np.array([
-    [91, 15, 60, 26], # compilation time of RelGo, todo: this seems can be refined.
+    [55, 11, 55, 19], # compilation time of RelGo
     [10201, 394, 25839, 60000], # Calcite
     [1.04, 0.69, 1.61, 0.96], # GrainDB
 ])
