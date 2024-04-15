@@ -312,3 +312,5 @@ main.pdf
 algorithm.tex
 
 cover_Letter/template.pdf
+.DS_Store
+~*.pptx
