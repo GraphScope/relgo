@@ -7,9 +7,9 @@ xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
 
 
-y_wo_filter_rule = [384.76,14.24,592.85,98.52] # todo: this are fake numbers!!!
+y_wo_filter_rule = [2670.55,0,2880.29,0] 
 
-y_ours = [210.96,13.88,524.21,64.75] # todo: this are fake numbers!!!
+y_ours = [1.94,38.82,125.12,14863.88] 
 
 total_width, n = 0.6, 2
 width = total_width / n

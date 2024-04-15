@@ -2,7 +2,7 @@
 \label{sec:optimizations}
 
 This section presents \name, a converged relational/graph optimization framework designed to optimize the query
-processing of \spjm queries. We begin by introducing a naive relational-only solution built upon the graph-agnostic
+processing of \spjm queries. We begin by introducing a naive solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
 
 \todo{add a comprehensive figure to include: framework overview, naive workflow, converged workflow}
@@ -12,21 +12,21 @@ method for solving the matching operator. We then delve into the converged workf
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{./figures/framework.png}
-    \caption{Overview of the Converged Graph Relational Optimization Framwork.}
+    \caption{Overview of the Converged Graph Relational Optimization Framework.}
     \label{fig:framework-overview}
 \end{figure}
 
 
-\subsection{Relational-Only Solution}
+\subsection{Graph-Agnostic Solution}
 \label{sec:relational-only}
-The relational-only solution is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
+The graph-agnostic solution is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
 
 \begin{itemize}
 \item The plan for solving the matching operator reflects a naive method of edge-based join plan, which is not worst-case optimal~\cite{lai2019distributed,mhedhbi2019optimizing}.
 \item After the matching operator has been transformed, the relational optimizer may treat vertex and edge relations as regular relations. Consequently, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
 \end{itemize}
 
-\subsection{The Graph/Relation Converged Solution}
+\subsection{The Converged Solution}
 As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
 In addition to the core workflow, we further explore heuristic rules that highlight the non-trivial interplay between the relational and graph components in an \spjm query.
@@ -36,6 +36,7 @@ In addition to the core workflow, we further explore heuristic rules that highli
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
 \subsubsection{The Graph Optimizer}
+\label{sec:graph-optimizer}
 The graph optimizer leverages the graph-aware method for transforming the matching operator, as introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
 \stitle{\glogue~Construction.} \glogs's optimization techniques are grounded on a data structure called \glogue. Essentially, \glogue~ is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the \glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Computing $|\matching(\pattern')|$ directly on the original graph can be computationally expensive, especially for large graphs. To address this issue, \glogs proposes a sparsification technique that constructs a smaller, representative subgraph $G'$. Instead of computing $|\matching(\pattern')|$, \glogs estimates the frequency of the pattern using $|\matching_{G'}(\pattern')|$, which is computed on the smaller sparsified graph $G'$.
@@ -87,6 +88,32 @@ The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pat
 \end{equation*}
 where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
+\stitle{\joinfuserule.}
+The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
+However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential. 
+For example, if subsequent relational operations do not require any vertex properties output by \getvertex~ (e.g., no property projection or filtering), the vertex properties can be trimmed.
+In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
+Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
+
+\subsection{System Implementation}
+\todo{align with the converged framework}
+
+The \name framework is implemented as a standalone system that can be integrated with various relational databases. We built \name on top of Apache Calcite~\cite{calcite}, a popular open-source data management framework, to leverage its well-established relational query optimization capabilities. 
+
+The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
+The Metadata Provider maintains the metadata of the database, such as the schema information, the graph index information, and the statistics of the data.
+Specifically, we incorporated \glogue as a high-order statistics provider, which precomputed the small patterns with size up to $k$ (usually $k=3$) together with their cardinalities, for a more accurate cost estimation of the matching operator.
+%This pre-computation are based on the sampled subsets of vertex and edge relations from the database, which are further constructed into a sparsified graph.
+
+In the Converged Optimizer,
+we incorporated both graph optimization techniques and relational optimization techniques, to optimize the \spjm queries in a converged manner.
+We use the rule-based optimization planner named HepPlanner in Calcite, to plug in heuristic optimization rules like \filterrule and \joinfuserule. We set up each rule by specifying the conditions under which it activates and the actions it takes once those conditions are met.
+For more nuanced optimization, we employ the VolcanoPlanner, a cost-based optimization planner provided by Calcite, to optimize the match operator in a cost-based manner.
+We have crafted a top-down search algorithm that calculates the most efficient physical plan for the match operator, leveraging the cost model outlined in \refsec{graph-optimizer}. The algorithm is informed by advanced statistics obtained from the Metadata Provider, ensuring a more precise cost estimation.
+For the relational part, Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques, is leveraged to fine-tune the rest of the relational operators in the query.
+The Converged Optimizer generates its output as a unified plan formatted with Google Protocol Buffers (protobuf)\cite{protobuf}. This serialization format is both platform-independent and highly interoperable, facilitating the easy conversion of the unified plan into executable query plans tailored for the destination database system. 
+
+To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GrainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
 
 \comment{
 To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
