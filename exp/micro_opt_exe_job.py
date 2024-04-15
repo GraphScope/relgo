@@ -5,7 +5,7 @@ queries = ['JOB[1]', 'JOB[2]', 'JOB[3]', 'JOB[4]']
 methods = ['RelGo', 'GrainDB']
 
 compile_times = np.array([
-    [91, 23, 21, 17], # compilation time of RelGo, todo: this seems can be refined.
+    [19, 13, 14, 14], # compilation time of RelGo
     [1, 1, 1, 1], # GrainDB
 ])
 
