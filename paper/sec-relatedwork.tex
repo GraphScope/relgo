@@ -4,72 +4,44 @@
 %Specifically, \textit{GetVertex} is used to get the adjacent vertices of an edge, \textit{GetEdge} returns the edges from or to a given vertex, and \textit{GetNeigbor} gets the neighbors of a given vertex.
 %Based on SQL/PGQ, in relational database, these operators can be implemented by joining tables representing vertices and edges.
 %Then, it is crucial to support efficient join order optimization in the converged graph relational optimizer.
- 
-In this section, we first summarize the previous studies of query optimizations for relational databases and graph databases, respectively.
-Moreover, some relational databases (e.g., Oracle) allow users to create graph indices on relational tables.
-Then, researchers study to improve the performances of query execution with such graph indices.
-Therefore, this kind of works are also included in this section.
+
+%In this section, we survey the query optimization techniques for relational databases and graph databases, respectively.
+%Moreover, the mapping between relational data model and property graph
+%Moreover, some relational databases (e.g., Oracle) allow users to create graph indices on relational tables.
+%Then, researchers study to improve the performances of query execution with such graph indices.
+%Therefore, this kind of works are also included in this section.
 %These two types of works are also included in this section.
 
-\subsection{Query Optimization for Relational Databases}
-\label{sec:related-work:ropt}
-Join order optimization is a traditional and crucial topic for query optimization in relational databases.
-The order that joins are conducted can influence the execution time significantly and has attained substantial accomplishments.
-Various studies of query optimization for relational databases have been proposed to find the optimal join order.
-Ibaraki et al.~\cite{nested-tods-1984} propose that there are usually fewer than ten tables involved in a typical query, and deal with joins with nested-loops join.
-Specifically, they prove the NP-complexity of the join order optimization problem, and design an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
-Then, Krishnamurthy et al.~\cite{optimize-nested-vldb-1986} optimize the algorithm, and propose an algorithm with time complexity of $O(N^2)$ by reusing the computation results.
-Besides, the authors emphasize that since finding the optimal join order is a complex problem, it is more important to avoid the worst plan.
-Moreover, Haffner et al.~\cite{astarjoin} convert the problem of join order optimization to that of finding the shortest path on directed graphs, and solve the problem with the A* algorithm.
-In detail, four heuristics are designed to estimate the remaining cost.
-Furthermore, Kossmann et al.~\cite{data-dependency-join} summarize the methods to optimize queries with data dependencies.
-For example, given two tables $T_1$ and $T_2$, if the values of attribute $A_1$ on $T_1$ are unique, then the inner-join in queries like 
+\stitle{Query Optimization for Relational Databases.} Join order optimization was a traditional and crucial topic for query optimization in relational databases. The order in which joins were conducted could influence the execution time significantly and had attained substantial accomplishments. Various studies of query optimization for relational databases were proposed to find the optimal join order. Ibaraki et al.\cite{nested-tods-1984} proposed that there were usually fewer than ten tables involved in a typical query, and dealt with joins using nested-loops join. Specifically, they proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries. Then, Krishnamurthy et al.\cite{optimize-nested-vldb-1986} optimized the algorithm and proposed an algorithm with a time complexity of $O(N^2)$ by reusing the computation results. Besides, the authors emphasized that since finding the optimal join order was a complex problem, it was more important to avoid the worst plan. Moreover, Haffner et al.\cite{astarjoin} converted the problem of join order optimization to that of finding the shortest path on directed graphs and solved the problem with the A* algorithm. In detail, four heuristics were designed to estimate the remaining cost. Furthermore, Kossmann et al.\cite{data-dependency-join} summarized the methods to optimize queries with data dependencies, such as uniqueness constraints, foreign key constraints, and inclusion dependencies.
+\comment{
+For example, given two tables $T_1$ and $T_2$, if the values of attribute $A_1$ on $T_1$ are unique, then the inner-join in queries like
 \begin{lstlisting}
     SELECT T2.A2 FROM T1, T2
     WHERE T1.A1 = T2.A2;
 \end{lstlisting}
 may be converted into a semi-join, which is more efficient.
+}
 
 
-Some other studies find better plans by estimating cardinalities more accurately.
-A typical method is to estimate the number of cardinalities with sampling \cite{index-based-join-sampling,ripple-join,wanderjoin,index-based-join-sampling}.
-Specifically, Li et al.~\cite{wanderjoin} present an unbiased estimator based on random walk to estimate the cardinalities.
-Leis et al.~\cite{index-based-join-sampling} propose a cheap method, i.e., index-based join sampling, to improve the accuracy.
-Some researchers \cite{selinger,postgres-row-estimation} estimate the number of cardinalities by computing the selectivity of $A \bowtie_{A.col_1 = B.col_2} B$ as 
+Several studies have focused on improving cardinality estimation for cost computation, enabling cost-based optimizers to search for execution plans with potentially lower costs. A common approach is to estimate cardinality through sampling \cite{index-based-join-sampling,ripple-join,wanderjoin,index-based-join-sampling}. For instance, Li et al.\cite{wanderjoin} present an unbiased estimator based on random walks to estimate cardinalities. Leis et al.\cite{index-based-join-sampling} propose a computationally inexpensive method called index-based join sampling to improve accuracy. Other studies estimate cardinalities using histograms \cite{histogram,postgres-row-estimation}. These methods divide the values of a table column into several buckets to build a histogram and assume that the values are uniformly distributed within each bucket. The cardinality is then estimated by summing the number of values in the relevant buckets. Additionally, learning-based methods have been explored for cardinality estimation \cite{learning-based-estimation-1,learning-based-estimation-2,learning-based-estimation-3,learning-based-estimation-4}.
+
+All relational optimizations can be orthogonally adopted in \name's relational optimizer.
+\comment{
+Some researchers \cite{selinger,postgres-row-estimation} estimate the number of cardinalities by computing the selectivity of $A \bowtie_{A.col_1 = B.col_2} B$ as
 \begin{equation*}
     \frac{1}{max(DV(A.col_1), DV(B.col_2))},
 \end{equation*}
 where $DV(A.col_1)$ is the number of distinct values of $A.col_1$ in table $A$.
-Besides, some studies estimate the number of cardinalities with histograms \cite{histogram,postgres-row-estimation}.
-These methods split the values of a table column into several buckets to build a histogram, and assume that the values are uniformly distributed in each bucket.
-Then, the cardinality is estimated by summing up the numbers of values in the related buckets.
-Moreover, there are also studies estimating cardinalities with learning-based methods \cite{learning-based-estimation-1,learning-based-estimation-2,learning-based-estimation-3,learning-based-estimation-4}.
+}
 
 
-\subsection{Query Optimization for Graph Databases}
-\label{sec:related-work:gopt}
-Subgraph matching is a common and important query in graph databases.
-Given a pattern graph, subgraph matching query is to find subgraphs of the data graph that is isomorphic/homomorphic to the pattern graph.
-In this process, good orders of matching nodes and edges are essential for efficiently executing the queries.
-Please note that when relational tables are considered to represent nodes and edges in graphs, finding a good order of matching nodes and edges is akin to find an efficient join order.
-Therefore, the optimization methods in graph databases are instructive for relational databases.
+\stitle{Query Optimization for Graph Databases.} Graph pattern matching is a fundamental problem in graph query processing and has been widely studied~\cite{angles2017foundations}. In sequential settings, Ullmann's traversal-based backtracking algorithm~\cite{ullmann1976algorithm} paved the way for various optimizations, such as tree indexing\cite{shang2008quicksi}, symmetry breaking~\cite{han13turbo}, and compression techniques~\cite{bi2016efficient}. However, due to the difficulties in parallelizing backtracking algorithms, join-based algorithms have been developed in distributed environments. These algorithms rely on cost estimation to optimize join order for efficient pattern matching. Binary-join algorithms\cite{lai2015scalable, lai2019distributed} estimate costs using random graph models, while worst-case-optimal join algorithms~\cite{ammar2018distributed} ensure that the cost remains within a worst-case upper bound. Hybrid approaches~\cite{mhedhbi2019optimizing, huge} have been proposed to adaptively select between binary and worst-case optimal join techniques based on which method incurs lower costs in a given situation. Recent studies have focused on enhancing cost estimation in graph pattern matching to achieve better matching orders and execution plans. These include C-Set \cite{cset} that decomposes the query and data graphs into star-shaped subgraphs and AutoMine \cite{AutoMine} that estimates costs based on the number of iterations in nested loops. Some optimizers, such as GLogS~\cite{GLogS}, search for the optimal plan by representing edges as binary joins or subtasks of extensions and computing the optimal plan in a bottom-up manner to obtain a worst-case optimal plan efficiently. Additionally, researchers in~\cite{gcare} have compared the performance of different cardinality estimation methods for graph pattern matching.
 
-Recently, some studies have been conducted to estimate cardinalities in the process of subgraph matching for a better matching order, and therefore, a better execution plan.
-In detail, 
-C-Set \cite{cset} decomposes the query graph and the data graph into star-shaped subgraphs, and constructs characteristic sets to estimate.
-AutoMine \cite{AutoMine} proposes to estimate the cost of a plan for subgraph matching with the number of iterations in the nested loop.
-DecoMine \cite{DecoMine} improves the method of AutoMine and presents an approximate-mining based cost model to estimate the costs of nested loops.
-Then, DecoMine finds the optimal abstract syntex tree with the smallest cost.
-GLogS \cite{GLogS} proposes a graph optimizer named GLogue to search for the optimal plan.
-In GLogue, an edge can represent a binary join or a subtask of an extension, and please note that an extension can be regarded as a set of joins.
-GLogue computes the optimal plan in a bottom-up manner, and can efficiently obtain a worst-case optimal plan.
-Besides, G-CARE \cite{gcare} compares the performances of different methods for cardinality estimation.
+We adopt join-based methods similar to those in~\cite{huge,GLogS} due to their compatibility with the relational context for which \name~ is designed. However, to ensure seamless integration with the relational environment, we need to make adaptations to these methods accordingly.
 
-\subsection{Query Optimization for Relational Databases with Graph Indices}
-\label{sec:related-work:ropt-gopt}
-Recently, researchers have attempted to incorporate the advantages of graph processing into query optimization for relational databases.
-The core issue of their studies lies in building graph indices on relational databases, which is similar to the idea of SQL/PGQ.
-In this subsection, we summarize these studies. 
+
+\stitle{Bridging Relational and Graph Models.} Due to the semantic equivalence between relational and graph models, there is a growing interest in the interaction between these two data models. GRFusion \cite{GRFusion} builds an in-memory graph view based on relational tables and supports queries on both tables and graph views. This allows some relational joins to be replaced with graph traversals, enabling the application of graph-level optimizations. GQ-Fast \cite{gqfast}, designed to work with traditional relational databases, focuses on relationship queries. It builds indices with lookup data structures to accelerate query processing. Given a SQL query, GQ-Fast generates physical plans by transforming relationship query normalized algebra expressions using a Physical-plan Producer, and further optimizations for the plans are necessary. GrainDB \cite{graindb} constructs RID indices and introduces two new join methods (i.e., sip-join and merged-sip-join) that utilize these indices to efficiently retrieve adjacent edges, one-hop neighbors of vertices, and adjacent vertices of edges. These techniques contribute to graph index construction, which can be leveraged by \relgo to compute execution plans involving efficient graph-related physical operations, such as retrieving neighbors from a given vertex. In the work of Gart~\cite{gart}, the authors develop ETL tools to convert and import relational data into a graph store, upon which any graph processing system can be plugged in for efficient graph analysis. However, this method incurs the overhead of data conversion and import, and the consistency between the relational and graph data cannot be guaranteed.
+
 
 
 %In terms of translation-based methods, Apache/Age \cite{apache-age} is a typical work.
@@ -80,13 +52,5 @@ In this subsection, we summarize these studies.
 %It seems that Apache/Age is more like a syntactic sugar, and the advantanges of graphs and graph optimizers are not utilized.
 
 %In terms of index-based methods, these methods build graph indices on relational databases, and attempt to accelerate queries with the indices.
-Specifically, GRFusion \cite{GRFusion} builds a graph view in main-memory based on the relational tables, and supports queries on both tables and graph views.
-Then, some relational joins can be replaced with graph traversals, and some graph-level optimizations can be applied.
-GQ-Fast \cite{gqfast} is proposed to deal with relationship queries, and works accompanying with traditional relational databases.
-In GQ-Fast, indices with lookup data structure are built to accelerate.
-Given a SQL query, GQ-Fast generates physical plans by transforming relationship query normalized algebra expressions with a Physical-plan Producer, and more optimizations for the plans are necessary.
-GrainDB \cite{graindb} builds RID indices, and presents two new join methods (i.e., sip-join and merged-sip-join) that utilize the RID indices to get the adjacent edges and one-hop neighbors of vertices and adjacent vertices of edges efficiently. 
-Based on these join methods, in some settings, the cost of multiple join can be reduced significantly.
-However, GrainDB inherits the optimizer of DuckDB, and replaces some hash joins with sip-joins and merged-sip-joins directly after the phyical plan is generated.
-After such replacement, the cost of the obtained plan is actually unknown.
-Therefore, the obtained plan is likely to be suboptimal and the best plan can be missed.
+
+
