@@ -108,24 +108,41 @@ In this case, the \expandedge~ can be fused with the \getvertex~ to form a singl
 % Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
 \subsection{System Implementation}
-\todo{align with the converged framework}
+We engineered the frontend of \name in Java and built it upon Apache Calcite, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.
+%The frontend of \name is responsible for parsing the input \spjm query, constructing the logical plan, and invoking the graph and relational optimizers to generate the optimal physical plan. 
+\todo{mention parser or not?}
+Firstly, we enhanced Calcite's SQL parser to recognize SQL/PGQ extensions, specifically to parse the \lstinline{GRAPH_TABLE} clause. 
+We created a new \lstinline{ScanGraphTableRelNode} that inherits from Calcite's core \lstinline{RelNode} class, translating the \lstinline{GRAPH_TABLE} clause into this newly defined operator within the logical plan.
+Following the formation of the logical plan, the frontend invokes the converged optimizer to generate the optimal physical plan.
+For the relational-graph interplay optimizations, we incorporate heuristic rules such as \filterrule and \joinfuserule into Calcite's rule-based HepPlanner, by specifying the activation conditions and consequent transformations of each rule.
+For more nuanced optimization, we rely on the VolcanoPlanner, the cost-based planner in Calcite, to optimize the \lstinline{ScanGraphTableRelNode}.
+We devised a top-down search algorithm that assesses the most efficient physical plan based on a cost model outlined in \refsec{graph-optimizer}, combined with high-order statistics from \glogue for more accurate cost estimation.
+For the remaining relational operators in the query, we leverage Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques.
+Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
 
-The \name framework is implemented as a standalone system that can be integrated with various relational databases. We built \name on top of Apache Calcite~\cite{calcite}, a popular open-source data management framework, to leverage its well-established relational query optimization capabilities. 
+We have developed the backend of the \name framework using C++, on top of DuckDB as the underlying relational execution engine, to demonstrate the optimization capabilities that \name can bring.
+We integrated graph index support, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations, leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
+Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
+However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
+To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB-compatible executable operators.
+For instance, the \expand operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
+Moreover, for the \intersect operator, we crafted a new worst-case-optimal join implementation, which is expected to outperform DuckDB's multiple join implementation, which do not guarantee worst-case optimality.
+This runtime module essentially bridges the gap between the optimized plans produced by the \name framework and DuckDB's execution engine, thereby validating \name's practicality and its potential to improve the performance of \spjm queries on an established relational database system.
 
-The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
-The Metadata Provider maintains the metadata of the database, such as the schema information, the graph index information, and the statistics of the data.
-Specifically, we incorporated \glogue as a high-order statistics provider, which precomputed the small patterns with size up to $k$ (usually $k=3$) together with their cardinalities, for a more accurate cost estimation of the matching operator.
+% The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
+% The Metadata Provider maintains the metadata of the database, such as the schema information, the graph index information, and the statistics of the data.
+% Specifically, we incorporated \glogue as a high-order statistics provider, which precomputed the small patterns with size up to $k$ (usually $k=3$) together with their cardinalities, for a more accurate cost estimation of the matching operator.
 %This pre-computation are based on the sampled subsets of vertex and edge relations from the database, which are further constructed into a sparsified graph.
 
-In the Converged Optimizer,
-we incorporated both graph optimization techniques and relational optimization techniques, to optimize the \spjm queries in a converged manner.
-We use the rule-based optimization planner named HepPlanner in Calcite, to plug in heuristic optimization rules like \filterrule and \joinfuserule. We set up each rule by specifying the conditions under which it activates and the actions it takes once those conditions are met.
-For more nuanced optimization, we employ the VolcanoPlanner, a cost-based optimization planner provided by Calcite, to optimize the match operator in a cost-based manner.
-We have crafted a top-down search algorithm that calculates the most efficient physical plan for the match operator, leveraging the cost model outlined in \refsec{graph-optimizer}. The algorithm is informed by advanced statistics obtained from the Metadata Provider, ensuring a more precise cost estimation.
-For the relational part, Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques, is leveraged to fine-tune the rest of the relational operators in the query.
-The Converged Optimizer generates its output as a unified plan formatted with Google Protocol Buffers (protobuf)\cite{protobuf}. This serialization format is both platform-independent and highly interoperable, facilitating the easy conversion of the unified plan into executable query plans tailored for the destination database system. 
+% In the Converged Optimizer,
+% we incorporated both graph optimization techniques and relational optimization techniques, to optimize the \spjm queries in a converged manner.
+% We use the rule-based optimization planner named HepPlanner in Calcite, to plug in heuristic optimization rules like \filterrule and \joinfuserule. We set up each rule by specifying the conditions under which it activates and the actions it takes once those conditions are met.
+% For more nuanced optimization, we employ the VolcanoPlanner, a cost-based optimization planner provided by Calcite, to optimize the match operator in a cost-based manner.
+% We have crafted a top-down search algorithm that calculates the most efficient physical plan for the match operator, leveraging the cost model outlined in \refsec{graph-optimizer}. The algorithm is informed by advanced statistics obtained from the Metadata Provider, ensuring a more precise cost estimation.
+% For the relational part, Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques, is leveraged to fine-tune the rest of the relational operators in the query.
+% The Converged Optimizer generates its output as a unified plan formatted with Google Protocol Buffers (protobuf)\cite{protobuf}. This serialization format is both platform-independent and highly interoperable, facilitating the easy conversion of the unified plan into executable query plans tailored for the destination database system. 
 
-To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GrainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
+%To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GrainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
 
 \comment{
 To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.
