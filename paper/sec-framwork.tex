@@ -125,8 +125,8 @@ We integrated graph index support, by building graph indices for predefined join
 Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
 However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
 To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB-compatible executable operators.
-For instance, the \expand operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
-Moreover, for the \intersect operator, we crafted a new worst-case-optimal join implementation, which is expected to outperform DuckDB's multiple join implementation, which do not guarantee worst-case optimality.
+For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
+Moreover, for the \intersect~ operator, we crafted a new worst-case-optimal join implementation, which achieves better performance compared to the traditional multiple join that is not worst-case optimal in DuckDB.
 This runtime module essentially bridges the gap between the optimized plans produced by the \name framework and DuckDB's execution engine, thereby validating \name's practicality and its potential to improve the performance of \spjm queries on an established relational database system.
 
 % The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
