@@ -1,9 +1,9 @@
 
 \section{Optimizing Matching Operator}
-In this section, we focus specifically on handling the matching operator, which plays a distinct role
-within the \spjm queries compared to the \spj queries. We discuss two main perspectives of optimizing
+In this section, we focus specifically on handling the matching operator (more precisely, the graph component),
+which plays a distinct role within the \spjm queries compared to the \spj queries. We discuss two main perspectives of optimizing
 the matching operator: logical transformation and physical implementation. Logical transformation is
-responsible for transforming a matching operator into a logically equivalent representation for further solving,
+responsible for transforming a matching operator into a logically equivalent representation,
 while physical implementation focuses on how the matching operator can be efficiently executed.
 
 \subsection{Logical Transformation}
@@ -31,10 +31,17 @@ It is important to note that \refeq{join-pattern} is also applicable to alternat
 
 \subsubsection{Graph-agnostic Method}
 \label{sec:intuitive-method}
-Graph-agnostic methods~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB} simply recast graph match operations
-as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers.
+If the matching operator can be transformed into purely relational operations, the \spjm query becomes a
+standard \spj query, which can then be optimized using existing relational optimizers (\refsec{relational-only}). This graph-agnostic
+approach is intuitive and easy to implement on top of existing relational databases, making it a straightforward
+choice in prototyped systems~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB}. However, there is no theoretical guarantee that
+such a transformation is lossless in the context of \rgmapping (\refdef{rgmapping}). In this subsection,
+we aim to bridge this gap by demonstrating the lossless transformation of the matching
+operator under \rgmapping.
+%Graph-agnostic methods~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB} simply recast graph match operations
+%as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers.
 
-Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. According to the definition of the matching operator (\refsec{matching-operator}), the graph edges and vertices that can be matched with $e$ must have the labels $\lab(e)$, $\lab(u_s)$, and $\lab(u_t)$. We further denote the relations corresponding to these edges and vertices via \rgmapping as $R_{\lab(e)}$, $R_{\lab(u_s)}$, and $R_{\lab(u_t)}$, respectively. Moreover, there must be total functions $\lambda_{\lab(e)}^s$ and $\lambda_{\lab(e)}^t$ for mapping tuples from $R_{\lab(e)}$ to $R_{\lab(u_s)}$ and $R_{\lab(u_t)}$, respectively. We define the following \EVjoin operation regarding $\lambda_{\lab(e)}^s$ as:
+Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. According to the definition of the matching operator (\refsec{matching-operator}), the graph edges and vertices that can be matched with $e$ must have the labels $\lab(e)$, $\lab(u_s)$, and $\lab(u_t)$. We further denote the relations corresponding to these edges and vertices via \rgmapping as $R_{\lab(e)}$, $R_{\lab(u_s)}$, and $R_{\lab(u_t)}$, respectively. Moreover, there must be total functions $\lambda_{\lab(e)}^s$ and $\lambda_{\lab(e)}^t$ for mapping tuples from $R_{\lab(e)}$ to $R_{\lab(u_s)}$ and $R_{\lab(u_t)}$, respectively. We define the following \EVjoin relational operation regarding $\lambda_{\lab(e)}^s$ as:
 
 \begin{equation} \label{eq:ev-join}
 \begin{split}
@@ -43,20 +50,21 @@ R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \{(\tau_e, \tau_s) \;|\; \\
 \end{split}
 \end{equation}
 
-The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Note that the \EVjoin is associative, meaning that the order of the edge and vertex relations is not important.
+The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although called \EVjoin, the operation is associative like any relation join, meaning that the order in which the edge and vertex relations are joined does not affect the final result.
 
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
-The following lemma shows that there exists a logically equivalent transformation from a matching operator to an \spj query.
+%The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
+We have the following lemma.
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
-    With \rgmapping, a matching operator can be losslessly converted to an \spj query.
+    Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational join operations.
 \end{lemma}
 \begin{proof}
-    It suffices to convert the matching operator into a sequence of relational operators. Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
+    Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
-The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
+The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $\lab(u_0)$, which is mapped from the relation $\relation{\lab(u_0)}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
 
 Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching $\pattern_1$ is equivalent to retrieving the edge relation, together with the corresponding source and target vertices. Therefore, we have:
 \[ R_1 = \gproject(M(\pattern_1)) = \relation{\lab(u_{s_1})} \evjoin \relation{\lab(e_1)} \evjoin \relation{\lab(u_{t_1})} \]
@@ -67,11 +75,11 @@ where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and 
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
-    &= \gproject(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \gproject(\matching(\pattern_{k-1})) \\
+    &= \widehat{\pi}_{A_1*}(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \widehat{\pi}_{A_2*}(\matching(\pattern_{k-1})) \\
     &= \relation{\lab(u_{s_k})} \evjoin \relation{\lab(e_k)} \evjoin \relation{\lab(u_{t_k})} \Join_{attr_{V_o}} R_{k-1}
 \end{split}
 \end{equation*}
-By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e_i)} \evjoin \relation{\lab(u_{t_i})}$, we have the matching operator losslessly converted to a sequence of relational operators:
+By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e_i)} \evjoin \relation{\lab(u_{t_i})}$, we have the matching operator losslessly converted to a sequence of relational join operations:
 \begin{equation}
     \label{eq:graph-agnostic}
     \gproject(\matching(\pattern_{k})) = R'_k \Join R'_{k-1} \Join \cdots \Join R'_1 \Join R_0.
@@ -81,10 +89,11 @@ We thus conclude the proof.
 \end{proof}
 
 
-Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins corresponding to the number of vertices and edges in the pattern graph, as illustrated in the following example.
+Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins involving $n$ vertex tables and
+$m$ edge tables, as illustrated in the following example.
 
 \begin{example}
-  Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operator $\matching(\pattern)$ can be converted to a sequence of relational operators as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
+  Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
   Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, u_{p_1})$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
   \begin{equation*}
     \begin{split}
@@ -101,15 +110,16 @@ Given that edges may connect to common vertices, it's obvious that there are som
 
 \subsubsection{Graph-aware Method}
 \label{sec:graph-aware}
-The graph-agnostic method, which converts the matching operator into a sequence of relational operators, is straightforward and easy to implement. However, it may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations, preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
+The graph-agnostic method may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations, preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
 
-In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is an \emph{induced} sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
-The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to indivisible patterns directly solvable with specific physical operations
-as will be introduced in~\refsec{xx}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
+We introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is a sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
+The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to nondivisible patterns directly solvable with specific physical operations
+as will be introduced in~\refsec{physical-operators}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
-\todo{add single-vertex pattern as an MMC.}
-We follow~\cite{huge} to use a single-edge pattern as well as a \emph{complete star} as an \mmc. We denote a star-shaped pattern as $\pattern(u;S)$, where $u$ denotes the root vertex of the star and $S$ is the set of leaf vertices\footnote{The edge directions among $u$ and $S$ are not important, and we assume they  all point from $u$ to $S$.}.
-In the decomposition tree, given $\pattern' = \pattern'' \cup \pattern(u;S)$, $\pattern(u;S)$ is called a complete star if and only if it is a right child and $S \subseteq V_{\pattern'}$, indicating that the leaf vertices of the complete star must all be common vertices for the decomposition. The complete star is a logical representation of the physical operations of \expand~and \intersect, which are key to the implementation worst-case optimal join algorithm~\cite{mhedhbi2019optimizing} for graph pattern matching, as will be discussed in \refsec{xx}.
+Following state-of-the-art graph optimizers~\cite{huge,GLogS}, to guarantee a \emph{worst-case optimal} execution plan~\cite{ngo2018worst}, all intermediate sub-patterns in the decomposition tree must be induced subgraphs of $\pattern$. Furthermore, \mmc is restricted to be a single-vertex pattern and a \emph{complete star}. A star-shaped pattern is denoted as $\pattern(u;V_s)$, where $u$ is the root vertex and $V_s$ is the set of leaf vertices\footnote{Edge directions between $u$ and $V_s$ are not important, and we assume they all point from $u$ to $V_s$.}. In the decomposition tree, given $\pattern' = \pattern'' \cup \pattern(u;V_s)$, $\pattern(u;V_s)$ is a complete star if and only if it is a right child and $V_s \subseteq V_{\pattern'}$, meaning that the leaf vertices of the complete star must all be common vertices for the decomposition. A single-edge pattern is a special case of a complete star. The complete star logically represents the physical operations of \expandintersect, which will be discussed in \refsec{physical-operators}. As shown in \reffig{match-decomposition}, a single-edge pattern, such as $\pattern_3$, is further decomposed into a single-vertex pattern and the pattern itself, allowing the optimizer to select from which vertex the edge can be expanded.
+
+
+%The complete star is a logical representation of the physical operations of \expand~and \intersect, which are key to the implementation worst-case optimal join algorithm~\cite{mhedhbi2019optimizing} for graph pattern matching, as will be discussed in \refsec{xx}.
 
 \comment{
 Therefore, decomposing the matching operators recursively can finally result in a tree, whose leaf nodes are MMCs.
@@ -132,6 +142,7 @@ Besides, a matching operator located on the left subtree of the join operator is
     \label{fig:match-decomposition}
 \end{figure}
 
+\comment{
 \begin{example}
     \todo{the sample and figure must all be refined.}
     \modify{
@@ -140,22 +151,25 @@ Besides, a matching operator located on the left subtree of the join operator is
     Please note that $\pattern_{2,1}$ is not an \mmc, because it is not the right child of $\pattern_{0}$.
     }
 \end{example}
+}
 
-Upon initial examination, the logical plan generated by the decomposition tree, particularly when all the \mmcs are single-edge patterns,
-may appear similar to the graph-agnostic method presented in \refsec{intuitive-method}. However, an essential distinction lies in the fact that the graph-agnostic method consistently decomposes the matching of a single-edge pattern into joins of the corresponding vertex and edge relations, whereas the graph-aware method does not. The issues with the graph-agnostic method are towfold. Firstly, it can lead to increased complexity in query optimization, as will be discussed in the subsequent section. Secondly, it may result in the relational optimizer altering the order of joining vertex and edge relations, thereby overlooking the opportunity to utilize graph indexes for the efficient computation of adjacent edges and vertices, as will be further elaborated upon in \refsec{graph-index}.
+\begin{remark}
+    \label{re:graph-agnostic-vs-graph-aware}
+    The graph-aware method is fundamentally different from its graph-agnostic counterpart. While the graph-agnostic approach consistently converts pattern matching operations into relational joins between vertex and edge relations, the graph-aware method does not, due to the constraints imposed by pattern decomposition. While the graph-agnostic approach is straightforward, it has the following drawbacks:
+    \begin{itemize}
+    \item \textbf{Poor Join Order}: It may cause the relational optimizer to change the order of joining vertex and edge relations, potentially missing opportunities to leverage graph indexes for the efficient computation of adjacent edges and vertices, as will be further discussed in \refsec{graph-index}.
+    \item \textbf{Suboptimal Join Plans}: It generates plans that consistently reflect edge-based join plans that have been shown to be suboptimal in terms of worst-case performance~\cite{lai2015scalable}.
+    \item \textbf{Increased Search Space}: Compared to the graph-aware method, it can lead to an exponentially larger search space when computing optimal plans, which will be elaborated upon in the following subsection.
+    \end{itemize}
+\end{remark}
 
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
+We demonstrate the superiority of the graph-aware method by theoretically proving that the search space employed by the graph-aware method is exponentially smaller than that of the graph-agnostic method for optimizing the matching operator.
 
-In this section, we demonstrate the superiority of the graph-aware method by theoretically proving that the search space employed by the graph-aware method is significantly smaller than that of the graph-agnostic method for optimizing the matching operator in an \spjm query.
-Consider a pattern $\pattern$ consisting of $n$ vertices and $m$ edges.
+For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia}, which is the most widely used relational optimizer. We chose not to use more advanced state-of-the-art optimizers, such as~\cite{Haffnerjoinorder}, because they often employ heuristics that would complicate the analysis. Moreover, our primary goal is to compare the search space sizes of the graph-agnostic and graph-aware methods, rather than evaluating the efficiency of the optimizers themselves.
 
-For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia} for the graph-agnostic method, which is one of the most widely utilized relational optimizer.
-The original paper introducing the volcano optimizer~\cite{columbia} provided only an upper bound for the search space.
-In this work, we contribute to the analysis by deriving a lower bound and comparing it to the upper bound of the graph-aware method, thereby enhancing the constructiveness of the comparison. Although there may exist other relational optimizers~\cite{xx} that exhibit greater efficiency in terms of search space, our study remains sound within a generic context.
-
-For matching the pattern, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, and then utilize a volcano optimizer to search for the optimal join order. We have the following theorem.
-
+According to \reflem{graph-agnostic}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. We have the following theorem.
 
 \begin{theorem}
     \label{thm:complexity-of-volcano}
@@ -163,17 +177,16 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
 \end{theorem}
 
 \begin{proof}
-    \todo{refine the proof.}
-    To obtain the search space, we first estimate the number of possible join orders, and each join order is a logical plan of join operators.
+    We first estimate the number of possible join orders, and each join order is a logical plan of join operators.
     Then, the search space refers to the number of physical plans corresponding to these logical plans.
     To avoid cross production, for each explored logical plan, everytime two relations are joined together, there should be join conditions between them.
 
-    \modify{Given $n + m$ relations, we first construct a graph $G_R = (V_{G_R}, E_{G_R})$, where each relation corresponds to a vertex in $V_{G_R}$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E_{G_R}$.
-    Then, each possible logical plan forms a spanning tree in $G_R$, and different logical plans may form the same tree.
-    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $G_R$.}
+    \modify{Given $n + m$ relations, we first construct a graph $\mathbb{G} = (V, E)$, where each relation corresponds to a vertex in $V$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E$.
+    Then, each possible logical plan forms a spanning tree in $\mathbb{G}$, and different logical plans may form the same tree.
+    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\mathbb{G}$.}
 
-    We consider the case that there is only one spanning tree $ST$ in $G_{R}$ with $k$ edges.
-    When there are more than one spanning trees in $G_R$, only the number of logical plans corresponding to one of these trees is computed.
+    We consider the case that there is only one spanning tree $ST$ in $\mathbb{G}$ with $k$ edges.
+    When there are more than one spanning trees in $\mathbb{G}$, only the number of logical plans corresponding to one of these trees is computed.
     It is obvious that the obtained number is a lower bound of the total number of possible logical plans.
 
     We start from the condition where $ST$ is a path.
@@ -188,8 +201,10 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
     With the generating function, it is obtained that
     \begin{equation*}
         \begin{split}
-            c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
-            & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
+            c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
+            % C(2k, k)
+            % c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
+            % & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
         \end{split}
     \end{equation*}
 
@@ -212,10 +227,6 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
         \end{split}
     \end{equation*}
 
-    %Thus, the number of logical plans w.r.t.~a spanning tree is
-    %\begin{equation*}ƒ
-    %    \frac{2^{m+n-1}}{m+n}C(2m+2n-2, m+n-1) \geq \frac{4^{m+n-1}}{m+n}.
-    %\end{equation*}
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of the edges in the spanning tree should be $k = m + n - 1$.
     Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
@@ -239,16 +250,16 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     \todo{refine the proof.}
     Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\emptyset}$ in $\searchgraph_\pattern(V, E)$.
     Therefore, the search space equals the number of paths from $\pattern$ to $\pattern_{\emptyset}$.
-        
+
     Denote the maximum number of paths from a sub-pattern with $s$ vertices (i.e., $\pattern_s \in V_s$) to $\pattern_{\emptyset}$ by $\decompnum_\pattern(s)$.
     Please note that $\decompnum_\pattern(1) = 1$ and $\decompnum_\pattern(n)$ is an upper bound of the search space for determining the optimal decomposition tree for $\pattern$.
     Then, we have the following inequality:
     \begin{equation*}
         \decompnum_{\pattern}(n) \leq \binom{n}{1}\decompnum_{\pattern}(n-1)\decompnum_{\pattern}(1) + \cdots + \binom{n}{n-1}\decompnum_{\pattern}(1)\decompnum_{\pattern}(n-1).
     \end{equation*}
-    
+
     It is clear that $\decompnum_\pattern(i) \geq \decompnum_\pattern(j)$ if $i > j$.
-    Therefore, we have 
+    Therefore, we have
     \begin{equation*}
         \decompnum_{\pattern}(n) \leq \decompnumsq{2}_\pattern(n-1)(\binom{n}{1} + \cdots + \binom{n}{n-1}) < \decompnumsq{2}_\pattern(n-1)2^{n}
     \end{equation*}
@@ -271,7 +282,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
         \todo{refine the proof.}
         Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\empty}$ in $\searchgraph_\pattern(V, E)$.
         According to Dijkstra's algorithm, the time complexity of the shortest path query problem is $O(|E|)$.
-    
+
         As the number of edges from patterns in $V_i$ is at most
         \begin{equation*}
             \sum\limits_{\pattern_i}(2^i - 2) = \binom{n}{i}(2^i - 2),
@@ -284,7 +295,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
                  = 3^n.
             \end{split}
         \end{equation*}
-    
+
         Therefore, the time complexity is at most $O(3^n)$.
         We thus conclude the proof.
     \end{proof}
@@ -301,6 +312,21 @@ Based on \refthm{complexity-of-volcano} and \refthm{complexity-of-graph-aware}, 
         \frac{o(4^{m+n-1})}{O(4^{n-1})} = o(4^m).
     \end{equation*}
 \end{proof}
+
+\comment{In practical implementation, efficient pruning strategies can be employed to trim the search space. 
+We conducted experiments on Linked Data Benchmark Council (LDBC) social network benchmark \cite{ldbc_snb} with using the dataset with scale factor of 30.
+The utilized queries are those in \cite{graindb}. 
+In the experiments, Calcite was used as a typical volcano optimizer, while our \name employed the Graph-aware method. 
+The experimental results of optimizing queries using Calcite and \name are shown in \reffig{exp-optimization-sf30}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\linewidth]{./figures/exp/optimization_sf30.pdf}
+    \caption{Comparison of the optimization time.}
+    \label{fig:exp-optimization-sf30}
+\end{figure}
+
+The experimental results show that the optimization time of Calcite is exponentially longer than that of \name. Additionally, it is worth paying attention to the results of three queries: IC1-1, IC1-2, and IC1-3. IC1-2 is obtained by adding a node and an edge to the pattern graph of IC1-1, while IC1-3 is derived by adding a node and an edge to IC1-2. It can be observed that as the number of nodes and edges increases, the time cost for Calcite also grows exponentially, which is consistent with the \refthm{complexity-of-volcano}. In this case, the optimization time for RelGO does not show significant change with the increase of nodes and edges. This is because RelGO implements an efficient pruning strategy in its execution, further reducing the optimization complexity to be linearly related to the number of edges in $\searchgraph_\pattern$.}
 
 \iffalse
 the complexity analysis in Theorem \ref{theorem:complexity-of-calcite} and Theorem \ref{theorem:complexity-of-glogue}, it is found that when there is only a matching operator,
@@ -529,7 +555,10 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 
 With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
 When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
-However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
+However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. 
+\modify{In \refsec{experiment-opt}, we demonstrated through experiments that using this index can be about twice as fast compared to not using the index.}
+Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
+\modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
 
 \subsubsection{The Graph-Aware Execution Plan}
 \label{sec:join-matching-operator}
@@ -543,7 +572,6 @@ The plan is then constructed in a bottom-up manner. As shown in \reffig{match-de
 be projected into relational tuples until the last stage that obtain the results $\matching(\pattern)$.
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
-\todo{why can't $u_t$ be in $\pattern'_l$}
 
 When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$, 
 where the first join is to obtain the edge tuples that connect $u_s$, which are encoded into edge objects, 
@@ -560,7 +588,6 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 \stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{S, E_S} \matching(\pattern(u;S))$}, where $\pattern(u;S = [u_1, \ldots, u_k])$ is a complete $k$-star pattern. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;S)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $S = [u_1, \ldots, u_k]$.
 
 When there is no graph index, solving Case III involves continuously joining $|S|$ single-edge patterns.
-\todo{why reduce to Case II ?}
 
 When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;S)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 

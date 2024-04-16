@@ -6,7 +6,7 @@
 
 A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attributes. Each attribute \(a_i\) in this schema is associated with a specific data domain \(D_i\), which defines the set of permissible values that \(a_i\) can take.
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(\tau = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(\tau\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
-Moreover, for any tuple \(\tau\) in the relation \(R\), the notation \(\attr(\tau, a_i) = d_i\), or \(\tau.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(\tau\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
+Moreover, for any tuple \(\tau\) in the relation \(R\), the notation \(\tau.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(\tau\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
 
 We define a \emph{Property Graph} as $G = (V_G, E_G)$,
 where
@@ -14,7 +14,7 @@ where
     \item $V$ stands for the set of vertices.
     \item Let $E \subseteq V \times V$ denote the set of edges in the graph. An edge $e \in E$ is represented as an ordered pair $e = (v_s, v_t)$, where $v_s \in V$ is the source vertex and $v_t \in V$ is the target vertex, indicating that the edge $e$ connects from $v_s$ to $v_t$.
     %we use $\id(e)$ and $\lab(e)$ to denote the globally unique id and label of $e$, and $\attr(e, a_i)$, or $e.a_i$, to denote the value of the attribute $a_i$ of $e$.
-    \item For any graph element $\epsilon$ that is either a vertex or an edge, we denote $\id(\epsilon)$ and $\lab(\epsilon)$ as the globally unique ID and the label of $\epsilon$, respectively. Given an attribute $a_i$, $\attr(\epsilon, a_i)$, or $\epsilon.a_i$, denotes the value of the attribute $a$ of $\epsilon$.
+    \item For any graph element $\epsilon$ that is either a vertex or an edge, we denote $\id(\epsilon)$ and $\lab(\epsilon)$ as the globally unique ID and the label of $\epsilon$, respectively. Given an attribute $a_i$, $\epsilon.a_i$ denotes the value of the attribute $a$ of $\epsilon$.
 \end{itemize}
 
 
@@ -28,18 +28,20 @@ To formalize the integration of graph syntax within the realm of relational data
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
 \begin{definition}[\rgmapping]
 \label{def:rgmapping}
-Given two set of relations $\{R_{v_1}, R_{v_2}, \ldots, R_{v_n}\}$, and $\{R_{e_1}, R_{e_2}, \ldots, R_{e_m}\}$, we define an \rgmapping to map the relations to a property graph $G = (V, E)$, %which contains the mappings of $(\zeta_v, \zeta_e, \lambda_{e_1}^s, \lambda_{e_1}^t, \ldots, \lambda_{e_m}^s, \lambda_{e_m}^t)$,
+Given two set of relations $\{R_{p_1}, \ldots, R_{p_n}\}$ and $\{R_{q_1}, \ldots, R_{q_m}\}$,
+we define an \rgmapping to map the relations to a property graph $G = (V, E)$, %which contains the mappings of $(\zeta_v, \zeta_e, \lambda_{e_1}^s, \lambda_{e_1}^t, \ldots, \lambda_{e_m}^s, \lambda_{e_m}^t)$,
 which are elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{v_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an ID $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
+\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{p_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an ID $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
 The relations that are mapped to vertices in the graph are referred to as vertex relations.
 
-\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{e_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{e_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an ID $\id(e)$,
-a label $\lab(e)$ corresponding to the name of $R_{e_i}$, and attributes $e.attr*$ that reflect the attributes $\tau.attr*$ of $\tau$.
-For each edge relation $R_{e_i}$, there are two corresponding vertex relations $R_{v_s}$ and $R_{v_t}$. We further define two total functions: $\lambda_{e_i}^s: R_{e_i} \to R_{v_s}$ and $\lambda_{e_i}^t: R_{e_i} \to R_{v_t}$, which maps a tuple $\tau \in R_{e_i}$ to a tuple $\tau_s \in R_{v_s}$ and a tuple $\tau_t \in R_{v_t}$, respectively.
+\item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{q_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{q_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an ID $\id(e)$,
+a label $\lab(e)$ corresponding to the name of $R_{q_i}$, and attributes $e.attr*$ that reflect the attributes $\tau.attr*$ of $\tau$.
+For each edge relation $R_{q_i}$, there are two corresponding vertex relations $R_{p_s}$ and $R_{p_t}$.
+We further define two total functions: $\lambda_{q_i}^s: R_{q_i} \to R_{p_s}$ and $\lambda_{q_i}^t: R_{q_i} \to R_{p_t}$, which maps a tuple $\tau \in R_{q_i}$ to a tuple $\tau_s \in R_{p_s}$ and a tuple $\tau_t \in R_{p_t}$, respectively.
 The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function $\zeta_v$, i.e., $v_s = \zeta_v(\tau_s)$ and $v_t = \zeta_v(\tau_t)$.
-The relations $R_{e_i}$ that are mapped to edges in the graph are referred to as edge relations.
+The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as edge relations.
 \end{itemize}
 \end{definition}
 
@@ -92,10 +94,11 @@ CREATE PROPERTY GRAPH G1
 
 \subsection{Matching Operator}
 \label{sec:matching-operator}
-Consider a property graph \(G(V_G, E_G)\), alongside a \emph{connected} pattern graph, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes.
+Consider a property graph \(G(V_G, E_G)\), alongside a \emph{connected} pattern graph, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes, and
+we denote $n$ and $m$ as the number of vertices and edges in the $\pattern$, respectively.
 %Graph pattern matching is defined as the task of identifying all subgraphs within a target graph \(G\) that are \emph{homomorphic} to \(\pattern\).
 Graph pattern matching seeks to determine all subgraphs in \(G\) that are \emph{homomorphic} to \(\pattern\).
-Formally, given a subgraph $g \subseteq G$, a homomorphism from \(\pattern\) to \(g\) is a \emph{surjective}, total mapping \(f: V_\pattern \cup E_\pattern \to V_{g} \cup E_{g}\) that satisfy the following conditions: (1) For every vertex \(u \in V_\pattern\), there is a corresponding vertex \(v = f(u) \in V_{g}\) with \(\lab(v) = \lab(u)\)\footnote{As a convention, we will always write $u$ and $v$ for a pattern vertex and a graph vertex, respectively.}; (2) For each edge \(e = (u_s, u_t) \in E_\pattern\), there is a corresponding edge \(f(e) = (v_s, v_t) \in E_{g}\), ensuring that the mapping preserves the edge's the label, as well as its source and target vertices , that is \(\lab(e) = \lab(f(e))\), and \(f(u_s) = v_s\), \(f(u_t) = v_t\). It's important to highlight the homomorphism semantics, as one of the widely used semantics for graph pattern matching~\cite{angles2017foundations}, \modify{does} not require each pattern vertex and edge being uniquely mapped to distinct vertices and edges in the data graph. This facilitates a seamless integration between graph pattern matching and relational operations, but alternative semantics for graph pattern matching such as isomorphism can also be adopted, as will be further discussed in~\refsec{handling-match-operator}.
+Formally, given a subgraph $g \subseteq G$, a homomorphism from \(\pattern\) to \(g\) is a \emph{surjective}, total mapping \(f: V_\pattern \cup E_\pattern \to V_{g} \cup E_{g}\) that satisfies the following conditions: (1) For every vertex \(u \in V_\pattern\), there is a corresponding vertex \(v = f(u) \in V_{g}\) with \(\lab(v) = \lab(u)\)\footnote{As a convention, we will always write $u$ and $v$ for a pattern vertex and a graph vertex, respectively.}; (2) For each edge \(e = (u_s, u_t) \in E_\pattern\), there is a corresponding edge \(f(e) = (v_s, v_t) \in E_{g}\), ensuring that the mapping preserves the edge's the label, as well as its source and target vertices , that is \(\lab(e) = \lab(f(e))\), and \(f(u_s) = v_s\), \(f(u_t) = v_t\). It's important to highlight the homomorphism semantics, as one of the widely used semantics for graph pattern matching~\cite{angles2017foundations}, \modify{does} not require each pattern vertex and edge being uniquely mapped to distinct vertices and edges in the data graph. This facilitates a seamless integration between graph pattern matching and relational operations, but alternative semantics for graph pattern matching such as isomorphism can also be adopted, as will be further discussed in~\refsec{handling-match-operator}.
 
 The outcomes of graph pattern matching can be succinctly modeled as a relation \(GR_G^\pattern\), or more compactly \(GR^\pattern\) in clear contexts, defined over the schema \(S = V_\pattern \cup E_\pattern\). Here, the sets \(V_G\) and \(E_G\) serve as the respective domains for the vertices and edges identified through the matching process. Within this framework, we refer to such a relation as a \emph{Graph Relation}, a construct where all attributes are derived from the domain of a property graph.
 It is essential to recognize that any property graph \(G\) can be conceptualized as a graph relation \(GR^G\), represented by a singular tuple that collectively encompasses all of its vertices and edges. Throughout this paper, we treat the notions of a property graph and a tuple of graph relation as essentially interchangeable terms. In alignment with this perspective, we proceed to elaborate on the \emph{Matching} operator as follows.
@@ -113,13 +116,13 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
 
 \begin{example}
     \label{ex:matching}
-    Consider the property graph \(G_1\) derived from the \rgmapping in \refex{rgmapping}. As shown in \reffig{intro-rgmapping-example}(a), we conceptualize the graph as a graph relation \(GR^{G_1}\) that contains a single tuple, encapsulating all vertices and edges in \(G_1\).
-    Given a pattern graph \(\pattern\) shown in Fig.~\ref{fig:intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G_1\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G_1}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
+    Let \(G_1\) denote the property graph derived from the relations via \rgmapping in \refex{rgmapping}.
+    Given a pattern graph \(\pattern\) shown in \reffig{intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G_1\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G_1}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
 \end{example}
 
 This definition ensures that the matching operator is inherently closed regarding graph relations,
 which adheres to the language opportunities of ``nested matching'' (specified as PGQ-079) in SQL/PGQ~\cite{sql-pgq}.
-In this paper, we only handle cases where $G$ represents the entire property graph, and thereafter simplify the matching operator notation to $\matching_G(\pattern)$, or $\matching(\pattern)$ when the context is clear.
+In this paper, we only handle cases where $G$ represents the entire property graph, and thereafter simplify the matching operator notation to $\matching(\pattern)$ when the context is clear.
 
 \subsection{Problem Definition}
 \label{sec:problem-definition}
@@ -129,7 +132,7 @@ which encapsulate the three most frequently employed operations in database mana
 These operations form the backbone of many relational queries. Given a set of relations \(R_1, R_2, \ldots, R_m\),
 an \spj query is formally represented as:
 \[
-Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m)).
+Q = \pi_A(\sigma_\Omega(R_1 \Join \cdots \Join R_m)).
 \]
 
 Inspired from the \spj paradigm, we introduce a novel category of queries, termed \spjm queries, to logically formulate SQL/PGQ~\cite{sql-pgq} queries that
@@ -140,23 +143,23 @@ an \spjm query is articulated as:
 
 \begin{equation}
     \label{eq:spjm}
-Q = \pi_A(\sigma_d(R_1 \Join \cdots \Join R_m \Join \widetilde{R}))
+Q = \pi_A(\sigma_\Omega(R_1 \Join \cdots \Join R_m \Join (\widehat{\pi}_{A*}\matching_G(\pattern))))
 \end{equation}
-where
-\[
-\widetilde{R} = \widehat{\pi}_{attr*}\matching_G(\pattern).
-\]
-In this formulation, \(\widehat{\pi}_{attr*}(GR)\) denotes a specialized projection operator to extract attributes (including the ID and label)
-from vertices and edges within a graph relation $GR$.
+In this formulation, \(\widehat{\pi}_{A*}\matching_G(\pattern)\) is the \emph{graph component} of
+the query, while the remaining part of the query is an \spj expression referred to as the \emph{relational component}.
+Here, \(\matching_G(\pattern)\) represents the process of matching the pattern \(\pattern\) on the graph \(G\) and
+returns a graph relation as defined in \refdef{matching}. The operator \(\widehat{\pi}_{A*}\) is a
+graph-calibrated projection operator that extracts the ID, label, and other attributes from the vertices and edges in the matched results.
 This process helps ``flatten'' graph elements into relational tuples.
 For example, given a graph relation $GR$ that contains a vertex of \{ID:0, label:Person, name:``Tom''\}, the
 following projection
 \[
 \widehat{\pi}_{\id(v) \rightarrow \text{v\_id}, \lab(v) \rightarrow \text{v\_label}, v.name \rightarrow \text{v\_name}}(GR)
 \]
-turns the vertex into a tuple of (0, Person, ``Tom'').
-The projection operation is designed to selectively retrieve specific attributes from vertices and edges as required, but for simplicity, we assume that all attributes are extracted if otherwise specified.
-The construction makes the resultant relation \(\tilde{R}\) fully compatible with original relational operations.
+turns the vertex into a relational tuple of (0, Person, ``Tom'').
+The projection operation is designed to reflect the \lstinline{COLUMNS} clause in SQL/PGQ
+to retrieve specific attributes from vertices and edges as required. For simplicity, we assume that all
+attributes are extracted unless otherwise specified.
 
 In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
 
@@ -164,6 +167,43 @@ In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
     \reffig{intro-rgmapping-example}(c) illustrates an example of an \spjm query, along with its corresponding SQL/PGQ expression. The query's objective is to identify pairs of persons who like the same message, know each other, and where one of them resides in Germany. As per the query, once the results of the matching operator are obtained (as described in \refex{matching}), a $\gproject$ operator is applied to extract attributes from all vertices, forming a relational table. Subsequently, the join, selection, and projection operators are employed to compute the final results.
     %Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
 \end{example}
+
+\reftable{notations} summarizes frequently used notations in this paper.
+\begin{table}[ht]
+    \centering
+   \caption{Frequently used notations.}
+   \label{tab:notations}
+    \scalebox{0.9}{
+        \begin{tabular}{|m{0.34\linewidth}|m{0.63\linewidth}|}
+            \hline
+            Notation                 & Definition                                                                                       \\
+            \hline
+            $R$    & a relation or relational table   \\
+            \hline
+            $\tau$ and $\tau.attr$    & a tuple in a relation, and the value of an attribute of $\tau$ \\
+            \hline
+            $G(V,E)$         & a property graph with $V$ and $E$                                                          \\
+            \hline
+            $\pattern(V, E)$   & a pattern graph with $V$ and $E$  \\
+            \hline
+            $\id(\epsilon)$, $\lab(\epsilon)$, $\epsilon$.attr  & the identifier, label, and the value of given attribute of a graph element $\epsilon$ \\
+            \hline
+            $\adj(u)$ and $\adj^E(u)$           & neighbors and adjacent edges of $u$           \\
+            \hline
+            $GR$   & a graph relation     \\
+            \hline
+            $\matching(GR, \pattern)$, $\matching(\pattern)$  & matching $\pattern$ on a graph relation $GR$ or a graph $G$ \\
+            \hline
+            $\pi_{A}$, $\sigma_\Omega$, $\Join$  & projection, selection, and join operators over relations \\
+            \hline
+            $\gproject$, $\gjoin$  & projection and join operators over graph relations \\
+            \hline
+            $\lambda^s_\lab(e)$, $\lambda^t_\lab(e)$  & the total functions for mapping tuples in an edge relation to source and target vertex relations \\
+            \hline
+        \end{tabular}
+    }
+    % \vspace{-.05in}
+\end{table}
 
 %is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
 %Besides, $GR_i$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}_i$ is the pattern.
