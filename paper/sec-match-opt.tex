@@ -290,6 +290,31 @@ We ultimately obtain the following theorem.
 
 \end{remark}
 
+To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method. 
+Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges. 
+The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
+        \caption{Search Space Comparison.}
+        \label{fig:exp-search-space}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_time.pdf}
+        \caption{Search Space Traversal Time Comparison.}
+        \label{fig:exp-search-time}
+    \end{subfigure}
+    \caption{Compare the search space of the graph-agnostic and graph-aware methods.}
+    \label{fig:exp-compare-search-space-and-time}
+\end{figure}
+
+Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit.
+\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
+Specifically, the results also demonstrate that the search space of the graph-agnostic method increase exponentially faster than that of the graph-aware method, which corroborates the correctness of \refthm{compare-search-space}.
 
 
 \subsection{Physical Implementation}
