@@ -49,9 +49,12 @@ We have made four pivotal contributions in this paper.
 
 \item Building on the theoretical exploration, we introduce \name, a pioneering framework that leverages the extensive advancements made in both relational and graph query optimization to optimize \spjm queries. The framework adapts state-of-the-art graph optimizers to the relational context, effectively producing worst-case optimal graph subplans for the matching operator. Inspired by GrainDB's predefined join~\cite{graindb}, we treat it as a graph index and implement physical operations based on this index to enable efficient graph execution. The relational part of the query, along with the optimized graph subplans encapsulated within a special operator called \scangraphtable, is optimized using standard relational optimizers. We incorporate heuristic rules in the \name~framework, such as \filterrule, to optimize cases unique to \spjm queries that involve the interplay between relational and graph semantics.
 
-\item We have implemented \name~ based on the industrial relational optimization framework Calsite~\cite{calsite}.
+\item We have implemented \name~ based on the industrial relational optimization framework Calcite~\cite{calsite}.
 \todo{add more of implementations and experiment findings.}
-Our contributions are substantiated by experimental results that underscore the efficacy of the proposed optimization framework. These results highlight the advantages of our approach in real-world applications, providing empirical evidence to support the theoretical advancements posited in our study.
+Our contributions are substantiated by experimental results that underscore the efficacy of the proposed optimization framework. 
+\modify{Specifically, end-to-end testing reveals that the execution plans crafted by \name consistently outperform those by GrainDB and DuckDB, outpacing them by factors of more than 2$\times$ and 5$\times$ across various benchmarks, respectively. Moreover, targeted experiments with micro benchmarks confirm the effectiveness of the heuristic rules employed in \name. For example, the omission of the \filterrule rule may lead to a performance degradation in plan execution by up to two orders of magnitude.
+}
+These results highlight the advantages of our approach in real-world applications, providing empirical evidence to support the theoretical advancements posited in our study.
 
 \end{enumerate}
 

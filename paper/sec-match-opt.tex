@@ -105,7 +105,7 @@ The graph-agnostic method, which converts the matching operator into a sequence 
 
 In this section, we introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is an \emph{induced} sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
 The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to indivisible patterns directly solvable with specific physical operations
-as will be introduced in~\refsec{xx}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
+as will be introduced in~\refsec{physical-operators}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
 \todo{add single-vertex pattern as an MMC.}
 We follow~\cite{huge} to use a single-edge pattern as well as a \emph{complete star} as an \mmc. We denote a star-shaped pattern as $\pattern(u;S)$, where $u$ denotes the root vertex of the star and $S$ is the set of leaf vertices\footnote{The edge directions among $u$ and $S$ are not important, and we assume they  all point from $u$ to $S$.}.
@@ -188,8 +188,10 @@ For matching the pattern, the graph-agnostic method must produce a sequence of j
     With the generating function, it is obtained that
     \begin{equation*}
         \begin{split}
-            c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
-            & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
+            c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
+            % C(2k, k)
+            % c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
+            % & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
         \end{split}
     \end{equation*}
 
@@ -301,6 +303,21 @@ Based on \refthm{complexity-of-volcano} and \refthm{complexity-of-graph-aware}, 
         \frac{o(4^{m+n-1})}{O(4^{n-1})} = o(4^m).
     \end{equation*}
 \end{proof}
+
+\comment{In practical implementation, efficient pruning strategies can be employed to trim the search space. 
+We conducted experiments on Linked Data Benchmark Council (LDBC) social network benchmark \cite{ldbc_snb} with using the dataset with scale factor of 30.
+The utilized queries are those in \cite{graindb}. 
+In the experiments, Calcite was used as a typical volcano optimizer, while our \name employed the Graph-aware method. 
+The experimental results of optimizing queries using Calcite and \name are shown in \reffig{exp-optimization-sf30}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.6\linewidth]{./figures/exp/optimization_sf30.pdf}
+    \caption{Comparison of the optimization time.}
+    \label{fig:exp-optimization-sf30}
+\end{figure}
+
+The experimental results show that the optimization time of Calcite is exponentially longer than that of \name. Additionally, it is worth paying attention to the results of three queries: IC1-1, IC1-2, and IC1-3. IC1-2 is obtained by adding a node and an edge to the pattern graph of IC1-1, while IC1-3 is derived by adding a node and an edge to IC1-2. It can be observed that as the number of nodes and edges increases, the time cost for Calcite also grows exponentially, which is consistent with the \refthm{complexity-of-volcano}. In this case, the optimization time for RelGO does not show significant change with the increase of nodes and edges. This is because RelGO implements an efficient pruning strategy in its execution, further reducing the optimization complexity to be linearly related to the number of edges in $\searchgraph_\pattern$.}
 
 \iffalse
 the complexity analysis in Theorem \ref{theorem:complexity-of-calcite} and Theorem \ref{theorem:complexity-of-glogue}, it is found that when there is only a matching operator,
@@ -529,7 +546,10 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 
 With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
 When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
-However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
+However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. 
+\modify{In \refsec{experiment-opt}, we demonstrated through experiments that using this index can be about twice as fast compared to not using the index.}
+Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
+\modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
 
 \subsubsection{The Graph-Aware Execution Plan}
 \label{sec:join-matching-operator}
@@ -543,7 +563,6 @@ The plan is then constructed in a bottom-up manner. As shown in \reffig{match-de
 be projected into relational tuples until the last stage that obtain the results $\matching(\pattern)$.
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
-\todo{why can't $u_t$ be in $\pattern'_l$}
 
 When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$, following the encoding of vertex tuples into vertex objects and edge tuples into edge objects.
 This case is then reduced to Case I, where a join operation is performed between $\matching(\pattern'_l)$ and the computed $\matching(\pattern_e)$.
@@ -557,7 +576,6 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 \stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{S, E_S} \matching(\pattern(u;S))$}, where $\pattern(u;S = [u_1, \ldots, u_k])$ is a complete $k$-star pattern. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;S)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $S = [u_1, \ldots, u_k]$.
 
 When there is no graph index, solving Case III involves continuously joining $|S|$ single-edge patterns.
-\todo{why reduce to Case II ?}
 
 When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;S)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
