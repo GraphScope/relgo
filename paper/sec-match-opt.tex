@@ -550,12 +550,15 @@ be projected into relational tuples until the last stage that obtain the results
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
 
-When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$, following the encoding of vertex tuples into vertex objects and edge tuples into edge objects.
+When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$, 
+where the first join is to obtain the edge tuples that connect $u_s$, which are encoded into edge objects, 
+and the second join is to obtain the associated vertex tuples of $u_t$, which are encoded into vertex objects.
+%following the encoding of vertex tuples into vertex objects and edge tuples into edge objects.
 This case is then reduced to Case I, where a join operation is performed between $\matching(\pattern'_l)$ and the computed $\matching(\pattern_e)$.
 
-When graph indexes exist, the implementation is handled via the physical operator \expandx{$\matching(\pattern'_l)$}{$u_s$}. For each tuple $\tau \in \matching(\pattern'_l)$, $\tau.u_s$ must record a graph vertex $v_s$ that matches $u_s$ in the pattern $\pattern'_l$. The \expand~ operator looks up the VE-index of $v_s$, which allows it to efficiently computes $v_s$'s adjacent edges (more precisely, it's the corresponding edge tuples) and neighbors, rendering the tuple of $(\tau, \adj^E(v_s), \adj(v_s))$. For example, in \reffig{graph-index}(b), if we apply $\expand$~ to a tuple $\tau$ from $v_{p_2}$, the result $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$ is returned.
-To obtain $\matching(\pattern')$, we flatten the adjacent edges and vertices and pair them up. In the case of $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$, two tuples $(\tau, e_{l_2}, v_{m_1})$ and $(\tau, e_{l_3}, v_{m_2})$ are generated.
-
+When graph indexes exist, the implementation is handled by the physical operators of \expandedge~ and \getvertex. For each tuple $\tau \in \matching(\pattern'_l)$, $\tau.u_s$ must record a graph vertex $v_s$ that matches $u_s$ in the pattern $\pattern'_l$. The \expandedge~ operator looks up the VE-index of $v_s$, which allows it to efficiently computes $v_s$'s adjacent edges (more precisely, it's the corresponding edge tuples). Furthermore, the \getvertex~ operator is used to obtain the matched vertex $v_t$ that is connected to $v_s$ via the previous matched edges, which can be achieved by looking up the EV-index of the matched edges.
+By combining the results of \expandedge~ and \getvertex, the tuple of $(\tau, \adj^E(v_s), \adj(v_s))$ is rendered. For example, in \reffig{graph-index}(b), if we apply \expandedge~ and \getvertex~ to a tuple $\tau$ from $v_{p_2}$, the result $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$ is returned.
+Furthermore, to obtain $\matching(\pattern')$, we flatten the adjacent edges and vertices and pair them up. In the case of $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$, two tuples $(\tau, e_{l_2}, v_{m_1})$ and $(\tau, e_{l_3}, v_{m_2})$ are generated.
 
 In real-life scenarios, a vertex may be adjacent to multiple types of edges. For example, in \reffig{intro-rgmapping-example}, a \kk{Person} vertex can be connected to both \kk{Likes} and \kk{Knows} edges. To handle such cases, we can record edge's ID instead of just the row ID of the tuple. Given that the edge's ID is a combination of its label and the tuple's row ID, the adjacent edges of a specific label can be easily obtained from the VE-Index.
 
@@ -565,11 +568,11 @@ When there is no graph index, solving Case III involves continuously joining $|S
 
 When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;S)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
-Consequently, for the tuple $\tau$, the physical \expandintersectx{$\matching(\pattern'_l)$}{$\pattern(u;S)$}~operator performs the following steps:
+Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 
 \begin{enumerate}
-\item For each leaf vertex $u_i \in S$, where $1 \leq i \leq k$, apply the \expandx{$\matching(\pattern'_l)$}{$u_i$} operator to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$.
-\item Compute the intersections of all adjacent edges and neighbors returned by the \expand~ operators.
+\item For each leaf vertex $u_i \in S$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
+\item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
 \item Return a new tuple as
 \[
     (\tau, \bigcap_{1 \leq i \leq k}\adj^E(v_i), \bigcap_{1 \leq i \leq k}\adj(v_i)).
