@@ -75,8 +75,8 @@ where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and 
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
-    &= \widehat{\pi}_{A_1*}(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \widehat{\pi}_{A_2*}(\matching(\pattern_{k-1})) \\
-    &= \relation{\lab(u_{s_k})} \evjoin \relation{\lab(e_k)} \evjoin \relation{\lab(u_{t_k})} \Join_{attr_{V_o}} R_{k-1}
+    &= \widehat{\pi}_{A_1*}(\matching(\pattern_{e_k})) \Join_{V_o.attr}  \widehat{\pi}_{A_2*}(\matching(\pattern_{k-1})) \\
+    &= \relation{\lab(u_{s_k})} \evjoin \relation{\lab(e_k)} \evjoin \relation{\lab(u_{t_k})} \Join_{V_o.attr} R_{k-1}
 \end{split}
 \end{equation*}
 By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e_i)} \evjoin \relation{\lab(u_{t_i})}$, we have the matching operator losslessly converted to a sequence of relational join operations:
@@ -286,221 +286,17 @@ We ultimately obtain the following theorem.
     \end{equation*}
 \end{proof}
 
-\todo{Add some heuristic explanation to the results (why $m$ is gone in graph-aware method), and also include a micro benchmark to show the results.}
+\begin{remark}
 
-\comment{In practical implementation, efficient pruning strategies can be employed to trim the search space.
-We conducted experiments on Linked Data Benchmark Council (LDBC) social network benchmark \cite{ldbc_snb} with using the dataset with scale factor of 30.
-The utilized queries are those in \cite{graindb}.
-In the experiments, Calcite was used as a typical volcano optimizer, while our \name employed the Graph-aware method.
-The experimental results of optimizing queries using Calcite and \name are shown in \reffig{exp-optimization-sf30}.
+\end{remark}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.6\linewidth]{./figures/exp/optimization_sf30.pdf}
-    \caption{Comparison of the optimization time.}
-    \label{fig:exp-optimization-sf30}
-\end{figure}
-
-The experimental results show that the optimization time of Calcite is exponentially longer than that of \name. Additionally, it is worth paying attention to the results of three queries: IC1-1, IC1-2, and IC1-3. IC1-2 is obtained by adding a node and an edge to the pattern graph of IC1-1, while IC1-3 is derived by adding a node and an edge to IC1-2. It can be observed that as the number of nodes and edges increases, the time cost for Calcite also grows exponentially, which is consistent with the \refthm{complexity-of-volcano}. In this case, the optimization time for RelGO does not show significant change with the increase of nodes and edges. This is because RelGO implements an efficient pruning strategy in its execution, further reducing the optimization complexity to be linearly related to the number of edges in $\searchgraph_\pattern$.}
-
-\iffalse
-the complexity analysis in Theorem \ref{theorem:complexity-of-calcite} and Theorem \ref{theorem:complexity-of-glogue}, it is found that when there is only a matching operator,
-\begin{equation*}
-    \begin{split}
-        \frac{\text{Complexity of Calcite}}{\text{Complexity of relgo}} & > O(\frac{4^{m+n-1}}{3^n}) = O(4^{m-1}(\frac{4}{3})^n).
-    \end{split}
-\end{equation*}
-Therefore, it suggests that GLogS is exponentially faster than Calcite in optimizing matching operators.
-
-\section{Solutions for SPJM Problem}
-Two techniques can be applied to assist in solving the SPJM problem.
-Since the inputs of matching operators include a graph relation that can be represented as a property graph and a pattern, this process can be regarded as querying on graphs.
-Then, the graph structure can be leveraged to generate better plans.
-Moreover, in a graph, vertices and edges do not have to be joined one by one and the results of specific substructures can be obtained more efficienctly.
-In this section, we first introduce the concepts of the above techniques, and then present different types of methods for solving the SPJM problem.
-
-\subsection{Graph Structure}
-
-The definition of graph structure is as follows.
-
-\begin{definition}[Graph Structure, abbr.~GS]
-    Graph structure refers to the connectivity relationships between vertices and edges within the graph, which can be stored in graph indices in varied data structure such as adjacent lists.
-\end{definition}
-
-With graph structure, tables can be joined more efficiently.
-For example, when two tables representing persons and friendships respectively are joined together, the rows that can be joined are quickly located using graph indices.
-Therefore, when graph indices are available, using join methods that can leverage graph indices is a more efficient choice.
-
-\subsection{Graph Matching Decomposition}
-
-A matching operator can be decomposed into two new matching operators.
-By joining the results of the new matching operators, the results of the original matching operator can be obtained.
-Decomposing the matching operator recursively can result in a tree, which is called the match scanning plan.
-Each tree node represents an operator.
-\textbf{Without loss of generality, the left-deep join order is employed on the tree}.
-Each internal node represents an operator including the join, selection, and projection operator.
-Please note that these operators in the tree always map graph relations to graph relations, because in the matching process, graph elements are the smallest units that operators can manipulate.
-
-For internal nodes representing join operators, they are generated when matching operators are decomposed.
-Suppose a matching operator $TN_0 = \mathcal{M}(GR, \mathcal{P}_0)$ is decomposed into two child operators, i.e., $TN_1 = \mathcal{M}(GR, \mathcal{P}_1)$ and $TN_2 = \mathcal{M}(GR, \mathcal{P}_2)$.
-Denote the sets of vertices and edges in a pattern $\mathcal{P}$ by $\mathcal{P}.V$ and $\mathcal{P}.E$, respectively.
-Then, we have $\mathcal{P}_0.V = \mathcal{P}_1.V \cup \mathcal{P}_2.V$, $\mathcal{P}_0.E = \mathcal{P}_1.E \cup \mathcal{P}_2.E$, $\mathcal{P}_1.V \cap \mathcal{P}_2.V \neq \emptyset$, and $\mathcal{P}_1.E \cap \mathcal{P}_2.E = \emptyset$.
-After $TN_0$ is decomposed, it is transformed to an internal node representing the join operator, with $TN_1$ and $TN_2$ being its child nodes.
-
-
-Each leaf node of the match scanning plan is a minimum matching component, and the definition is as follows.
-
-\begin{definition}[Minimum Matching Component, abbr.~MMC]
-    A matching operator is called a minimum matching component iff the matching of the pattern has a specific physical implementation according to the optimizer and the matching operator will not be further decomposed.
-\end{definition}
-
-In the process of decomposing the matching operator, an important point is the order in which the nodes and edges are decomposed each time.
-In other words, it is crucial to determine the order of the joins to generate the pattern specified in the original matching operator.
-Therefore, optimizers are applied to optimize the match scanning plan.
-In this paper, optimizers utilized in relational databases (e.g., Calcite) are called relational optimizers and those applied in graph databases (e.g., GLogS) are called graph optimizers.
-
-For relational optimizers, the MMCs are matching operators whose patterns only contain a vertex or an edge.
-Then, the physical implementation of such matching operators is scanning the tables of the corresponding vertices or edges, respectively.
-Therefore, for relational optimizers, the matching operator will be replaced with selection operators, projection operators, and a sequence of join operators between tables representing vertices and edges.
-
-For graph optimizers, the MMCs are more diverse.
-Following the idea of StarJoin \cite{starjoin,huge}, matching operators whose patterns consist of a vertex, an edge, or a complete star are considered as MMCs.
-Here, the pattern consisting of an edge actually contains the edge and its adjacent two vertices.
-A complete star is a special structure on a graph.
-Let $TL = \mathcal{M}(GR, \mathcal{P})$ be an MMC, which is also a leaf node of the tree, and $\mathcal{P}$ is a complete star.
-Also, denote the parent node of $TL$ by $Join_{TL}$.
-A complete star is a tree of depth one with at least three vertices, whose root is called the core, while the other nodes are called the outsiders.
-For each outsider $v_o$ of a complete star, $v_o$ should exist in the pattern of matching operators in $Join_{TL}$'s left subtree.
-Besides, $TL$ should be the right subtree of $Join_{TL}$.
-Otherwise, $TL$ is not a minimum matching componet and should be further decomposed.
-
-For the MMC whose pattern is a vertex, it is implemented with scanning the corresponding table.
-
-For the MMC whose pattern is an edge, if graph strucutre is utilized, it can be implemented with joins that leverage graph indices, and the neighbors of vertices can be obtained efficiently.
-If graph structure is not utilized, such a pattern is obtained by two joins between tables representing vertices and edges.
-
-
-For the MMC whose pattern is a complete star, it can be implemented with a table scan of the core.
-The outsiders are not handled, because they are already computed in the left subtree of the parent node of MMC.
-MMC's parent node representing the join operator is then implemented with extend-intersection.
-Specifically, in the process of extend-intersection, the neighbors of the outsiders are obtained by joining them with tables representing edges and the results of MMC, respectively.
-The common neighbors are obtained by calculating the intersection.
-Please note that if graph structure is available, the neighbors can be obtained with graph indices.
-With extend-intersection, the times of joins are reduced significantly, and it has better performances than joining tables one by one.
-
-
-Moreover, for optimizers, cost of different join orders should be evaluated.
-Normally, the cost is estimated with the numbers of vertices and edges with different labels, which are obtained by counting the rows of the corresponding tables.
-These are low-order statistics in graphs.
-Since matching operators perform pattern matching on graphs, it is more efficient to estimate the cost with graph statistics.
-
-\begin{definition}[Graph Statistics]
-    Graph statistics record the occurrence of structures within the graph, such as the number of triangles appearing in the graph.
-\end{definition}
-
-Specifically, graph statistics can reflect the higher-order features of graphs (e.g., the number of subgraphs), and well represent the characteristics of graphs.
-Thus, with garph statistics, better join orders with lower cost can be obtained.
-
-The aforementioned optimizations are collectively referred to as optimizations based on graph matching decompostion (abbr.~GMD).
-
-
-\subsection{Different Types of Methods}
-\label{sec:different-type-of-methods}
-
-The general approach to handling the SPJM queries is to first transform it into an SPJ queries, and then optimize the SPJ queries to obtain the corresponding physical plans.
-It is proved in Theorem \ref{theorem:spjm-to-spj} that SPJM queries can always be losslessly converted to SPJ queries.
-Existing methods can be divided into four categories based on whether GS and GMD are utilized in the process.
-
-(1) \emph{\textbf{Translator}: SPJM $\rightarrow$ SPJ $\rightarrow$ Physical Plan}.
-
-Translators do not apply GS and GMD in the process of optimizing the SPJM queries.
-In detail, matching operators are decomposed into minimum matching components, whose patterns contain only a vertex or an edge.
-Such matching operators are converted to table scans, and a new SPJ query is generated and optimized.
-This type of method degrades into relational optimizers and loses the chance of query optimization from the graph perspective.
-Typical methods of this type include Apache Age \cite{apache-age} and DuckPGQ \cite{DuckPGQ,DuckPGQ-VLDB}.
-
-
-In order to leverage the graph information to obtain better physical plans, the second kind of method is proposed.
-
-(2) \emph{\textbf{Post-processor}: SPJM $\rightarrow$ SPJ $\xrightarrow{GS}$ Physical Plan}.
-
-For this type of method, graph structure is utilized in the process of optimizing the SPJ queries.
-Specifically, with graph indices, the connectivity between vertices and edges can be obtained efficiently.
-Therefore, new physical implementations of joins can be constructed to leverage the benefits of graph indices.
-
-The optimizer in GrainDB is a representative of this type.
-GrainDB builds RID indices on DuckDB \cite{duckdb}, and proposes two new join methods, i.e., sip-join and merge-sip-join.
-In detail, sip-join gets adjacent edges of vertices or gets adjacent vertices of edges based on the RID indices, while merge-sip-join obtains the neighbors of vertices.
-Given a SPJM query, it is first transformed to the equal SPJ query, and then GrainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
-Next, GrainDB replaces some hash-joins in the plan with sip-joins and merge-sip-joins to leverage graph indices.
-
-It indicates that the cost-based optimization in GrainDB only finds the optimal execution plan before the graph indices are awared.
-Therefore, the plan can be suboptimal after replacement.
-Moreover, some efficient replacement cannot be applied w.r.t.~the obtained execution plan due to the order of joining tables representing vertices and edges.
-
-
-It is also reasonable to exploit the capability of graph matching decomposition for better optimization.
-Then, the third kind of method is proposed as follows.
-
-(3) \emph{\textbf{Sorter}: SPJM $\xrightarrow{GMD}$ SPJ $\rightarrow$ Physical Plan}.
-
-This type of method converts SPJM queries to SPJ queries in a different manner.
-Specifically, graph matching decomposition is applied and the matching of complete stars is a minimum matching component.
-With GMD, higher-order features of graphs are leveraged, and cost of join orders can be estimated more accurately.
-Please note graph structure is not applied in this type of method.
-Thus, when we optimize SPJ queries and generate physical plans, the physical implementations of joins cannot utilize the graph indices, including the implementation of extend-intersection.
-
-
-(4) \emph{\textbf{Optimizer}: SPJM $\xrightarrow{GMD}$ SPJ $\xrightarrow{GS}$ Physical Plan}.
-
-This is the method utilized in this paper.
-Compared to method (3), this kind of methods further utilize graph strucutre in optimization.
-Therefore, physical implementations of join operators can utilize the graph indices and the common neighbors can be obtained more efficiently in extend-intersection.
-Besides, in the process of graph matching decomposition, since the higher-order statistics are utilized (i.e., the number of subgraphs), the cost of joins are estimated assuming that graph indices can be utilized in execution.
-Therefore, cost estimation is more accurate for when graph indices are applicable.
-
-\subsection{Feasibility of Converting SPJM Queries to SPJ Queries}
-In this subsection, we prove that SPJM queries can always be converted to SPJ queries.
-Therefore, it is possible to leverage relational databases to process matching operators, and the methods proposed in Sec.~\ref{sec:different-type-of-methods} are workable.
-
-\begin{theorem}
-    \label{theorem:spjm-to-spj}
-    The SPJM query can be losslessly converted to an SPJ query.
-\end{theorem}
-\begin{proof}
-    Clearly, if the matching operator can be expressed with selection, projection, and join operators (abbr.~SPJ operators), then naturally, the theorem is correct.
-    We first discuss the matching operators under the semantics of homomorphism and prove the theorem by induction.
-    % We begin with matching operators with homomorphic semantics, and prove the theorem using induction.
-    In this proof, vertices and edges are elements in a pattern and a pattern $\mathcal{P}$ is called a strict pattern, if the adjacent vertices of each edge in $\mathcal{P}$ are specified in the pattern (e.g., (u)-[e]-(v)).
-    Otherwise, the pattern is called a loose pattern (e.g., (u)-[e]).
-    Without the loss of generality, matching operator $\mathcal{M}(GR, \mathcal{P})$ is considered.
-    Then, induction is conducted on the number of elements in $\mathcal{P}$.
-
-    When there is only one element in $\mathcal{P}$ (e.g., $\mathcal{P}=(u:\text{Person})$), such a pattern can be expressed with the selection operators (e.g., $\sigma_{label=\text{``Person''}}(V)$).
-    Please note that if there are more constraints on the element (e.g., the returned person should be at least 18 years old), more constraints can be specified with the selection operators.
-
-    Suppose for patterns with at most $n$ elements, they can be expressed with SPJ operators.
-    Denote the sequence of SPJ operators that have the same meaning as pattern $\mathcal{P}$ by $\mathcal{E}_{\mathcal{P}}$.
-    When there are $n+1$ elements in a pattern $\mathcal{P}$, let $v$ be a vertex in $\mathcal{P}$, and $e_1, \cdots, e_k$ are the edges adjacent to $v$. %connecting $v$ with the other vertices in $\mathcal{P}$.
-    $\widehat{\mathcal{P}}$ is the strict pattern obtained by removing $v$ and $e_1, \cdots, e_k$ from $\mathcal{P}$.
-    Then, $\mathcal{P}$ can be expressed with SPJ operators as follows:
-    \begin{equation*}
-        \mathcal{E}_{\widehat{\mathcal{P}}} \Join \sigma_{label=el_1}(E) \Join \cdots \Join \sigma_{label=el_k}(E) \Join \sigma_{label=vl}(V),
-    \end{equation*}
-    where $vl$ is the label of $v$, $el_1, \cdots, el_k$ are labels of $e_1, \cdots, e_k$.
-    In conclusion, adopting the homomorphism semantics, the matching operator can be expressed with SPJ operators.
-
-    Furthermore, when the matching operator adopt other semantics (e.g., isomorphism), it is straightforward to add some constraints on the elements with selection operators.
-    For instance, when the isomorphism semantics is adopted, constraints should be added to ensure that different vertices in the pattern graph match with different vertices in the database.
-    Therefore, the theorem is correct.
-\end{proof}
-\fi
 
 
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
-In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations, but has to be computed via the \EVjoin operations (\refeq{ev-join}). In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we treat it as \emph{graph index} in this paper.
+In the graph view, given a vertex $v$, it is efficient to obtain its adjacent edges and vertices (i.e., neighbors). However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations but must be computed via the \EVjoin operations (\refeq{ev-join}). While there are multiple ways to construct the graph view in the literature~\cite{gart,GRFusion}, we refer to the method introduced in GrainDB~\cite{graindb}, which is free from materializing the graph. This approach avoids the extra storage cost associated with graph materialization and ensures compatibility with the relational context,
+Specifically, GrainDB introduces an indexing technique called pre-defined join to improve the performance of join operations. As the pre-defined join essentially materializes the adjacency relationships, we treat it as a \emph{graph index} in this work.
 
 \begin{figure}
     \centering
@@ -550,8 +346,8 @@ be projected into relational tuples until the last stage that obtain the results
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
 
-When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$, 
-where the first join is to obtain the edge tuples that connect $u_s$, which are encoded into edge objects, 
+When there is no graph index, the results of $\matching(\pattern_e)$ are computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$,
+where the first join is to obtain the edge tuples that connect $u_s$, which are encoded into edge objects,
 and the second join is to obtain the associated vertex tuples of $u_t$, which are encoded into vertex objects.
 %following the encoding of vertex tuples into vertex objects and edge tuples into edge objects.
 This case is then reduced to Case I, where a join operation is performed between $\matching(\pattern'_l)$ and the computed $\matching(\pattern_e)$.
