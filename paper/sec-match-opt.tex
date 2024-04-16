@@ -165,15 +165,13 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
-We demonstrate the superiority of the graph-aware method by theoretically proving that the search space employed by the graph-aware method is exponentially smaller than that of the graph-agnostic method for optimizing the matching operator.
+The optimization of the matching operator, after transforming it using graph-agnostic and graph-aware methods, is equivalent to performing pure relational optimization and graph optimization, respectively. We compare the search space of the two optimizations rather than their time complexity using advanced optimizers for several reasons. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
-For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia}, which is the most widely used relational optimizer. We chose not to use more advanced state-of-the-art optimizers, such as~\cite{Haffnerjoinorder}, because they often employ heuristics that would complicate the analysis. Moreover, our primary goal is to compare the search space sizes of the graph-agnostic and graph-aware methods, rather than evaluating the efficiency of the optimizers themselves.
-
-According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. We have the following lemma.
+According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma establishes a lower bound on the search space complexity for this problem:
 
 \begin{lemma}
-    \label{lem:complexity-of-volcano}
-    Given a join among $n + m$ relations, the search space for a volcano optimizer is at least $o(4^{m+n-1})$.
+\label{lem:complexity-of-volcano}
+Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
 \begin{proof}
@@ -206,9 +204,10 @@ According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequ
 \end{proof}
 
 
-Subsequently, we analyze the search space when the graph-aware method is applied, which is equivalent to the number of possible decomposition trees. Although numerous works have been proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of the optimization problem has not been thoroughly analyzed.
+In contrast, when the graph-aware method is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware method:
 
-\begin{lemma} \label{lem:complexity-of-graph-aware}
+\begin{lemma}
+\label{lem:complexity-of-graph-aware}
 The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^n)$.
 \end{lemma}
 
@@ -282,12 +281,13 @@ We ultimately obtain the following theorem.
 \begin{proof}
     According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     \begin{equation*}
-        \frac{o(4^{m+n-1})}{O(4^{n-1})} = o(4^m).
+        \frac{\Omega(4^{m+n-1})}{O(4^{n-1})} = \Omega(4^m).
     \end{equation*}
 \end{proof}
 
 \begin{remark}
-
+    \label{re:search-space}
+    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n$ vertices and $n - 1$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{micro_experiment}, confirm the significant difference in search space size between the two methods.
 \end{remark}
 
 
