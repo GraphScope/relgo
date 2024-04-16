@@ -169,87 +169,58 @@ We demonstrate the superiority of the graph-aware method by theoretically provin
 
 For the purpose of this analysis, we adopt the volcano optimizer~\cite{columbia}, which is the most widely used relational optimizer. We chose not to use more advanced state-of-the-art optimizers, such as~\cite{Haffnerjoinorder}, because they often employ heuristics that would complicate the analysis. Moreover, our primary goal is to compare the search space sizes of the graph-agnostic and graph-aware methods, rather than evaluating the efficiency of the optimizers themselves.
 
-According to \reflem{graph-agnostic}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. We have the following theorem.
+According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. We have the following lemma.
 
-\begin{theorem}
-    \label{thm:complexity-of-volcano}
+\begin{lemma}
+    \label{lem:complexity-of-volcano}
     Given a join among $n + m$ relations, the search space for a volcano optimizer is at least $o(4^{m+n-1})$.
-\end{theorem}
+\end{lemma}
 
 \begin{proof}
-    We first estimate the number of possible join orders, and each join order is a logical plan of join operators.
-    Then, the search space refers to the number of physical plans corresponding to these logical plans.
-    To avoid cross production, for each explored logical plan, everytime two relations are joined together, there should be join conditions between them.
+    We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
-    \modify{Given $n + m$ relations, we first construct a graph $\mathbb{G} = (V, E)$, where each relation corresponds to a vertex in $V$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E$.
-    Then, each possible logical plan forms a spanning tree in $\mathbb{G}$, and different logical plans may form the same tree.
-    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\mathbb{G}$.}
+    Given $n + m$ relations, we construct a graph $\searchgraph = (V, E)$, where each relation corresponds to a vertex in $V$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E$. Each possible logical plan forms a spanning tree in $\searchgraph$, and different logical plans may form the same tree. Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\searchgraph$.
 
-    We consider the case that there is only one spanning tree $ST$ in $\mathbb{G}$ with $k$ edges.
-    When there are more than one spanning trees in $\mathbb{G}$, only the number of logical plans corresponding to one of these trees is computed.
-    It is obvious that the obtained number is a lower bound of the total number of possible logical plans.
+    We consider the case where there is only one spanning tree $ST$ in $\searchgraph$ with $k$ edges. When there are multiple spanning trees in $\searchgraph$, we compute the number of logical plans corresponding to one of these trees, which provides a lower bound on the total number of possible logical plans.
 
-    We start from the condition where $ST$ is a path.
-    Then, denote the number of logical plans corresponding to a spanning tree which is a path of length $k$ by $c_p(k)$, we have
+    First, we examine the case where $ST$ is a path. Let $c_p(k)$ denote the number of logical plans corresponding to a spanning tree that is a path of length $k$. We have:
     \begin{equation*}
-        \begin{split}
-            c_p(k) & = 2 * (c_p(0)c_p(k-1) + c_p(1)c_p(k-2) + \cdots + c_p(k-1)c_p(0)) \\
-            & = 2\Sigma_{i=0}^{i=k-1}c_p(i)c_p(k-1-i), \\
-            & \text{where } c_p(0) = 1.
-        \end{split}
+        c_p(k) = 2\sum_{i=0}^{i=k-1}c_p(i)c_p(k-1-i),
     \end{equation*}
-    With the generating function, it is obtained that
+    where $c_p(0) = 1$. Using the generating function, we obtain:
     \begin{equation*}
-        \begin{split}
-            c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
-            % C(2k, k)
-            % c_p(k) & = \frac{2^k}{k+1}C(2k, k) = \frac{2^k}{k+1}\frac{2k \times \cdots \times (k+1)}{k \times \cdots \times 1} \\
-            % & \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
-        \end{split}
+        c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
     \end{equation*}
 
-    Subsequently, we proceed to examine a more general scenario in which $ST$ does not necessarily represent a path, and denote the number of logical plans corresponding to $ST$ by $c(ST)$.
-    Without loss of generality, suppose there are $k$ edges in $ST$.
-    Denote the longest path in the tree by $p_1$, and its length is $P_1 = |p_1|$.
-    By removing edges in $p_1$ from $ST$, a new subgraph $ST_1$ is obtained.
-    Analogously, denote the longest path in $ST_1$ that intersects with the already removed paths (i.e., $p_1$) by $p_2$ with $P_2 = |p_2|$.
-    Then, edges in $p_2$ are removed from and subgraph $ST_2$ is obtained.
-    Since $p_1$ and $p_2$ are both paths, the number of logical plans corresponding to them are $c_p(P_1)$ and $c_p(P_2)$, respectively.
-    Suppose $p_1$ and $p_2$ intersect at vertex $v_i$, and then the operator that scans $v_i$ appears in each logical plan corresponding to $p_1$.
-    By replacing these scanning operators with the plans corresponding to $p_2$, respectively, $c(p_1 \cup p_2)$ plans are obtained, satisifying $c(p_1 \cup p_2) \geq c_p(p_1)c_p(p_2)$ because the relations corresponding to vertices in $p_1$ and those in for $p_2$ can be joined in an interleaved fashion, which is overlooked by multipling $c_p(p_1)$ and $c_p(p_2)$.
+    Next, we consider a more general scenario where $ST$ is not necessarily a path. Let $c(ST)$ denote the number of logical plans corresponding to $ST$. Suppose there are $k$ edges in $ST$. We denote the longest path in the tree by $p_1$, with length $P_1 = |p_1|$. By removing edges in $p_1$ from $ST$, we obtain a new subgraph $ST_1$. We then find the longest path $p_2$ in $ST_1$ that intersects with the already removed path $p_1$, with length $P_2 = |p_2|$. We remove edges in $p_2$ from $ST_1$ to obtain subgraph $ST_2$. Since $p_1$ and $p_2$ are both paths, the number of logical plans corresponding to them are $c_p(P_1)$ and $c_p(P_2)$, respectively. If $p_1$ and $p_2$ intersect at vertex $v_i$, the operator that scans $v_i$ appears in each logical plan corresponding to $p_1$. By replacing these scanning operators with the plans corresponding to $p_2$, we obtain $c(p_1 \cup p_2)$ plans, satisfying $c(p_1 \cup p_2) \geq c_p(p_1)c_p(p_2)$ because the relations corresponding to vertices in $p_1$ and those in $p_2$ can be joined in an interleaved fashion, which is overlooked by multiplying $c_p(p_1)$ and $c_p(p_2)$.
 
-    As $ST$ is a tree, by repeatedly finding and removing the paths as above, all the edges in $ST$ are finally removed.
-    Let the number of paths removed be $s$, we have
+    As $ST$ is a tree, by repeatedly finding and removing paths as described above, all edges in $ST$ are eventually removed. Let $s$ be the number of paths removed. We have:
     \begin{equation*}
-        \begin{split}
-            c(ST) & = c(p_1 \cup \cdots \cup p_s) \geq c_p(P_1) \cdots c_p(P_s) \\
-            & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{k}}{2^s} \geq 2^{k}.
-        \end{split}
+    \begin{split}
+        c(ST) & = c(p_1 \cup \cdots \cup p_s) \geq c_p(P_1) \cdots c_p(P_s) \\
+        & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{k}}{2^s} \geq 2^{k}.
+    \end{split}
     \end{equation*}
 
-
-    Since there are $m + n$ vertices in $\mathbb{G}$, the number of the edges in the spanning tree should be $k = m + n - 1$.
-    Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
-    We thus conclude the proof.
+    Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
 
 
-\modify{Subsequently, we analyze the time complexity of optimization when the graph-aware method is applied, which is equivalent to that of determining the optimal decomposition tree given a pattern $\pattern$}. Although numerous works have been proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the complexity of the optimization problem has not been thoroughly analyzed. To address this, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ \modify{as well as an empty graph $\pattern_{\emptyset}$.
-We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
-An edge exists from a larger\footnote{A pattern is considered larger if it contains more vertices.} sub-pattern $\pattern_1$ to a smaller sub-pattern $\pattern_2$ if it is possible for $\pattern_2$ to be the child of $\pattern_1$ in any decomposition tree. Each edge has a weight representing the cost of extending graphs matching $\pattern_2$ to those matching $\pattern_1$.
-Moreover, there are edges weighted 0 from sub-patterns in $V_1$ to $\pattern_{\emptyset}$.}
+Subsequently, we analyze the search space when the graph-aware method is applied, which is equivalent to the number of possible decomposition trees. Although numerous works have been proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of the optimization problem has not been thoroughly analyzed.
 
-Determining the exact number of edges in $\searchgraph_\pattern$ for an arbitrary pattern is non-trivial. However, since we are studying the upper bound, we can consider the worst-case scenario. Given a sub-pattern $\pattern'$ consisting of $1 < i \leq n$ vertices, \modify{the number of induced subgraphs of $\pattern'$ with $j$ vertices is at most $\binom{i}{j}$}, which constrains the maximum number of edges to $\pattern_j \in V_j$ that $\pattern'$ can connect.
-With this in mind, we can prove the following theorem:
-
-\begin{theorem} \label{thm:complexity-of-graph-aware}
+\begin{lemma} \label{lem:complexity-of-graph-aware}
 The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^n)$.
-\end{theorem}
+\end{lemma}
 
 \begin{proof}
-    \todo{refine the proof.}
-    Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\emptyset}$ in $\searchgraph_\pattern(V, E)$.
-    Therefore, the search space equals the number of paths from $\pattern$ to $\pattern_{\emptyset}$.
+    To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
+    We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
+    An edge exists from a larger (a pattern is considered larger if it contains more vertices) sub-pattern $\pattern_1$ to a smaller sub-pattern $\pattern_2$ if it is possible for $\pattern_2$ to be the child of $\pattern_1$ in any decomposition tree. Each edge has a weight representing the cost of extending graphs matching $\pattern_2$ to those matching $\pattern_1$.
+    Moreover, there are edges weighted 0 from sub-patterns in $V_1$ to $\pattern_{\emptyset}$.
+    Given the graph $\searchgraph_\pattern(V, E)$, %the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\emptyset}$ in $\searchgraph_\pattern(V, E)$.
+    the search space equals the number of paths from $\pattern$ to $\pattern_{\emptyset}$.
+
+    Determining the exact number of edges in $\searchgraph_\pattern$ for an arbitrary pattern is non-trivial. However, since we are studying the upper bound, we can consider the worst-case scenario. Given a sub-pattern $\pattern'$ consisting of $1 < i \leq n$ vertices, the number of induced subgraphs of $\pattern'$ with $j$ vertices is at most $\binom{i}{j}$, which constrains the maximum number of edges to $\pattern_j \in V_j$ that $\pattern'$ can connect.
 
     Denote the maximum number of paths from a sub-pattern with $s$ vertices (i.e., $\pattern_s \in V_s$) to $\pattern_{\emptyset}$ by $\decompnum_\pattern(s)$.
     Please note that $\decompnum_\pattern(1) = 1$ and $\decompnum_\pattern(n)$ is an upper bound of the search space for determining the optimal decomposition tree for $\pattern$.
@@ -301,22 +272,26 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     \end{proof}
 }
 
-Based on \refthm{complexity-of-volcano} and \refthm{complexity-of-graph-aware}, we can ultimately obtain the following theorem.
+We ultimately obtain the following theorem.
 
 \begin{theorem}
     \label{thm:compare-search-space}
-    The search space of optimization with the graph-aware method is exponentially smaller than that with the graph-agnostic method.
+    The graph-aware method yields a search space that is exponentially smaller than that of the graph-agnostic method,
+    for optimizing the matching operator in an \spjm query.
 \end{theorem}
 \begin{proof}
+    According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     \begin{equation*}
         \frac{o(4^{m+n-1})}{O(4^{n-1})} = o(4^m).
     \end{equation*}
 \end{proof}
 
-\comment{In practical implementation, efficient pruning strategies can be employed to trim the search space. 
+\todo{Add some heuristic explanation to the results (why $m$ is gone in graph-aware method), and also include a micro benchmark to show the results.}
+
+\comment{In practical implementation, efficient pruning strategies can be employed to trim the search space.
 We conducted experiments on Linked Data Benchmark Council (LDBC) social network benchmark \cite{ldbc_snb} with using the dataset with scale factor of 30.
-The utilized queries are those in \cite{graindb}. 
-In the experiments, Calcite was used as a typical volcano optimizer, while our \name employed the Graph-aware method. 
+The utilized queries are those in \cite{graindb}.
+In the experiments, Calcite was used as a typical volcano optimizer, while our \name employed the Graph-aware method.
 The experimental results of optimizing queries using Calcite and \name are shown in \reffig{exp-optimization-sf30}.
 
 \begin{figure}[ht]
@@ -525,7 +500,7 @@ Therefore, it is possible to leverage relational databases to process matching o
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
-In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations, but has to be computed via the \EVjoin operations (\refeq{ev-join}). In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we consider it as \emph{graph index} in this paper.
+In the graph view, given a vertex $v$, it is expected to be efficient to obtain its adjacent edges and neighbors. However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations, but has to be computed via the \EVjoin operations (\refeq{ev-join}). In GrainDB~\cite{graindb}, the authors introduced an indexing technique called pre-defined join to improve the performance of such join operations. As the pre-defined join essentially materializes the adjacency relationships, we treat it as \emph{graph index} in this paper.
 
 \begin{figure}
     \centering
@@ -549,13 +524,15 @@ The VE-index, shown in \reffig{graph-index}(b), is created on the table $\relati
 We can adopt GrainDB's approach to construct the graph indexes during the \rgmapping process. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $\tau_e \in R_e$ by including $\rowid(\lambda_e^s(\tau_e))$ and $\rowid(\lambda_e^t(\tau_e))$, which are the row ids of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $\tau_{v_s} \in R_{v_s}$ by including the row ids of all tuples $\tau_e \in R_e$ such that $\lambda_e^s(\tau_e) = \tau_{v_s}$, along with the row ids of the corresponding tuples $\tau_{v_t} \in R_{v_t}$ such that $\lambda_e^t(\tau_e) = \tau_{v_t}$.
 The construction of VE-index on $R_{v_t}$ is analogous.
 
+\comment{
 \begin{remark}
   Several alternative approaches exist for handling the \rgmapping process. One such approach, proposed in~\cite{gart}, involves directly materializing the property graph using an additional graph store, rather than simply building graph indexes on the relational data. While this method may enable more efficient graph processing, it comes with the trade-off of requiring extra storage space and incurring higher maintenance costs. Moreover, \spjm queries often involve a combination of graph and relational operations, which may not be fully supported by the graph store alone.
 \end{remark}
+}
 
 With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
 When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
-However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes. 
+However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
 \modify{In \refsec{experiment-opt}, we demonstrated through experiments that using this index can be about twice as fast compared to not using the index.}
 Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
 \modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
