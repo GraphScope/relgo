@@ -287,34 +287,23 @@ We ultimately obtain the following theorem.
 
 \begin{remark}
     \label{re:search-space}
-    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n$ vertices and $n - 1$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{micro_experiment}, confirm the significant difference in search space size between the two methods.
+    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n + 1$ vertices and $n$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two methods.
 \end{remark}
 
-To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method. 
-Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges. 
-The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
+%To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method. 
+%Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges. 
+%The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
 
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
-        \caption{Search Space Comparison.}
-        \label{fig:exp-search-space}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_time.pdf}
-        \caption{Search Space Traversal Time Comparison.}
-        \label{fig:exp-search-time}
-    \end{subfigure}
-    \caption{Compare the search space of the graph-agnostic and graph-aware methods.}
-    \label{fig:exp-compare-search-space-and-time}
+    \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
+    \caption{Search Space Comparison.}
+    \label{fig:exp-search-space}
 \end{figure}
 
-Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit.
-\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
-Specifically, the results also demonstrate that the search space of the graph-agnostic method increase exponentially faster than that of the graph-aware method, which corroborates the correctness of \refthm{compare-search-space}.
+%Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit.
+%\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
+%Specifically, the results also demonstrate that the search space of the graph-agnostic method increase exponentially faster than that of the graph-aware method, which corroborates the correctness of \refthm{compare-search-space}.
 
 
 \subsection{Physical Implementation}
@@ -396,7 +385,7 @@ Consequently, for the tuple $\tau$, the physical \expandintersect~ operator perf
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
 \item Return a new tuple as
 \[
-    (\tau, \bigcap_{1 \leq i \leq k}\adj^E(v_i), \bigcap_{1 \leq i \leq k}\adj(v_i)).
+    (\tau, \adj^E(v_i), \cdots, \adj^E(v_k), \bigcap_{1 \leq i \leq k}\adj(v_i)).
 \]
 \end{enumerate}
 
