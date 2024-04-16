@@ -60,7 +60,7 @@ where $\Phi_l$ and $\Phi_r$ are the execution plans for computing $\matching(\pa
 
 When a graph index is available, there are three physical implementations of $\gjoin$, depending on the type of $\pattern'_r$, and the calculation of $\cost(\gjoin)$ differs accordingly:
 \begin{itemize}
-\item If $\pattern'_r$ is a single-edge pattern, $\gjoin$ is implemented using the \expand~ operator. The cost is calculated based on the cardinality of $\matching(\pattern'_l)$ (can be looked up in the \glogue) and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
+\item If $\pattern'_r$ is a single-edge pattern, $\gjoin$ is implemented using \expandedge~ followed by \getvertex. The cost is calculated based on the cardinality of $\matching(\pattern'_l)$ (can be looked up in the \glogue) and the average degree of the graph, namely $|\matching(\pattern'_l)| \times \overline{d}$.
 \item If $\pattern'_r$ is a complete star, $\gjoin$ is implemented using the \expandintersect~ operator. The cost is calculated based on the cardinality of $\matching(\pattern'_l)$ and the average intersection size of the neighbors of the vertices being intersected, which is maintained on the corresponding edge from $P'$ to $\pattern'_l$ in \glogue.
 \item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
@@ -96,10 +96,10 @@ The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pat
 where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
 \stitle{\joinfuserule.}
-The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
-However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the edge properties output by \expandedge~ are essential.
+The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, where these two operators are typically paired in the physical implementation of the matching operator. This rule aims to combine the two operators into a single \expand~ operator that retrieves the neighboring vertices directly, to enhance the plan's efficiency.
+However, this fusion strategy is conditional and precedes a critical examine-and-trim step to verify the necessity of edge properties provided by \expandedge. 
 If subsequent relational operations do not require any edge properties output by \getvertex~ (e.g., no property projection or filtering), the edge properties can be trimmed.
-In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, which can directly retrieve the neighboring vertices when the graph indices are available.
+In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, which can directly retrieve the neighboring vertices by looking up the VE-index of the source vertex when the graph indices are available.
 %
 % The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
 % However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential.
