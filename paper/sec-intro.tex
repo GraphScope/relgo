@@ -1,21 +1,21 @@
 \section{Introduction}
 \label{sec:introduction}
 
-In the realms of data management and analytics, relational databases have long been the bedrock of structured data storage and retrieval, empowering a plethora of applications across domains ranging from finance to healthcare and beyond. The ubiquity of these databases has been supported by the advent of Structured Query Language (SQL)~\cite{chamberlin1974sequel}, a standardized language that has been adopted widely by various relational database management systems (RDBMS) for managing data through schema-based operations. SQL has been pivotal in the progression of data management, enabling the efficient manipulation of complex data structures and fostering interoperability between disparate systems.
+In the realms of data management and analytics, relational databases have long been the bedrock of structured data storage and retrieval, empowering a plethora of applications across domains ranging from finance to healthcare and beyond. The ubiquity of these databases has been supported by the advent of Structured Query Language (SQL)~\cite{chamberlin1974sequel}, a standardized language that has been adopted widely by various relational database management systems for managing data through schema-based operations. SQL has been pivotal in the progression of data management, enabling the efficient manipulation of complex data structures and fostering interoperability between disparate systems.
 
 Despite its considerable success and broad adoption, SQL has its limitations, particularly when it comes to representing and querying intricately linked data. Consider, for instance, the relational tables of \kk{Person} and \kk{Knows}, the latter symbolizing a many-to-many relationship between instances of the former. Constructing a SQL query to retrieve a group of four persons who are all mutually acquainted is not a straightforward endeavor, potentially leading to a cumbersome and complex SQL expression.
 
 In comparison, such a scenario could be elegantly and succinctly addressed using graph query languages, exemplified by Cypher~\cite{opencypher}, a language where queries are expressed as intuitive and concise graph pattern matching. This discrepancy between the relational and graph querying paradigms has given rise to the innovative SQL/Property Graph Queries (SQL/PGQ), an extension proposed as part of SQL 2023 standard~\cite{sql-pgq}. SQL/PGQ is designed to amalgamate the extensive capabilities of SQL with the inherent benefits of graph pattern matching. With SQL/PGQ, it is now possible to define and query graphs within the comfort of SQL expressions, transforming otherwise complex relational queries -- characterized by multiple joins -- into simpler and more intuitive graph queries.
 
 \begin{example}
-    \label{example:introduction:sqlpgq}
-    Consider the four relational tables in the database schema: \kk{Person(id, name, place\_id)}, \kk{Message(id, content, date)}, \kk{Like(p\_id, m\_id, date)}, and \kk{Place(id, name)}. Within the SQL/PGQ framework, a property graph $G$ is articulated as a \lstinline{GRAPH_TABLE}, established on the basis of the first three tables. In this mapping, rows from \kw{Person} and \kw{Message} are interpreted as vertices with labels ``Person'' and ``Message'' respectively, while rows from Like represent edges with the label ``Likes''. This mapping process will be formally elaborated in \refdef{rgmapping}. An SQL/PGQ query to discover pairs of individuals who are acquainted with one another and share an affinity for the same message, with the additional condition that the first person is named ``Tom'', is formulated as follows:
+    \label{ex:introduction:sqlpgq}
+    Consider the four relational tables in the database schema: \kk{Person(id, name, place\_id)}, \kk{Message(id, content, date)}, \kk{Like(p\_id, m\_id, date)}, and \kk{Place(id, name)}. Within the SQL/PGQ framework, a property graph $G$ is articulated as a \lstinline{GRAPH_TABLE}, established on the basis of the first three tables. In this mapping, rows from \kw{Person} and \kw{Message} are interpreted as vertices with labels ``Person'' and ``Message'' respectively, while rows from Like represent edges with the label ``Likes''. This mapping process will be formally elaborated in \refdef{rgmapping}. An SQL/PGQ query to discover the friends of a person named ``Tom'' and the place they live in, where ``Tom'' and friends share an affinity for the same message, can be formulated as follows:
     \begin{lstlisting}
         SELECT p2_name, place.name
         FROM GRAPH_TABLE (G
             MATCH (p1:Person)-[:Likes]->(m:Message),
                   (p2:Person)-[:Likes]->(m:Message),
-                  (p1)-[:Knows]-(p2) // mutual Knows
+                  (p1)-[:Knows]->(p2) // mutual Knows
             COLUMNS (
                 p1.name AS p1_name,
                 p1.place_id AS p1_place_id,
@@ -51,7 +51,7 @@ We have made four pivotal contributions in this paper.
 
 \item We have implemented \name~ based on the industrial relational optimization framework Calcite~\cite{calsite}.
 \todo{add more of implementations and experiment findings.}
-Our contributions are substantiated by experimental results that underscore the efficacy of the proposed optimization framework. 
+Our contributions are substantiated by experimental results that underscore the efficacy of the proposed optimization framework.
 \modify{Specifically, end-to-end testing reveals that the execution plans crafted by \name consistently outperform those by GrainDB and DuckDB, outpacing them by factors of more than 2$\times$ and 5$\times$ across various benchmarks, respectively. Moreover, targeted experiments with micro benchmarks confirm the effectiveness of the heuristic rules employed in \name. For example, the omission of the \filterrule rule may lead to a performance degradation in plan execution by up to two orders of magnitude.
 }
 These results highlight the advantages of our approach in real-world applications, providing empirical evidence to support the theoretical advancements posited in our study.

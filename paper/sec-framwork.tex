@@ -5,9 +5,6 @@ This section presents \name, a converged relational/graph optimization framework
 processing of \spjm queries. We begin by introducing a naive solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
 
-\todo{add a comprehensive figure to include: framework overview, naive workflow, converged workflow}
-
-
 
 %\begin{figure}
 %    \centering
@@ -26,15 +23,10 @@ method for solving the matching operator. We then delve into the converged workf
 
 \subsection{Graph-Agnostic Optimizer}
 \label{sec:relational-only}
-The graph-agnostic optimizer is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks (\todo{can provide experiment results/cases}):
+The graph-agnostic optimizer is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
-\begin{itemize}
-\item The plan for solving the matching operator reflects a naive method of edge-based join plan, which is not worst-case optimal~\cite{lai2019distributed,mhedhbi2019optimizing}.
-\item After the matching operator has been transformed, the relational optimizer may treat vertex and edge relations as regular relations. Consequently, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
-\end{itemize}
-
-\subsection{The Converged Solution}
-As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
+\subsection{The Converged Optimizer}
+As illustrated in \reffig{framework-workflow}, the core workflow of the \name framework consists of two components: \emph{graph optimization} and \emph{relational optimization}. The graph optimization is responsible for handling the graph component in an \spjm query, leveraging graph optimization techniques to determine the optimal decomposition tree of the matching operator. On the other hand, the relational optimization takes over to optimize the relational component in the query, applying existing relational optimization techniques.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
 In addition to the core workflow, we further explore heuristic rules that highlight the non-trivial interplay between the relational and graph components in an \spjm query.
 
@@ -42,9 +34,9 @@ In addition to the core workflow, we further explore heuristic rules that highli
 
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
-\subsubsection{The Graph Optimizer}
+\subsubsection{The Graph Optimization}
 \label{sec:graph-optimizer}
-The graph optimizer leverages the graph-aware method for transforming the matching operator, as introduced in \refsec{graph-aware}. In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
+In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
 \stitle{\glogue~Construction.} \glogs's optimization techniques are grounded on a data structure called \glogue. Essentially, \glogue~ is similar to the graph structure $\searchgraph_{\pattern}(V, E)$ that we introduced in \refsec{compare-search-space} for analyzing the search space of the graph-aware method. The main difference is that \glogue~not only maintains sub-patterns of a specific pattern but also include all patterns with a number of vertices within a threshold ($k=3$). Each vertex $\pattern'$ in the \glogue~ maintains a numeric value corresponding to the cardinality of the pattern in the graph, denoted as $|\matching(\pattern')|$. Computing $|\matching(\pattern')|$ directly on the original graph can be computationally expensive, especially for large graphs. To address this issue, \glogs proposes a sparsification technique that constructs a smaller, representative subgraph $G'$. Instead of computing $|\matching(\pattern')|$, \glogs estimates the frequency of the pattern using $|\matching_{G'}(\pattern')|$, which is computed on the smaller sparsified graph $G'$.
 
@@ -68,36 +60,42 @@ When a graph index is available, there are three physical implementations of $\g
 In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
 
 \stitle{Plan Computation.} Searching for the optimal execution plan remains the same as in \glogs. The optimal execution plan is obtained by traversing the \glogue~ from the queried pattern $\pattern$ in a top-down manner.
-Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained.
+Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained. A detailed description of the algorithm can be found in~\cite{GLogS}.
+We have demonstrated in \reffig{framework-workflow}(c) a physical plan for matching the given triangle pattern
+\todo{describe the physical plan}.
 
-\subsubsection{The Relational Optimizer}
-Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimizer is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
 
-It's important to note that before $\matching(\pattern)$ can be integrated with the remaining \spj component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
+\subsubsection{The Relational Optimization}
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
+
+It's important to note that before $\matching(\pattern)$ can be integrated with the remaining relational component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
 
 The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the relational optimizer, \scangraphtable~ behaves like a standard \scan operator, providing a relational interface to the matched results. This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
 
 \subsubsection{Heuristic Optimization Rules}
-We explore heuristic rules to address the non-trivial interplay between the relational and graph components in an \spjm query.
+In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
 
-\todo{other rules?}
-
-\stitle{\filterrule.} To elaborate the rule, we redefine a pattern $(\pattern, \Omega)$, introducing constraints within $\Omega$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
+\stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \Omega)$, introducing constraints within $\Omega$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
 
 Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
 \[
 \sigma_{d'_{v_a}} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern))
 \]
-The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pattern vertex that is projected by $\widehat{\pi}$ from the matched results. There is wasteful computation if the selection is applied after the costly pattern matching. A more efficient approach is to push the selection predicate down into the matching operator. An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans. The \filterrule is formally defined as:
+The predicate $d'_{v_a}$ defines a predicate in terms of an attribute of the pattern vertex that is projected by $\widehat{\pi}$ from the matched results. The motivation example in \refex{introduction:sqlpgq} illustrates such a case, where the selection predicate \kk{g.p1\_name = ``Tom''} is applied to the pattern vertex $v_{p_1}$.
+There is wasteful computation if the selection is applied after the costly pattern matching. A more efficient approach is to push the selection predicate down into the matching operator.
+%An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans.
+The \filterrule is formally defined as:
 \begin{equation*}
 \sigma_{\Omega} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern)) \\
 \equiv \sigma_{\Omega'} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching((\pattern, \{d_v\}))),
 \end{equation*}
 where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
+It is recommended to apply the \filterrule before graph optimization, as this allows the optimizer to leverage the pushed-down constraints to recalculate the cost, potentially generating more efficient execution plans. \reffig{framework-workflow}(b) showcases the effects of applying the \filterrule, where the selection predicate \kk{g.p1\_name = ``Tom''} is pushed down into the matching operator.
+
 \stitle{\joinfuserule.}
 The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, where these two operators are typically paired in the physical implementation of the matching operator. This rule aims to combine the two operators into a single \expand~ operator that retrieves the neighboring vertices directly, to enhance the plan's efficiency.
-However, this fusion strategy is conditional and precedes a critical examine-and-trim step to verify the necessity of edge properties provided by \expandedge. 
+However, this fusion strategy is conditional and precedes a critical examine-and-trim step to verify the necessity of edge properties provided by \expandedge.
 If subsequent relational operations do not require any edge properties output by \getvertex~ (e.g., no property projection or filtering), the edge properties can be trimmed.
 In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, which can directly retrieve the neighboring vertices by looking up the VE-index of the source vertex when the graph indices are available.
 %
@@ -108,9 +106,8 @@ In this case, the \expandedge~ can be fused with the \getvertex~ to form a singl
 % Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
 \subsection{System Implementation}
-We engineered the frontend of \name in Java and built it upon Apache Calcite, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.
+We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite}, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.
 %The frontend of \name is responsible for parsing the input \spjm query, constructing the logical plan, and invoking the graph and relational optimizers to generate the optimal physical plan.
-\todo{mention parser or not?}
 Firstly, we enhanced Calcite's SQL parser to recognize SQL/PGQ extensions, specifically to parse the \lstinline{GRAPH_TABLE} clause.
 We created a new \lstinline{ScanGraphTableRelNode} that inherits from Calcite's core \lstinline{RelNode} class, translating the \lstinline{GRAPH_TABLE} clause into this newly defined operator within the logical plan.
 Following the formation of the logical plan, the frontend invokes the converged optimizer to generate the optimal physical plan.
@@ -121,12 +118,15 @@ For the remaining relational operators in the query, we leverage Calcite's built
 Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
 
 We have developed the backend of the \name framework using C++, on top of DuckDB as the underlying relational execution engine, to demonstrate the optimization capabilities that \name can bring.
-We integrated graph index support, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations, leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
-Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
-However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
-To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB-compatible executable operators.
-For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
-Moreover, for the \intersect~ operator, we crafted a new worst-case-optimal join implementation, which achieves better performance compared to the traditional multiple join that is not worst-case optimal in DuckDB.
+We integrated graph index support in GrainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
+%Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
+%However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
+With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the predefined join in GrainDB.
+Note that we craft a new implementation called merge sip join for the support of \expandintersect.
+Without graph index, the \hashjoin~ operator is used throughout the entire plan.
+To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GrainDB-compatible executable operators.
+%For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
+%Moreover, for the \intersect~ operator, we crafted a new worst-case-optimal join implementation, which achieves better performance compared to the traditional multiple join that is not worst-case optimal in DuckDB.
 This runtime module essentially bridges the gap between the optimized plans produced by the \name framework and DuckDB's execution engine, thereby validating \name's practicality and its potential to improve the performance of \spjm queries on an established relational database system.
 
 % The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
@@ -134,6 +134,7 @@ This runtime module essentially bridges the gap between the optimized plans prod
 % Specifically, we incorporated \glogue as a high-order statistics provider, which precomputed the small patterns with size up to $k$ (usually $k=3$) together with their cardinalities, for a more accurate cost estimation of the matching operator.
 %This pre-computation are based on the sampled subsets of vertex and edge relations from the database, which are further constructed into a sparsified graph.
 
+\comment{
 In the Converged Optimizer,
 we incorporated both graph optimization techniques and relational optimization techniques, to optimize the \spjm queries in a converged manner.
 We use the rule-based optimization planner named HepPlanner in Calcite, to plug in heuristic optimization rules like \filterrule and \joinfuserule. We set up each rule by specifying the conditions under which it activates and the actions it takes once those conditions are met.
@@ -141,7 +142,7 @@ For more nuanced optimization, we employ the VolcanoPlanner, a cost-based optimi
 We have crafted a top-down search algorithm that calculates the most efficient physical plan for the match operator, leveraging the cost model outlined in \refsec{graph-optimizer}. The algorithm is informed by advanced statistics obtained from the Metadata Provider, ensuring a more precise cost estimation.
 For the relational part, Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques, is leveraged to fine-tune the rest of the relational operators in the query.
 The Converged Optimizer generates its output as a unified plan formatted with Google Protocol Buffers (protobuf)\cite{protobuf}. This serialization format is both platform-independent and highly interoperable, facilitating the easy conversion of the unified plan into executable query plans tailored for the destination database system.
-
+}
 %To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GrainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
 
 \comment{
