@@ -64,7 +64,7 @@ We have the following lemma.
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
-The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $l_{u_0}$, which is mapped from the relation $\relation{u}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
+The proof proceeds by induction, starting with a pattern graph $\pattern_0$ with a single vertex and no edges. It is clear that $\matching(\pattern_0)$ yields a subset of vertices with label $\lab(u_0)$, which is mapped from the relation $\relation{\lab(u_0)}$ via $\rgmapping$. As a result, we have $R_0 = \gproject(\matching(\pattern_0)) = \relation{\lab(u_0)}$.
 
 Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching $\pattern_1$ is equivalent to retrieving the edge relation, together with the corresponding source and target vertices. Therefore, we have:
 \[ R_1 = \gproject(M(\pattern_1)) = \relation{\lab(u_{s_1})} \evjoin \relation{\lab(e_1)} \evjoin \relation{\lab(u_{t_1})} \]
@@ -75,7 +75,7 @@ where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and 
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
-    &= \widehat{\pi}_{A_1*}(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \widehat{\pi}_{A_1*}(\matching(\pattern_{k-1})) \\
+    &= \widehat{\pi}_{A_1*}(\matching(\pattern_{e_k})) \Join_{attr_{V_o}}  \widehat{\pi}_{A_2*}(\matching(\pattern_{k-1})) \\
     &= \relation{\lab(u_{s_k})} \evjoin \relation{\lab(e_k)} \evjoin \relation{\lab(u_{t_k})} \Join_{attr_{V_o}} R_{k-1}
 \end{split}
 \end{equation*}
