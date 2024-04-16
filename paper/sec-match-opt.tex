@@ -177,17 +177,16 @@ According to \reflem{graph-agnostic}, the graph-agnostic method must produce a s
 \end{theorem}
 
 \begin{proof}
-    \todo{refine the proof.}
-    To obtain the search space, we first estimate the number of possible join orders, and each join order is a logical plan of join operators.
+    We first estimate the number of possible join orders, and each join order is a logical plan of join operators.
     Then, the search space refers to the number of physical plans corresponding to these logical plans.
     To avoid cross production, for each explored logical plan, everytime two relations are joined together, there should be join conditions between them.
 
-    \modify{Given $n + m$ relations, we first construct a graph $G_R = (V_{G_R}, E_{G_R})$, where each relation corresponds to a vertex in $V_{G_R}$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E_{G_R}$.
-    Then, each possible logical plan forms a spanning tree in $G_R$, and different logical plans may form the same tree.
-    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $G_R$.}
+    \modify{Given $n + m$ relations, we first construct a graph $\mathbb{G} = (V, E)$, where each relation corresponds to a vertex in $V$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E$.
+    Then, each possible logical plan forms a spanning tree in $\mathbb{G}$, and different logical plans may form the same tree.
+    Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\mathbb{G}$.}
 
-    We consider the case that there is only one spanning tree $ST$ in $G_{R}$ with $k$ edges.
-    When there are more than one spanning trees in $G_R$, only the number of logical plans corresponding to one of these trees is computed.
+    We consider the case that there is only one spanning tree $ST$ in $\mathbb{G}$ with $k$ edges.
+    When there are more than one spanning trees in $\mathbb{G}$, only the number of logical plans corresponding to one of these trees is computed.
     It is obvious that the obtained number is a lower bound of the total number of possible logical plans.
 
     We start from the condition where $ST$ is a path.
@@ -226,10 +225,6 @@ According to \reflem{graph-agnostic}, the graph-agnostic method must produce a s
         \end{split}
     \end{equation*}
 
-    %Thus, the number of logical plans w.r.t.~a spanning tree is
-    %\begin{equation*}ƒ
-    %    \frac{2^{m+n-1}}{m+n}C(2m+2n-2, m+n-1) \geq \frac{4^{m+n-1}}{m+n}.
-    %\end{equation*}
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of the edges in the spanning tree should be $k = m + n - 1$.
     Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, so is the complexity of join order optimization with Calcite.
