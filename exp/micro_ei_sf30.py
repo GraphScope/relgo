@@ -3,7 +3,7 @@ import numpy as np
 
 # matplotlib.rcParams.update({'font.size': 22})
 
-xlabel = ['QC[1]', 'QC[2]', 'QC[3]']
+xlabel = ["QC[1]", "QC[2]", "QC[3]"]
 
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
@@ -18,20 +18,40 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.bar(xaxis, y_ours, color='lightgreen', edgecolor='k', width=width, hatch='-', label='RelGo')
-plt.bar(xaxis + width, y_woei, color='salmon', edgecolor='k', width=width, hatch='\\', label='RelGoNoEI')
+plt.figure(figsize=(10, 6))
 
-plt.xticks(xaxis_final, xlabel, fontsize=22)
-plt.yticks(fontsize=22)
+plt.bar(
+    xaxis,
+    y_ours,
+    color="lightgreen",
+    edgecolor="k",
+    width=width,
+    # hatch="/",
+    label="RelGo",
+)
+plt.bar(
+    xaxis + width,
+    y_woei,
+    color="salmon",
+    edgecolor="k",
+    width=width,
+    # hatch="\\",
+    label="RelGoNoEI",
+)
+
+plt.xticks(xaxis_final, xlabel, fontsize=28)
+plt.yticks(fontsize=28)
 
 plt.margins(0.08)
 
-plt.ylabel("Time Cost (ms)", fontsize=22)
+plt.ylabel("Time Cost (ms)", fontsize=28)
 
-plt.yscale('log')
+plt.yscale("log")
 
-plt.legend(loc="upper left", fontsize=16)
+plt.grid(linestyle="--", axis="y")
+
+plt.legend(loc="upper left", fontsize=32)
 plt.tight_layout()
 # plt.show()
 
-plt.savefig('../paper/figures/exp/ablation_ei_sf30.pdf', bbox_inches='tight')
+plt.savefig("../paper/figures/exp/ablation_ei_sf30.pdf", bbox_inches="tight")
