@@ -161,12 +161,14 @@ The projection operation is designed to reflect the \lstinline{COLUMNS} clause i
 to retrieve specific attributes from vertices and edges as required. For simplicity, we assume that all
 attributes are extracted unless otherwise specified.
 
-In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
+In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}. \reffig{intro-rgmapping-example}(c) illustrates the \spjm query skeleton corresponding to the SQL/PGQ query in \refex{introduction:sqlpgq}.
 
+\comment{
 \begin{example}
-    \reffig{intro-rgmapping-example}(c) illustrates an example of an \spjm query, along with its corresponding SQL/PGQ expression. The query's objective is to identify pairs of persons who like the same message, know each other, and where one of them resides in Germany. As per the query, once the results of the matching operator are obtained (as described in \refex{matching}), a $\gproject$ operator is applied to extract attributes from all vertices, forming a relational table. Subsequently, the join, selection, and projection operators are employed to compute the final results.
+    \reffig{intro-rgmapping-example}(c) illustrates an example of an \spjm query, along with its corresponding SQL/PGQ expression. The query's semantic is to identify Tom's friends (and their living place) who like the same messages as Tom. As per the query, once the results of the matching operator are obtained (as described in \refex{matching}), a $\gproject$ operator is applied to extract attributes from all vertices, forming a relational table. Subsequently, the join, selection, and projection operators are employed to compute the final results.
     %Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
 \end{example}
+}
 
 \reftable{notations} summarizes frequently used notations in this paper.
 \begin{table}[ht]

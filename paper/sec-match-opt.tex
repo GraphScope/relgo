@@ -423,19 +423,25 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
 
 \begin{example}
     \label{ex:physical-implementation}
-    Given $\pattern_0$ in \reffig{match-decomposition}, a decomposition tree and the corresponding logical plan is presented.
-    The implementation of the decomposition tree follows a bottom-up order.
-    Firstly, the join operation between $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
+    Given $\pattern$ in \reffig{match-decomposition}, a decomposition tree and its corresponding logical plan are presented. We illustrate the physical implementation of $\matching(\pattern_1) \gjoin \matching(\pattern_2)$ using \expandintersect when a graph index is available.
+    Consider the tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example. First, the \expandedge and \getvertex operators are applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, resulting in
+    \begin{equation*}
+        \begin{split}
+    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]), \text{and} \\
+    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}]).
+        \end{split}
+    \end{equation*}
+    Next, the intersection process is conducted. Since $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, the edges in both sets that have $v_{m_1}$ as the target vertex are retained, resulting in $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}, e_{l_2}, v_{m_1}])$. Finally, the tuple is flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, e_{l_1}, e_{l_2}, v_{m_1})$.
+
+    \comment{
+    Case II: $\matching(\pattern_3) \gjoin \matching(\pattern_4)$ is implemented using \expandedge~and \getvertex. Take $v_{p_1} \in \matching(\pattern_3)$ as an example, we first do \expandedge by looking up the
+    VE-index corresponding to $v_{p_1}$ in \reffig{graph-index}(b), which
+    locates the edge $e_{}$ the $0^{th}$ row of $\relation{\text{Likes}}$. Then, \getvertex~is computed by looking up the EV-index \reffig{graph-index}(a), which locates the vertex tuples corresponding to $v_{m_1}$
+
+    is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
     Thus, when there is no graph index on $\relation{Likes}$, the results of $\matching(\pattern_4)$ is computed via $\relation{Person} \Join_{person\_id = pid1} \relation{Knows} \Join_{pid2 = person\_id} \relation{Person}$.
     Specifically, the results include tuples $(v_{p_1}, e_{k_1}, v_{p_2})$, $(v_{p_2}, e_{k_2}$, $v_{p_1})$, $(v_{p_2}, e_{k_3}, v_{p_3})$, and $(v_{p_3}, e_{k_4}, v_{p_2})$.
     Then, since $\pattern_3$ is a single-vertex pattern whose vertex exists in $\pattern_4$, the results of the join equals $\matching(\pattern_4)$.
     Otherwise, if a graph index exists, $\matching(\pattern_4)$ can be computed with \expandedge~and \getvertex.
-
-    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m}, \{u_{p_1}, u_{p_2}\})$ is a complete $2$-star pattern.
-    This join pretains to Case III and suppose the graph indexes are available.
-    Take tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example, where $u_{p_1}$ and $u_{p_2}$ in $\pattern$ match with $v_{p_1}$ and $v_{p_2}$, respectively.
-    \expandedge~operator is first applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, and the results are $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}])$ and $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$, respectively.
-    Then, intersections are applied.
-    As $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, edges connected to $v_{m_1}$ are reserved and the returned tuple is $(v_{p_1}, e_{k_1}, v_{p_2}, [v_{m_1}])$.
-    The tuple can be flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, v_{m_1})$ if necesary.
+    }
 \end{example}
