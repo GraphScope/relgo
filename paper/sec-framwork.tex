@@ -1,6 +1,6 @@
 \section{The Converged Optimizations Framework}
 \label{sec:optimizations}
-
+\enlargethispage{1em}
 This section presents \name, a converged relational/graph optimization framework designed to optimize the query
 processing of \spjm queries. We begin by introducing a naive solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
@@ -20,7 +20,7 @@ method for solving the matching operator. We then delve into the converged workf
     \label{fig:framework-workflow}
 \end{figure*}
 
-\enlargethispage{1em}
+
 
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
@@ -37,6 +37,8 @@ In addition to the core workflow, we further explore heuristic rules that highli
 
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
+\enlargethispage{1em}
+
 \subsubsection{The Graph Optimization}
 \label{sec:graph-optimizer}
 In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
@@ -44,6 +46,8 @@ In this work, we adopt the graph optimization techniques developed in \glogs~\ci
 \stitle{\glogue~Construction.} \glogs is built upon a data structure called \glogue, which is essentially a graph $\searchgraph_{\pattern}(V, E)$. In this graph, each vertex represents a pattern $\pattern'$ consisting of up to $k$ vertices (typically, $k=3$) that has non-empty matched instances in the original graph. There is an edge from $\pattern''$ to $\pattern'$, if there is a decomposition tree where $\pattern''$ is a child node of $\pattern'$.
 
  Each vertex $\pattern'$ in the \glogue maintains $|\matching(\pattern')|$, denoting the cardinality of the pattern. To reduce computation costs, \glogs employs a sparsification technique that constructs a smaller subgraph $G'$. The cardinality of the pattern can then be estimated using $|\matching_{G'}(\pattern')|$, computed based on the subgraph $G'$. In our work, we adapt this sparsification technique to construct the \glogue. To do so, we sample a subset of vertex and edge relations during the \rgmapping process. Once the subset of relations is obtained, they can serve as the input tables to the techniques presented in~\cite{gart} for constructing the sparsified graph $G'$.
+
+ \enlargethispage{1em}
 
 \stitle{Cost Calculation.} The optimization process is essentially searching for the execution plan that incurs the minimal cost. Let the cost of an execution plan $\Phi$ for computing $\matching(\pattern)$ be $\cost_\Phi(\pattern)$. %The graph optimizer aims to find an optimal execution plan such that $\cost_\Phi(\pattern)$ is minimized. Clearly, this can be solved using dynamic programming~\cite{GLogS}.
 
@@ -72,7 +76,6 @@ In the absence of a graph index, \hashjoin~ is used for the entire plan, where t
 \stitle{Plan Computation.} Searching for the optimal execution plan in \name remains the same as in \glogs. The optimal plan is obtained by searching for the shortest path in the \glogue from the single-vertex pattern to the queried pattern.  %The process is repeated until the $\pattern$ node is reached, at which point the optimal execution plan is obtained.
 \reffig{framework-workflow}(c) demonstrates a physical plan for matching the given triangle pattern when a graph index is present. The plan reflects the example in~\refex{physical-implementation}, with one exception: the pair of \expandedge~ and \getvertex~ operators is fused into a single \expand~ operator, which will be discussed as a heuristic rule called \joinfuserule.
 
-\enlargethispage{1em}
 
 \subsubsection{The Relational Optimization}
 Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
@@ -121,6 +124,7 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 % Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
 \enlargethispage{1em}
+
 
 \subsection{System Implementation}
 We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite}, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.
