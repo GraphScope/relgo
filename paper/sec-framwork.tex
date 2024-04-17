@@ -21,11 +21,11 @@ method for solving the matching operator. We then delve into the converged workf
 \end{figure*}
 
 
-\subsection{Graph-Agnostic Optimizer}
+\subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
-The graph-agnostic optimizer is straightforward: it applies the graph-agnostic method to transform the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
+The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
-\subsection{The Converged Optimizer}
+\subsection{The Converged Approach}
 \label{sec:converged}
 As illustrated in \reffig{framework-workflow}, the core workflow of the \name framework consists of two components: \emph{graph optimization} and \emph{relational optimization}. The graph optimization is responsible for handling the graph component in an \spjm query, leveraging graph optimization techniques to determine the optimal decomposition tree of the matching operator. On the other hand, the relational optimization takes over to optimize the relational component in the query.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimization and then proceed to the relational optimization.
@@ -60,19 +60,15 @@ When a graph index is available, there are three physical implementations of $\g
 
 In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
 
-\modify{
+\comment{
 \begin{example}
     As shown in \reffig{framework-workflow}, since $\matching(\pattern_2)$ is a single-edge pattern, the join operator between $\matching(\pattern_1)$ and $\matching(\pattern_2)$ is implemented using \expandedge~followed by \getvertex.
-    Besides, as $\matching(\pattern_4)$ is a complete star, the join operator bewteen $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented using the \expandintersect~operator.
+    Besides, as $\matching(\pattern_4)$ is a complete star, the join operator between $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented using the \expandintersect~operator.
 \end{example}
 }
 
-\stitle{Plan Computation.} Searching for the optimal execution plan remains the same as in \glogs. The optimal execution plan is obtained by traversing the \glogue~ from the queried pattern $\pattern$ in a top-down manner.
-Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained. A detailed description of the algorithm can be found in~\cite{GLogS}.
-We have demonstrated in \reffig{framework-workflow}(c) a physical plan for matching the given triangle pattern.
-\modify{In this physical plan, we initiate the process by identifying vertices labeled "Tom" through a scan of $\relation{Person}$. Subsequently, we sequentially apply the \expandvertex~and \expandintersect~operators to construct the triangle pattern. The procedure is completed by employing the \project* operator, which flattens the results into relational tuples for further analysis.
-}
-\todo{describe the physical plan}.
+\stitle{Plan Computation.} Searching for the optimal execution plan in \name remains the same as in \glogs. The optimal plan is obtained by searching for the shortest path in the \glogue from the single-vertex pattern to the queried pattern.  %The process is repeated until the $\pattern$ node is reached, at which point the optimal execution plan is obtained.
+\reffig{framework-workflow}(c) demonstrates a physical plan for matching the given triangle pattern when a graph index is present. The plan reflects the example in~\refex{physical-implementation}, with one exception: the pair of \expandedge and \getvertex operators is fused into a single \expand operator, which will be discussed as a heuristic rule called \joinfuserule.
 
 
 \subsubsection{The Relational Optimization}
@@ -258,10 +254,10 @@ The introduction of the framework is concluded with an example.
     \begin{subfigure}[b]{0.5\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/converged-physical-plan.png}
-        \caption{Obtained Optimial Physical Plan.}
+        \caption{Obtained Optimal Physical Plan.}
         \label{fig:physical-plan-optimized}
     \end{subfigure}
-    \caption{An example of query opitmization.}
+    \caption{An example of query optimization.}
     \label{fig:query-grtree-example}
 \end{figure*}
 
