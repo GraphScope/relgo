@@ -112,7 +112,7 @@ y_ours_complete = [
 xlabel = []
 
 for i in range(1, 18):
-    xlabel.append(str(i) + "a")
+    xlabel.append(str(i))
 
 
 xaxis = np.arange(len(xlabel))
@@ -159,10 +159,11 @@ plt.bar(
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=22, rotation=-20)
+plt.xticks(xaxis_final, xlabel, fontsize=22)
 plt.yticks(fontsize=22)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
+plt.xlabel("Queries of JOB[*]", fontsize=24)
 plt.ylabel("Time Cost (ms)", fontsize=22)
 
 plt.tight_layout()
@@ -172,7 +173,7 @@ plt.savefig("../paper/figures/exp/e2e_job_part1.pdf", bbox_inches="tight")
 xlabel = []
 
 for i in range(18, 34):
-    xlabel.append(str(i) + "a")
+    xlabel.append(str(i))
 
 
 xaxis = np.arange(len(xlabel))
@@ -219,10 +220,11 @@ plt.bar(
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=22, rotation=-20)
+plt.xticks(xaxis_final, xlabel, fontsize=22)
 plt.yticks(fontsize=22)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
+plt.xlabel("Queries of JOB[*]", fontsize=24)
 plt.ylabel("Time Cost (ms)", fontsize=22)
 
 plt.tight_layout()
