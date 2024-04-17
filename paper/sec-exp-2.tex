@@ -107,13 +107,19 @@ To ensure a fair comparison, in the subsequent experiments, we evaluate the effi
 
 \begin{figure}[ht]
     \centering
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/opt_exe_legends.pdf}
+        \label{fig:exp-opt-legends}
+        \vspace*{-2ex}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/opt_exe_ldbc.pdf}
         \caption{Opt. and Exe. Time on $G_{sf30}$.}
         \label{fig:exp-opt-ldbc}
     \end{subfigure}
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{subfigure}[b]{0.48\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/opt_exe_job.pdf}
         \caption{Opt. and Exe. Time on IMDB.}
@@ -191,8 +197,8 @@ The results of this experiment indicate that \expandintersectrule~ can not only 
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=.9\linewidth]{./figures/exp/hash_plan_job.pdf}
-    \caption{Efficiency Comparison of \name and Baselines}
+    \includegraphics[width=\linewidth]{./figures/exp/hash_plan_job.pdf}
+    \caption{Experiments that compare the efficiency of \name and \name-hash.}
     \label{fig:exp-hash-plan}
 \end{figure}
 
@@ -235,29 +241,34 @@ However, its optimized plans generally remain competitive across a majority of c
 % In detail, querying for 4-cliques with \name can be 100$\times$ faster than with \textit{"Relgo w.o. EI"}.
 % The results illustrate the efficiency of \expandintersectrule.
 
-\begin{figure*}[ht]
+\begin{figure}[ht]
     \centering
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/e2e_sf10.pdf}
         \caption{Time Cost on $G_{sf10}$.}
         \label{fig:exp-e2e-sf10}
     \end{subfigure}
-    \begin{subfigure}[b]{0.45\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/e2e_sf30.pdf}
         \caption{Time Cost on $G_{sf30}$.}
         \label{fig:exp-e2e-sf30}
     \end{subfigure}
-    \begin{subfigure}[b]{0.6\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{./figures/exp/e2e_job.pdf}
+        \includegraphics[width=\linewidth]{./figures/exp/e2e_job_part1.pdf}
+        \vspace*{-2ex}
+    \end{subfigure}
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/e2e_job_part2.pdf}
         \caption{Time Cost on IMDB.}
         \label{fig:exp-e2e-job}
     \end{subfigure}
     \caption{Results of the end-to-end experiments.}
     \label{fig:exp-e2e}
-\end{figure*}
+\end{figure}
 
 \subsection{End-to-End Experiments}
 \label{sec:experiment-e2e}
