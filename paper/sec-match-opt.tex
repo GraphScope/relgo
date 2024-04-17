@@ -306,10 +306,24 @@ We ultimately obtain the following theorem.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
-    \caption{Search Space Comparison. Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit of the server with 251GB of RAM.}
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
+    \end{subfigure}
+    \caption{Search Space Comparison.}
     \label{fig:exp-search-space}
 \end{figure}
+
+%\begin{figure}[ht]
+%    \centering
+%    \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
+%    \caption{Search Space Comparison.}
+%    \label{fig:exp-search-space}
+%\end{figure}
 
 %Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit.
 %\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
