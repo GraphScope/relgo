@@ -140,7 +140,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \begin{figure}
     \centering
-    \includegraphics[width=.8\linewidth]{./figures/decomposition-example.pdf}
+    \includegraphics[width=.7\linewidth]{./figures/decomposition-example.pdf}
     \caption{Example of decomposition trees and the corresponding logical plans.}
     \label{fig:match-decomposition}
 \end{figure}
@@ -181,7 +181,7 @@ establishes a lower bound on the search space complexity for this problem:
 Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
-
+\comment{
 \begin{proof}
     We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
@@ -210,7 +210,7 @@ Given a join among $n + m$ relations, the search space for determining the optim
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
-
+}
 
 In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
 
@@ -220,6 +220,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 \end{lemma}
 
 
+\comment{
 \begin{proof}
     To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
     We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
@@ -255,7 +256,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Therefore, the search space is at most $O(4^{n-1})$.
     We thus conclude the proof.
 \end{proof}
-
+}
 
 \comment{
     \begin{proof}
@@ -421,8 +422,7 @@ Note that the above step (1) and (2) can be computed in a pipeline manner, follo
 Similar to Case II, we flatten the common edges and vertices and pair them up to obtain the final result.
 
 \begin{example}
-    \todo{should better refactor the example using Figure 5, by also drawing the physical plan in Figure 5}
-    \todo{moreover, combining Figure 5/6 may be a good idea.}
+    \label{ex:physical-implementation}
     Given $\pattern_0$ in \reffig{match-decomposition}, a decomposition tree and the corresponding logical plan is presented.
     The implementation of the decomposition tree follows a bottom-up order.
     Firstly, the join operation between $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
