@@ -305,7 +305,7 @@ We ultimately obtain the following theorem.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
-    \caption{Search Space Comparison.}
+    \caption{Search Space Comparison. Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit of the server with 251GB of RAM.}
     \label{fig:exp-search-space}
 \end{figure}
 
@@ -393,8 +393,13 @@ Consequently, for the tuple $\tau$, the physical \expandintersect~ operator perf
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
 \item Return a new tuple as
 \[
-    (\tau, \adj^E(v_i), \cdots, \adj^E(v_k), \bigcap_{1 \leq i \leq k}\adj(v_i)).
+    \left(\tau,\bigcup\limits_{v_s \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_s, )\right)
 \]
+
+
+%\[
+%    (\tau, \adj^E(v_i), \cdots, \adj^E(v_k), \bigcap_{1 \leq i \leq k}\adj(v_i)).
+%\]
 \end{enumerate}
 
 Note that the above step (1) and (2) can be computed in a pipeline manner, following a certain order of among the leaf vertices.
