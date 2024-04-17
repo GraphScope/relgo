@@ -1,5 +1,6 @@
 
 \section{Optimizing Matching Operator}
+\label{sec:optimizing-matching-operator}
 In this section, we focus specifically on handling the matching operator (more precisely, the graph component),
 which plays a distinct role within the \spjm queries compared to the \spj queries. We discuss two main perspectives of optimizing
 the matching operator: logical transformation and physical implementation. Logical transformation is
@@ -55,12 +56,13 @@ The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although cal
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 %The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
-We have the following lemma.
+We have the following lemma\footnote{Omitted proofs can be found in the full paper~\cite{full-paper}.}.
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
-    Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational join operations.
+    Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
+\comment{
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -87,10 +89,11 @@ By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e
 
 We thus conclude the proof.
 \end{proof}
+}
 
 
-Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins involving $n$ vertex tables and
-$m$ edge tables, as illustrated in the following example.
+%Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in
+%a sequence of joins involving $n$ vertex tables and $m$ edge tables, as illustrated in the following example.
 
 \begin{example}
   Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
@@ -170,8 +173,7 @@ After applying graph-agnostic transformations to the matching operator, the opti
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
 According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
-which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma\footnote{The proofs of \reflem{complexity-of-volcano}
-and \reflem{complexity-of-graph-aware} are in the full paper~\cite{full_paper}.}
+which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma
 establishes a lower bound on the search space complexity for this problem:
 
 \begin{lemma}
@@ -305,7 +307,7 @@ We ultimately obtain the following theorem.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
-    \caption{Search Space Comparison.}
+    \caption{Search Space Comparison. Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit of the server with 251GB of RAM.}
     \label{fig:exp-search-space}
 \end{figure}
 
@@ -384,17 +386,21 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
-When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;S)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
+When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 
 \begin{enumerate}
-\item For each leaf vertex $u_i \in S$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
+\item For each leaf vertex $u_i \in V_s$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
-\item Return a new tuple as
+\item Return a new tuple as follows, where the information of edges is ommited for simplicity.
+%\[
+%    \left(\tau,\bigcup\limits_{v_c \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_c, \bigcup\limits_{1 \leq i \leq k}\adj^E(v_i, v_c))\right)
+%\]
 \[
-    (\tau, \adj^E(v_i), \cdots, \adj^E(v_k), \bigcap_{1 \leq i \leq k}\adj(v_i)).
+    (\tau, \bigcap_{1 \leq i \leq k}\adj(v_i)).
 \]
+
 \end{enumerate}
 
 Note that the above step (1) and (2) can be computed in a pipeline manner, following a certain order of among the leaf vertices.
@@ -403,9 +409,23 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
 \begin{example}
     \todo{should better refactor the example using Figure 5, by also drawing the physical plan in Figure 5}
     \todo{moreover, combining Figure 5/6 may be a good idea.}
-    Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), a possible physical implementation for $\matching(\pattern)$ is as follows:
-    \begin{equation*}
-        \expandintersect(\expandvertex(\relation{\lab(u_{p_1})}, \pattern_{0}), \pattern_{s}),
-    \end{equation*}
-    where $\pattern_{0}$ consists of an edge connecting $u_{p_1}$ and $u_{p_2}$, while $\pattern_{s}$ is a complete star with $v_r = u_m$ and $\mathcal{H} = \{u_{p_1}, u_{p_2}\}$.
+    Given $\pattern_0$ in \reffig{match-decomposition}, a decomposition tree and the corresponding logical plan is presented.
+    The implementation of the decompostion tree follows a bottom-up order.
+    Firstly, the join operation between $\matching(\pattern_5)$ and $\matching(\pattern_6)$ is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
+    Thus, when there is no graph index on $\relation{Likes}$, the results of $\matching(\pattern_6)$ is computed via $\relation{Message} \Join_{message\_id = mid} \relation{Likes} \Join_{pid = person\_id} \relation{Person}$.
+    Then, since $\pattern_5$ is a single-vertex pattern whose vertex exists in $\pattern_6$, the results of the join equals $\matching(\pattern_6)$.
+    Otherwise, if a graph index exists, $\matching(\pattern_6)$ can be computed with \expandedge~and \getvertex.
+    Analogously, the join operation between $\matching(\pattern_7)$ and $\matching(\pattern_8)$ also pretains to Case II.
+    
+    Then, $\matching(\pattern_3) \widehat{\Join}_{\{u_{p_1}\}} \matching(\pattern_4)$ pretains to Case I.
+    The join operator is implemented as a natural join with constraints on $u_{p_1}$.
+
+    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m_2}, \{u_{m_1}, u_{p_2}\})$ is a complete $2$-star pattern.
+    For simplicity, suppose $(v_{m}, v_{p}, v_p')$ is a tuple in $\matching(\pattern_1)$, where $v_{m}, v_{p}, v_p'$ are vertices that matches $u_{m_1}$, $u_{p_2}$, and $u_{p_1}$ respectively.
+    $\adj(v_{m})$, $\adj(v_{p})$ are neighbors of $v_m$ and $v_p$ labeled Message.
+    Suppose the graph indexes are available, the physical operator \expandintersect~is applied.
+    Specifically, \expandedge~and \getvertex~operators are applied to obtain the adjacent edges and neighbors of $v_m$ and $v_p$, and the obtained tuples are $(v_m, \adj(v_m))$ and $(v_p, \adj(v_p))$.
+    Then, these two tuples are intersected and a new tuple $(v_m, v_p, \adj(v_m) \cup \adj(v_p))$ is obtained.
+    Finanlly, this tuple is concatenated with $\tau$ and tuple $(v_m, v_p, v_p', \adj(v_m) \cup \adj(v_p))$ is returned.
+    This returned tuple can be flattened if necessary.
 \end{example}
