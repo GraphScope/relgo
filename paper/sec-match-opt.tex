@@ -1,5 +1,6 @@
 
 \section{Optimizing Matching Operator}
+\label{sec:optimizing-matching-operator}
 In this section, we focus specifically on handling the matching operator (more precisely, the graph component),
 which plays a distinct role within the \spjm queries compared to the \spj queries. We discuss two main perspectives of optimizing
 the matching operator: logical transformation and physical implementation. Logical transformation is
@@ -55,12 +56,13 @@ The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although cal
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 %The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
-We have the following lemma.
+We have the following lemma\footnote{Omitted proofs can be found in the full paper~\cite{full-paper}.}.
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
-    Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational join operations.
+    Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
+\comment{
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -87,10 +89,11 @@ By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e
 
 We thus conclude the proof.
 \end{proof}
+}
 
 
-Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in a sequence of joins involving $n$ vertex tables and
-$m$ edge tables, as illustrated in the following example.
+%Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in
+%a sequence of joins involving $n$ vertex tables and $m$ edge tables, as illustrated in the following example.
 
 \begin{example}
   Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
@@ -170,8 +173,7 @@ After applying graph-agnostic transformations to the matching operator, the opti
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
 According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
-which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma\footnote{The proofs of \reflem{complexity-of-volcano}
-and \reflem{complexity-of-graph-aware} are in the full paper~\cite{full_paper}.}
+which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma
 establishes a lower bound on the search space complexity for this problem:
 
 \begin{lemma}
@@ -389,7 +391,7 @@ When graph indexes are available, we can use the \expandintersect~ operator, int
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 
 \begin{enumerate}
-\item For each leaf vertex $u_i \in S$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
+\item For each leaf vertex $u_i \in V_s$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
 \item Return a new tuple as
 \[
