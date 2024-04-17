@@ -32,7 +32,7 @@
     \item \textbf{JOB.} The Join Order Benchmark (JOB)~\cite{job_snb} on Internet Movie Database (IMDB) is adopted. We select the variants marked with ``a'' of all JOB queries, referred to as $JOB[1\ldots 33]$, without loss of generality. These queries are primarily designed to test join order optimization, with each query containing an average of $8$ joins.
 \end{itemize}
 The details of the dataset statistics are summarized in Table \ref{table:experiment-datasets}.
-\textcolor{blue}{We manually implement the queries using SQL/PGQ, which are presented in the full paper~\cite{full-paper}.}
+We manually implement the queries using SQL/PGQ, which are presented in the full paper~\cite{full-paper}.
 In addition, we adhered to the same procedures for data loading and graph index construction as in~\cite{graindb}.
 
 \noindent\textbf{Compared Systems. }
@@ -79,10 +79,8 @@ We imposed a timeout limit of 10 minutes for each query, and queries that fail t
 
 \subsection{Micro Benchmarks on RelGo}
 \label{sec:experiment-opt}
-\modify{
 In this subsection, we conducted three micro benchmarks to evaluate the effectiveness of \name,
 including assessing the efficiency of the optimizer, testing its advanced optimization strategies, and examining its effectiveness in optimizing join order.
-}
 
 \noindent\textbf{Optimization Efficiency Evaluation.}
 First, we assessed the optimization efficiency by comparing \name with GrainDB\cite{graindb}.
@@ -120,9 +118,8 @@ Furthermore, the execution times of the query plans optimized by \name are eithe
 For example, in the LDBC queries ($IC[7]$ excluded) shown in \reffig{exp-opt-ldbc}, the optimization time cost of \name is about two orders of magnitude faster than that of Calcite, and the execution time of the plans optimized by \name is more than 52.0$\times$ faster, on average.
 It is worth noting that for query $IC[7]$ and all queries in JOB, Calcite cannot even finish the optimization within the timeout limit (thus we omit the results of Calcite in \reffig{exp-opt-job}).
 On the contrary, \name shows an efficient optimization process for these queries.
-\textcolor{blue}{
 This stark contrast accentuates \name's capability to efficiently generate optimized plans, confirming the effectiveness of its graph-aware optimizer in reducing the search space and improving the optimization efficiency.
-}
+
 
 Then we move to the comparison between \name with GrainDB. Compared with GrainDB, \name demonstrates a slightly higher optimization cost. This outcome is expected to some extent, given GrainDB's design focuses on greedy, faster optimization methods.
 Nevertheless, the quality of \name's optimized plans are usually superior. This can be observed in the execution time results, where \name outperforms GrainDB by $9.5\times$ and $2.8\times$ on average on the $G_{sf30}$ and IMDB datasets, respectively.
@@ -153,7 +150,7 @@ To ensure a fair comparison, in the subsequent experiments, we evaluated the eff
         \caption{End-to-End Time on IMDB.}
         \label{fig:exp-opt-job}
     \end{subfigure}
-    \caption{Experiments on Optimization and Execution Cost}
+    \caption{Experiments on optimization and execution cost}
     \label{fig:exp-optimization}
 \end{figure}
 
@@ -181,7 +178,7 @@ To ensure a fair comparison, in the subsequent experiments, we evaluated the eff
         \caption{Time Cost on $G_{sf30}$.}
         \label{fig:exp-filter-sf30}
     \end{subfigure}
-    \caption{Efficiency Comparison of \name and \relgonofi}
+    \caption{Efficiency comparison of \name and \relgonofi}
     \label{fig:exp-filter}
 \end{figure}
 
@@ -199,14 +196,12 @@ To ensure a fair comparison, in the subsequent experiments, we evaluated the eff
         \caption{Time Cost on $G_{sf30}$.}
         \label{fig:exp-expand-intersect-sf30}
     \end{subfigure}
-    \caption{Efficiency Comparison of \name and \relgomj}
+    \caption{Efficiency comparison of \name and \relgomj}
     \label{fig:exp-expand-intersect}
 \end{figure}
 
 \noindent\textbf{Advanced Optimization Strategies.}
-\textcolor{blue}{
 In this experiment, we assessed the advanced optimization strategies in \name, including the heuristic \filterrule and \joinfuserule, and the optimized implementation of \expandintersect~ operator that aims to improve the efficiency of complete star join.
-}
 
 We began by testing \filterrule and \joinfuserule, two representative heuristic rules employed in \name that capture optimization opportunities at the interplay of relational and graph optimizations. We conducted experiments on the $G_{sf10}$ and $G_{sf30}$ datasets, using $QR[1]$ and $QR[2]$ to evaluate \filterrule, and $QR[3]$ and $QR[4]$ to test \joinfuserule. The results, depicted in \reffig{exp-filter}, compared the performance of \name with and without applying these rules, denoted as \name and \relgonofi, respectively.
 The results demonstrate that \filterrule significantly improves query performance, providing an average speedup of 299.4$\times$ on $G_{sf10}$ and 699.8$\times$ on $G_{sf30}$. After applying \joinfuserule, query execution is accelerated by an average of 2.0$\times$ on $G_{sf10}$ and 2.3$\times$ on $G_{sf30}$. These findings suggest that the heuristic rules, particularly \filterrule, are highly effective in enhancing query execution efficiency.
@@ -219,25 +214,17 @@ The results of this experiment indicate that the \expandintersect~ operator with
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\linewidth]{./figures/exp/hash_plan_job.pdf}
-    \caption{Experiments that compare the efficiency of \name and \name-hash.}
+    \caption{Experiments that compare the efficiency of \name and \relgohash.}
     \label{fig:exp-hash-plan}
 \end{figure}
 
 \noindent\textbf{Efficiency of Join Order.}
-\textcolor{blue}{
 %After the assessment of advanced strategies within \name, we integrate all these strategies (and so as in the following experiments) to conduct a performance comparison between \name, GrainDB, and DuckDB with a focus on the join order efficiency.
-In this experiment, we conduct a performance comparison between the graph-aware optimizer \name, and the graph-agnostic optimizers GrainDB and DuckDB, with a focus on the join order efficiency.
-Specifically, we further introduce a variant of \name, named \relgohash, which optimize the plan in a graph-aware manner in consist with \name, but exclusively utilizes hash join implementations for the \expand~ operations, deliberately bypassing the graph indices to facilitate a comparison with DuckDB.
-We select 10 queries from the JOB benchmark without loss of generality, and show the performance results in \reffig{exp-hash-plan}.
-From the results, we can observe that \name outperforms GrainDB on all the queries, accelerating the execution time from $1.2\times$ to $7.5\times$, and the average speedup is $3.31\times$.
-Besides, the plans optimized with \relgohash are always not inferior to those optimized by DuckDB as well, which achieves an average speedup of $1.4\times$.
-The effectiveness of \name and \relgohash stems from their employment of advanced graph-aware optimization techniques in optimizing the join order, which results in robust performance regardless of the presence or absence of graph indices.
-% It is noteworthy that for queries $JOB[4]$ and $JOB[5]$, the execution time of the plans generated by \relgohash is even shorter than those produced by GrainDB,
-% It is important to highlight that while graph indices are employed in executing GrainDB's plans, they are not utilized with \name-hash's plans.
-It should be noted that \name does not always generate plans featuring the absolute best join orders, since it relies on the estimated cost of the plans.
-However, its optimized plans generally remain competitive across a majority of cases, thanks to its integration of high-order statistics that contribute to more accurate cost estimation.
+In this experiment, we compared \name with GrainDB and DuckDB, focusing on the efficiency of the join order. For this purpose, we introduced a variant of \name called \relgohash, which optimizes the plan in a converged manner like \name but deliberately bypasses the use of graph index. We randomly selected 10 queries from the JOB benchmark and showed the performance results in \reffig{exp-hash-plan}.
+The results demonstrate that \name outperforms GrainDB on all the queries, accelerating the execution time by factors ranging from $1.2\times$ to $7.5\times$, with an average speedup of $3.31\times$. Additionally, the plans optimized with \relgohash are at least as good as those optimized by DuckDB, achieving an average speedup of $1.4\times$. The effectiveness of \name and \relgohash stems from their use of advanced graph-aware optimization techniques in optimizing the matching operator, resulting in good join order and thus robust performance regardless of the presence or absence of graph index.
+It is worth noting that \name does not always generate plans with the absolute best join orders, as it relies on the estimated cost of the plans. However, its optimized plans generally remain competitive in most cases, thanks to its integration of \glogue that use high-order statistics for cost estimation.
+
 %This superior join order offsets the absence of graph indices in the execution process.
-}
 
 % In this section, we conduct ablation study to show the efficiency of \expandintersectrule.
 % In detail, patterns in Fig.~\ref{fig:exp-hard-patterns} are queried on $G_{sf10}$ and $G_{sf30}$, and plans are optimized with Relgo.
@@ -289,30 +276,21 @@ However, its optimized plans generally remain competitive across a majority of c
         \caption{Time Cost on IMDB.}
         \label{fig:exp-e2e-job}
     \end{subfigure}
-    \caption{Results of the end-to-end experiments.}
+    \caption{Results of the comprehensive experiments.}
     \label{fig:exp-e2e}
 \end{figure}
 
-\subsection{End-to-End Experiments}
+\subsection{Comprehensive Experiments}
 \label{sec:experiment-e2e}
 
-End-to-end experiments are conducted on LDBC and JOB benchmarks for a comprehensive evaluation of the performance of \name compared to GrainDB and DuckDB,
-and the experimental results are presented in Fig.~\ref{fig:exp-e2e}.
-The results demonstrate that execution plans optimized by \name consistently outperform those optimized by GrainDB or DuckDB on both the LDBC and JOB benchmarks.
-Specifically, for the LDBC benchmark, the execution time of the plans optimized by \name is about 2.2$\times$ and 9.1$\times$ faster on average than those generated by GrainDB and DuckDB on $G_{sf10}$, respectively, and about 4.10$\times$ and 14.72$\times$ faster on $G_{sf30}$.
-\textcolor{blue}{
-It is important to note that \name is especially effective for queries containing cycles due to the optimized extend-intersect operator.
-For example, in query $IC[7]$ which contains a cycle, \name outperforms GrainDB and DuckDB by 29.7$\times$ and 63.5$\times$ on $G_{sf30}$, respectively.
-Conversely, the JOB benchmark, established for assessing join optimizations in relational databases, lacks any cyclic-pattern queries. Despite this, \name still achieved a better performance compared to GrainDB and DuckDB, with an average speedup of 2.1$\times$ and 5.1$\times$, respectively.
-}
+We conducted comprehensive experiments on the LDBC and JOB benchmarks to comprehensively evaluate the performance of \name compared to GrainDB and DuckDB. The experimental results, presented in \reffig{exp-e2e}, demonstrate that execution plans optimized by \name consistently outperform those optimized by GrainDB or DuckDB on both benchmarks.
+Specifically, for the LDBC benchmark, the execution time of the plans optimized by \name is about 2.2$\times$ and 9.1$\times$ faster on average than those generated by GrainDB and DuckDB, respectively, on $G_{sf10}$, and about 4.10$\times$ and 14.72$\times$ faster on $G_{sf30}$. It is important to note that \name is especially effective for queries containing cycles, which can benefit more from graph optimizations. For example, in query $IC[7]$, which contains a cycle, \name outperforms GrainDB and DuckDB by 29.7$\times$ and 63.5$\times$, respectively, on $G_{sf30}$.
+Conversely, the JOB benchmark, established for assessing join optimizations in relational databases, lacks any cyclic-pattern queries. Despite this, \name still achieves better performance compared to GrainDB and DuckDB, with an average speedup of 2.1$\times$ and 5.1$\times$, respectively.
 
-There are mainly three reasons for the superiority of \name.
-Firstly, by incorporating a matching operator in \spjm queries to capture the graph query semantics, \name is able to leverage the advanced graph optimization techniques to optimize the matching operator, such as using the high-order statistics to estimate the cost of the plans more accurately, and leveraging the worst-case optimal join implementation to optimize the cyclic patterns.
-Conversely, DuckDB and GrainDB cannot benefit from these graph-specific optimizations, and may generate suboptimal plans and have inefficient execution.
-%which, for example, rely on low-order statistics that may lead to inaccurate cost estimation, and traditional multiple join implementations for cyclic patterns that are usually inefficient and cannot guarantee worst-case optimal.
-Secondly, \name takes the optimization opportunities across the graph and relational query semantics into consideration, introducing effective heuristic rules such as \filterrule and \joinfuserule, which can significantly improve the efficiency of the plans.
-Thirdly, without loss of generality, \name is also aware of the existence of graph indices in graph query optimization, and leverages the graph indices to get neighboring vertices effectively.
-On the contrary, GrainDB occasionally partitions this process into separate stages, first retrieving adjacent edges and subsequently obtaining the corresponding endpoints, which may lead to inefficiency in execution. And DuckDB does not consider the graph indices in query optimization, and would execute the queries with hash joins which are not efficient in most cases.
+The experiment results in fact reflect our discussions in \refsec{graph-aware}. We summarize the superiority of \name, while compared to the graph-agnostic DuckDB and GrainDB, as follows.
+First, \name is designed to be aware of the existence of graph index in graph query optimization and can leverage the index to effectively retrieve adjacent edges and vertices. In contrast, for GrainDB, relational optimizers can occasionally alter the order of \EVjoin operations, rendering graph index ineffective. DuckDB, on the other hand, does not consider graph index in query optimization and executes queries using conventional hash joins, which are often less efficient compared to graph-aware approaches.
+Second, by incorporating a matching operator in \spjm queries to capture the graph query semantics, \name is able to leverage advanced graph optimization techniques to optimize the matching operator. These techniques include using high-order statistics to estimate the cost of plans more accurately and employing worst-case optimal join implementations to optimize cyclic patterns. In contrast, DuckDB and GrainDB cannot benefit from these graph-specific optimizations, which may lead to suboptimal plans and inefficient execution.
+Third, \name considers optimization opportunities across both graph and relational query semantics, introducing effective heuristic rules such as \filterrule and \joinfuserule. These rules can significantly improve the efficiency of the generated plans.
 
 % There are mainly two reasons for the superiority of \name.
 % Firstly, \name is aware of the existence of graph indices in graph query optimization.
