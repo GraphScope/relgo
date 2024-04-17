@@ -181,7 +181,7 @@ establishes a lower bound on the search space complexity for this problem:
 Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
-\comment{
+
 \begin{proof}
     We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
@@ -210,7 +210,7 @@ Given a join among $n + m$ relations, the search space for determining the optim
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
-}
+
 
 In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
 
@@ -219,7 +219,7 @@ In contrast, when the graph-aware transformation is applied, the search space is
 The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^{n-1})$.
 \end{lemma}
 
-\comment{
+
 \begin{proof}
     To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
     We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
@@ -255,7 +255,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Therefore, the search space is at most $O(4^{n-1})$.
     We thus conclude the proof.
 \end{proof}
-}
+
 
 \comment{
     \begin{proof}
@@ -407,7 +407,7 @@ Consequently, for the tuple $\tau$, the physical \expandintersect~ operator perf
 \begin{enumerate}
 \item For each leaf vertex $u_i \in V_s$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
-\item Return a new tuple as follows, where the information of edges is ommited for simplicity.
+\item Return a new tuple as follows; for the sake of simplicity, the details of the edges are omitted:
 %\[
 %    \left(\tau,\bigcup\limits_{v_c \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_c, \bigcup\limits_{1 \leq i \leq k}\adj^E(v_i, v_c))\right)
 %\]
@@ -424,23 +424,18 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     \todo{should better refactor the example using Figure 5, by also drawing the physical plan in Figure 5}
     \todo{moreover, combining Figure 5/6 may be a good idea.}
     Given $\pattern_0$ in \reffig{match-decomposition}, a decomposition tree and the corresponding logical plan is presented.
-    The implementation of the decompostion tree follows a bottom-up order.
-    Firstly, the join operation between $\matching(\pattern_5)$ and $\matching(\pattern_6)$ is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
-    Thus, when there is no graph index on $\relation{Likes}$, the results of $\matching(\pattern_6)$ is computed via $\relation{Message} \Join_{message\_id = mid} \relation{Likes} \Join_{pid = person\_id} \relation{Person}$.
-    Then, since $\pattern_5$ is a single-vertex pattern whose vertex exists in $\pattern_6$, the results of the join equals $\matching(\pattern_6)$.
-    Otherwise, if a graph index exists, $\matching(\pattern_6)$ can be computed with \expandedge~and \getvertex.
-    Analogously, the join operation between $\matching(\pattern_7)$ and $\matching(\pattern_8)$ also pretains to Case II.
-    
-    Then, $\matching(\pattern_3) \widehat{\Join}_{\{u_{p_1}\}} \matching(\pattern_4)$ pretains to Case I.
-    The join operator is implemented as a natural join with constraints on $u_{p_1}$.
+    The implementation of the decomposition tree follows a bottom-up order.
+    Firstly, the join operation between $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented and it pertains to Case II, since the $\pattern_6$ is a single-edge pattern.
+    Thus, when there is no graph index on $\relation{Likes}$, the results of $\matching(\pattern_4)$ is computed via $\relation{Person} \Join_{person\_id = pid1} \relation{Knows} \Join_{pid2 = person\_id} \relation{Person}$.
+    Specifically, the results include tuples $(v_{p_1}, e_{k_1}, v_{p_2})$, $(v_{p_2}, e_{k_2}$, $v_{p_1})$, $(v_{p_2}, e_{k_3}, v_{p_3})$, and $(v_{p_3}, e_{k_4}, v_{p_2})$.
+    Then, since $\pattern_3$ is a single-vertex pattern whose vertex exists in $\pattern_4$, the results of the join equals $\matching(\pattern_4)$.
+    Otherwise, if a graph index exists, $\matching(\pattern_4)$ can be computed with \expandedge~and \getvertex.
 
-    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m_2}, \{u_{m_1}, u_{p_2}\})$ is a complete $2$-star pattern.
-    This join pretains to Case III.
-    For simplicity, suppose $(v_{m}, v_{p}, v_p')$ is a tuple in $\matching(\pattern_1)$, where $v_{m}, v_{p}, v_p'$ are vertices that matches $u_{m_1}$, $u_{p_2}$, and $u_{p_1}$ respectively.
-    $\adj(v_{m})$, $\adj(v_{p})$ are neighbors of $v_m$ and $v_p$ labeled Message.
-    Suppose the graph indexes are available, the physical operator \expandintersect~is applied.
-    Specifically, \expandedge~and \getvertex~operators are applied to obtain the adjacent edges and neighbors of $v_m$ and $v_p$, and the obtained tuples are $(v_m, \adj(v_m))$ and $(v_p, \adj(v_p))$.
-    Then, these two tuples are intersected and a new tuple $(v_m, v_p, \adj(v_m) \cup \adj(v_p))$ is obtained.
-    Finanlly, this tuple is concatenated with $\tau$ and tuple $(v_m, v_p, v_p', \adj(v_m) \cup \adj(v_p))$ is returned.
-    This returned tuple can be flattened if necessary.
+    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m}, \{u_{p_1}, u_{p_2}\})$ is a complete $2$-star pattern.
+    This join pretains to Case III and suppose the graph indexes are available.
+    Take tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example, where $u_{p_1}$ and $u_{p_2}$ in $\pattern$ match with $v_{p_1}$ and $v_{p_2}$, respectively.
+    \expandedge~operator is first applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, and the results are $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}])$ and $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$, respectively.
+    Then, intersections are applied.
+    As $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, edges connected to $v_{m_1}$ are reserved and the returned tuple is $(v_{p_1}, e_{k_1}, v_{p_2}, [v_{m_1}])$.
+    The tuple can be flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, v_{m_1})$ if necesary.
 \end{example}
