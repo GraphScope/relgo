@@ -34,7 +34,7 @@ The graph-agnostic optimizer is straightforward: it applies the graph-agnostic m
 \end{itemize}
 
 \subsection{The Converged Solution}
-As illustrated in \reffig{framework-overview}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
+As illustrated in \reffig{framework-workflow}, the core workflow of the \name framework consists of two components: a \emph{graph optimizer} and a \emph{relational optimizer}. The graph optimizer is responsible for handling the matching operator in an \spjm query, leveraging graph-specific optimization techniques to generate an efficient execution plan for the graph pattern matching component. On the other hand, the relational optimizer takes over to optimize the remaining relational operators in the query, applying traditional relational optimization techniques.
 The order in which these two components are applied is not strictly defined. However, for the purpose of our discussion, we will first focus on the graph optimizer and then proceed to the relational optimizer.
 In addition to the core workflow, we further explore heuristic rules that highlight the non-trivial interplay between the relational and graph components in an \spjm query.
 
@@ -66,6 +66,13 @@ When a graph index is available, there are three physical implementations of $\g
 \end{itemize}
 
 In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
+
+\modify{
+    \begin{example}
+        As shown in \reffig{framework-workflow}, the join operator between $\matching(\pattern)$ and 
+        is implemented with \expandintersect~operator.
+    \end{example}
+}
 
 \stitle{Plan Computation.} Searching for the optimal execution plan remains the same as in \glogs. The optimal execution plan is obtained by traversing the \glogue~ from the queried pattern $\pattern$ in a top-down manner.
 Note that if $\pattern$ does not present in the \glogue, a recursively decomposition process will be first conducted. The cost of each node is computed based on the cost of its children, and the optimal cost is gradually refined after traversing all children. The process is repeated until the leaf node is reached, at which point the optimal execution plan is obtained.
