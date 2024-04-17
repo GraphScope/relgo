@@ -21,7 +21,7 @@ where
 Given a vertex $v$, we denote its adjacent edges as $\adj_G^E(v) = \{e = (v, v_t) | e \in E\}$ and its adjacent vertices (i.e., neighbors) as $\adj_G(v) = \{v_t | (v, v_t) \in E\}$\footnote{It is important to note that the adjacent edges and vertices can be defined for both directions of an edge $e = (v_s, v_t)$, i.e., when $v = v_s$ or $v = v_t$. However, for simplicity, we only define one direction in this notation. In the actual semantics of the paper, both directions may be considered.}. The degree of $v$ is defined as $d_G(v) = |\adj_G(v)|$, and the average degree of all vertices in the graph is $\overline{d}_G = \frac{1}{|V_G|} \sum_{v \in V_G} d_G(v)$.
 In the rest of the paper, when the context is clear, we may remove $G$ from the subscript for simplicity, for example $G=(V, E)$.
 
-Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph of \(G_1\), symbolized as \(G_2 \subseteq G_1\), if and only if \(V_{G_2} \subseteq V_{G_1}\), and \(E_{G_2} \subseteq (E_{G_1}\)). Furthermore, \(G_2\) qualifies as an induced subgraph of \(G_1\) under the condition that \(G_2\) is already a subgraph of \(G_1\), and for every pair of vertices in \(G_2\), any edge \(e\) that exists between them in \(G_1\) must also present in \(G_2\).
+Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph of \(G_1\), symbolized as \(G_2 \subseteq G_1\), if and only if \(V_{G_2} \subseteq V_{G_1}\), and \(E_{G_2} \subseteq E_{G_1}\). Furthermore, \(G_2\) qualifies as an induced subgraph of \(G_1\) under the condition that \(G_2\) is already a subgraph of \(G_1\), and for every pair of vertices in \(G_2\), any edge \(e\) that exists between them in \(G_1\) must also present in \(G_2\).
 
 To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
@@ -35,7 +35,7 @@ we define an \rgmapping to map the relations to a property graph $G = (V, E)$, %
 which are elaborated as follows:
 
 \begin{itemize}
-\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{p_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{v_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an ID $\id(v)$, a label $\lab(v)$ that matches the name of $R_{v_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
+\item \textbf{Vertex Mappings}: $\zeta_v: \bigcup_{i=1}^{n} R_{p_i} \mapsto V$ is a bijective function that maps every tuple $\tau \in R_{p_i}$ for all $1 \leq i \leq n$ to a unique vertex $v \in V$. This vertex $v$ is assigned: an ID $\id(v)$, a label $\lab(v)$ that matches the name of $R_{p_i}$, and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$.
 The relations that are mapped to vertices in the graph are referred to as vertex relations.
 
 \item \textbf{Edge Mappings}: $\zeta_e: \bigcup_{i=1}^{m} R_{q_i} \mapsto E$ is a bijective function that maps every tuple $\tau \in R_{q_i}$ for all $1 \leq i \leq m$ to a unique edge $e = (v_s, v_t) \in E$. Similar to vertices, each edge $e$ is assigned: an ID $\id(e)$,
@@ -57,7 +57,7 @@ The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as
 \begin{example}
     \label{ex:rgmapping}
     An \rgmapping can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.
-    Given five relations, an \rgmapping is defined with the statement shown in Fig.~\ref{fig:intro-rgmapping-example}(a).
+    Given the relations, an \rgmapping is defined with the statement shown in Fig.~\ref{fig:intro-rgmapping-example}(a).
     \iffalse
     \begin{equation*}
         \begin{split}
@@ -120,8 +120,8 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
 
 \begin{example}
     \label{ex:matching}
-    Let \(G_1\) denote the property graph derived from the relations via \rgmapping in \refex{rgmapping}.
-    Given a pattern graph \(\pattern\) shown in \reffig{intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G_1\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G_1}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
+    Let \(G\) denote the property graph derived from the relations via \rgmapping in \refex{rgmapping}.
+    Given a pattern graph \(\pattern\) shown in \reffig{intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
 \end{example}
 
 This definition ensures that the matching operator is inherently closed regarding graph relations,

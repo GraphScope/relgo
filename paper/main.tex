@@ -152,7 +152,9 @@
     REFERENCE,
     PROPERTY,
     PROPERTIES,
-    VERTEX
+    VERTEX,
+    JOIN,
+    ON
   },
   sensitive=false, % keywords are not case-sensitive
   morecomment=[l]{//}, % l is for line comment
@@ -166,19 +168,20 @@
   extendedchars=true, % Allows 256 instead of 128 ASCII characters
   tabsize=2, % number of spaces indented when discovering a tab
   columns=fullflexible, % fixed to make all characters equal width (but adds too much whitespace!)
-  keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
+%  keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
   showstringspaces=false, % lets spaces in strings appear as real spaces
-  breaklines=true, % wrap lines if they don't fit
+%  breaklines=true, % wrap lines if they don't fit
 %  numbers=left, % show line numbers at the left
 %  numberstyle=\tiny\ttfamily, % style of the line numbers
   commentstyle=\color{eclipseGreen}, % style of comments
   keywordstyle=\color{eclipsePurple}, % style of keywords
   stringstyle=\color{eclipseBlue}, % style of strings
   escapeinside={(*}{*)}, % escape symbols
-  aboveskip=2.5pt,
-  belowskip=1.5pt,
+  aboveskip=5pt,
+  belowskip=2pt,
   morestring=[b]',
   morestring=[b]",
+  frame=tb
 }
 
 \newtheorem{definition}{Definition}
