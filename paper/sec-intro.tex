@@ -21,11 +21,11 @@ In comparison, such a scenario could be succinctly addressed using graph query l
                 p1.name AS p1_name,
                 p1.place_id AS p1_place_id,
                 p2.name AS p2_name)
-        ) g JOIN Place place
-            ON g.p1_place_id = place.id
+            ) g
+        JOIN Place p ON g.p1_place_id = p.id
         WHERE g.p1_name = 'Tom';
     \end{lstlisting}
-    In graph $G$, a graph pattern matching is employed to decode the intricate relationships between persons and messages. Upon executing the pattern matching, a \lstinline{COLUMNS} clause projects the results into a tabular format, enumerating essential attributes. This resultant table is then joined with the \kk{Place} table to obtain the place's name.
+    \revisewy{In graph $G$, a {\sc Graph Pattern Matching} is employed to decode the intricate relationships between persons and messages. Upon executing the pattern matching, a \lstinline{COLUMNS} clause projects the results into a tabular format, enumerating essential attributes. Then the {\sc Relational}\lstinline{JOIN} is performed on resultant table \lstinline{g} and \kk{Place} table to obtain the place's name.}
 \end{example}
 
 The SQL/PGQ standard, while a significant leap forward in the realm of relational databases, primarily addresses language constructs. A discernible gap exists in the theoretical landscape, particularly in analyzing, transforming, and optimizing SQL/PGQ queries with hybrid relational and graph semantics. %This gap is mainly due to the absence of a unified framework for optimizing such hybrid queries, a framework that could bridge the divide between the well-established relational optimization techniques and the evolving domain of graph query optimization.
