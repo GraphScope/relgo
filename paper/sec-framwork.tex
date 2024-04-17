@@ -23,7 +23,7 @@ method for solving the matching operator. We then delve into the converged workf
 
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
-The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\refeq{graph-agnostic}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
+The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\refex{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
 \subsection{The Converged Approach}
 \label{sec:converged}
@@ -68,7 +68,7 @@ In the absence of a graph index, \hashjoin~ is used for the entire plan, where t
 }
 
 \stitle{Plan Computation.} Searching for the optimal execution plan in \name remains the same as in \glogs. The optimal plan is obtained by searching for the shortest path in the \glogue from the single-vertex pattern to the queried pattern.  %The process is repeated until the $\pattern$ node is reached, at which point the optimal execution plan is obtained.
-\reffig{framework-workflow}(c) demonstrates a physical plan for matching the given triangle pattern when a graph index is present. The plan reflects the example in~\refex{physical-implementation}, with one exception: the pair of \expandedge and \getvertex operators is fused into a single \expand operator, which will be discussed as a heuristic rule called \joinfuserule.
+\reffig{framework-workflow}(c) demonstrates a physical plan for matching the given triangle pattern when a graph index is present. The plan reflects the example in~\refex{physical-implementation}, with one exception: the pair of \expandedge~ and \getvertex~ operators is fused into a single \expand~ operator, which will be discussed as a heuristic rule called \joinfuserule.
 
 
 \subsubsection{The Relational Optimization}
@@ -77,7 +77,7 @@ Once the graph optimizer has computed the optimal execution plan for $\matching(
 %It's important to note that before $\matching(\pattern)$ can be integrated with the remaining relational component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
 
 To prevent the relational optimizer delve into the internal details of the graph pattern matching process, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
-The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the relational optimizer, \scangraphtable~ behaves like a standard \scan operator, providing a relational interface to the matched results. %This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
+The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the relational optimizer, \scangraphtable~ behaves like a standard \scan~ operator, providing a relational interface to the matched results. %This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
 
 \subsubsection{Heuristic Optimization Rules}
 In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
@@ -131,8 +131,8 @@ We have developed the backend of the \name framework using C++, on top of DuckDB
 We integrated graph index support in GrainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
 %Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
 %However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
-With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the \emph{SIP-Join} in GrainDB.
-Note that we craft a new join on DuckDB called \emph{MERGED-SIP-Join} for the support of \expandintersect.
+With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the predefined join in GrainDB.
+Note that we craft a new join on DuckDB called \emph{EI-Join} for the support of \expandintersect.
 Without graph index, the \hashjoin~ operator is used throughout the entire plan.
 To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GrainDB-compatible executable operators.
 %For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.

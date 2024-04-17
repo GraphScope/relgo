@@ -89,7 +89,7 @@ First, we assessed the optimization efficiency by comparing \name with GrainDB\c
 %Specifically, \name employs a graph-aware optimizer, which explores in a significantly narrowed search space as analyzed in \refsec{compare-search-space}.
 %In contrast, GrainDB utilizes graph-agnostic optimizer but generally employs a greedy optimization approach.
 We compared the optimization time of \name and GrainDB, and also evaluated the execution time for their optimized plans as a measure of the plan quality.
-We consider end-to-end time as optimization time plus execution time.
+We considered end-to-end time as optimization time plus execution time.
 We randomly selected two subsets of the LDBC and JOB queries, and conducted the experiments on $G_{sf30}$ and IMDB datasets respectively.
 
 The results, shown in Fig.~\ref{fig:exp-optimization}, reveal that \name significantly outperforms GrainDB in terms end-to-end time.

@@ -96,6 +96,7 @@ We thus conclude the proof.
 %a sequence of joins involving $n$ vertex tables and $m$ edge tables, as illustrated in the following example.
 
 \begin{example}
+  \label{ex:spjm-to-spj}
   Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
   Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, u_{p_1})$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
   \begin{equation*}
@@ -435,7 +436,7 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}]).
         \end{split}
     \end{equation*}
-    Next, the intersection process is conducted. Since $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, the edges in both sets that have $v_{m_1}$ as the target vertex are retained, resulting in $(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}, e_{l_2}, v_{m_1}])$. Finally, the tuple is flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, e_{l_1}, e_{l_2}, v_{m_1})$.
+    Next, the intersection process is conducted. Since $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, the edges in both sets that have $v_{m_1}$ as the target vertex are retained, resulting in $(v_{p_1}, e_{k_1}, v_{p_2}, [(e_{l_1}, e_{l_2}, v_{m_1})])$. Finally, the tuple is flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, e_{l_1}, e_{l_2}, v_{m_1})$.
 
     \comment{
     Case II: $\matching(\pattern_3) \gjoin \matching(\pattern_4)$ is implemented using \expandedge~and \getvertex. Take $v_{p_1} \in \matching(\pattern_3)$ as an example, we first do \expandedge by looking up the
