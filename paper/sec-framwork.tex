@@ -106,7 +106,7 @@ However, such a fusion is permissible solely when the output edges by \expandedg
 Specifically, the field trimmer would examine whether any subsequent relational processes rely on these edges, such as utilizing them for property projections or for filtering based on their attributes.
 If no such operations are found, the edges can be trimmed.
 Furthermore, the field trimmer would also consider a special case that the edges might be projected in the \scangraphtable~ operator as part of the matching results, but are subsequently unused in relational operations. In such cases, the edges can be trimmed as well.
-After the field trim step, if the output edges are trimmed, the \expandedge~ operator can be fused with the \getvertex~ operator to form a single \expand~ operator, which can directly retrieve the neighboring vertices efficiently by looking up the VE-index of the source vertex when the graph indices are available.
+After the field trim step, if the output edges are trimmed, the \expandedge~ operator can be fused with the \getvertex~ operator to form a single \expand~ operator, which can directly retrieve the neighboring vertices efficiently by looking up the VE-index of the source vertex when the graph index is available.
 
 %
 % The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
