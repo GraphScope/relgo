@@ -1,4 +1,6 @@
 
+\enlargethispage{1em}
+
 \section{Optimizing Matching Operator}
 \label{sec:optimizing-matching-operator}
 In this section, we focus on handling the matching operator (more precisely, the graph component),
@@ -6,6 +8,42 @@ which plays a distinct role within the \spjm queries compared to the \spj querie
 the matching operator: logical transformation and physical implementation. Logical transformation is
 responsible for transforming a matching operator into a logically equivalent representation,
 while physical implementation focuses on how the matching operator can be efficiently executed.
+
+\begin{table}[t]
+    \centering
+   \caption{Frequently used notations.}
+   \label{tab:notations}
+    \scalebox{0.9}{
+        \begin{tabular}{|m{0.29\linewidth}|m{0.79\linewidth}|}
+            \hline
+            Notation                 & Definition                                                                                       \\
+            \hline
+            $R$    & a relation or relational table   \\
+            \hline
+            $\tau$ and $\tau.attr$    & a tuple in a relation, and the value of an attribute of $\tau$ \\
+            \hline
+            $G(V,E)$         & a property graph with $V$ and $E$                                                          \\
+            \hline
+            $\pattern(V, E)$   & a pattern graph with $V$ and $E$  \\
+            \hline
+            $\id(\epsilon)$, $\lab(\epsilon)$, $\epsilon$.attr  & the identifier, label, and the value of given attribute of a graph element $\epsilon$ \\
+            \hline
+            $\adj(u)$ and $\adj^E(u)$           & neighbors and adjacent edges of $u$           \\
+            \hline
+            $GR$   & a graph relation     \\
+            \hline
+            $\matching(GR, \pattern)$, $\matching(\pattern)$  & matching $\pattern$ on a graph relation $GR$ or a graph $G$ \\
+            \hline
+            $\pi_{A}$, $\sigma_\constraints$, $\Join$  & projection, selection, and join operators over relations \\
+            \hline
+            $\gproject$, $\gjoin$  & projection and join operators over graph relations \\
+            \hline
+            $\lambda^s_\lab(e)$, $\lambda^t_\lab(e)$  & the total functions for mapping tuples in an edge relation to source and target vertex relations \\
+            \hline
+        \end{tabular}
+    }
+    % \vspace{-.05in}
+\end{table}
 
 \subsection{Logical Transformation}
 \label{sec:handling-match-operator}
@@ -15,7 +53,6 @@ is the key to the optimization of graph pattern matching in the literature~\cite
 
 Before proceeding, we introduce the concept of pattern decomposition that decomposes $\pattern$ into two overlapping patterns, $\pattern_1$ and $\pattern_2$, with shared vertices $V_{o} = V_{\pattern_1} \cap V_{\pattern_2}$ and shared edges $E_{o} = E_{\pattern_1} \cap E_{\pattern_2}$.
 Denote $\pattern = \pattern_1 \cup \pattern_2$. Under the homomorphism semantics, the matching of $\pattern$ can be represented as:
-
 \begin{equation}
     \label{eq:join-pattern}
     \matching(\pattern) = \matching(\pattern_1) \widehat{\Join}_{V_{o}, E_{o}} \matching(\pattern_2),
@@ -30,6 +67,8 @@ It is important to note that \refeq{join-pattern} is also applicable to alternat
 %Firstly, an intuitive method is presented and then an advanced method based on matching decomposition is proposed.
 %For simplicity, the pattern graph given in matching operators are assumed to be connected in this section.
 
+\enlargethispage{1em}
+
 \subsubsection{Graph-agnostic Transformation}
 \label{sec:intuitive-method}
 If the matching operator can be transformed into purely relational operations, the \spjm query becomes a
@@ -37,26 +76,26 @@ standard \spj query, which can then be optimized using existing relational optim
 approach is intuitive and easy to implement on top of existing relational databases, making it a straightforward
 choice in prototyped systems~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB}. However, there is no theoretical guarantee that
 such a transformation is lossless in the context of \rgmapping (\refdef{rgmapping}). In this subsection,
-we aim to bridge this gap by demonstrating the lossless transformation of the matching
+we bridge this gap by demonstrating the lossless transformation of the matching
 operator under \rgmapping.
+% aim to
 %Graph-agnostic methods~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB} simply recast graph match operations
 %as a sequence of relational operations (mainly joins and projections). This allows an \spjm query to be naively transformed into an \spj query, which then can be optimized through standard relational optimizers.
 
 Consider a pattern graph $\pattern$ and one of its edges $e = (u_s, u_t)$. According to the definition of the matching operator (\refsec{matching-operator}), the graph edges and vertices that can be matched with $e$ must have the labels $\lab(e)$, $\lab(u_s)$, and $\lab(u_t)$. We further denote the relations corresponding to these edges and vertices via \rgmapping as $R_{\lab(e)}$, $R_{\lab(u_s)}$, and $R_{\lab(u_t)}$, respectively. Moreover, there must be total functions $\lambda_{\lab(e)}^s$ and $\lambda_{\lab(e)}^t$ for mapping tuples from $R_{\lab(e)}$ to $R_{\lab(u_s)}$ and $R_{\lab(u_t)}$, respectively. We define the following \EVjoin relational operation regarding $\lambda_{\lab(e)}^s$ as:
-
 \begin{equation} \label{eq:ev-join}
 \begin{split}
 R_{\lab(e)} & \evjoin R_{\lab(u_s)} = \{(\tau_e, \tau_s) \;|\; \\
   &  \tau_e \in R_{\lab(e)} \land \tau_s \in R_{\lab(u_s)} \land \lambda_{\lab(e)}^s(\tau_e) = \tau_s\}.
 \end{split}
 \end{equation}
-
 The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although called \EVjoin, the operation is associative like any relation join, meaning that the order in which the edge and vertex relations are joined does not affect the final result.
 
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 %The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
 We have the following lemma\footnote{Omitted proofs can be found in the full paper~\cite{full-paper}.}.
+
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
@@ -97,8 +136,8 @@ We thus conclude the proof.
 
 \begin{example}
   \label{ex:spjm-to-spj}
-  Given the pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
-  Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, u_{p_1})$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
+  Given pattern graph $\pattern$ shown in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
+  Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_1}, u_{m})$, and $e_3 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
   \begin{equation*}
     \begin{split}
     R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relation{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
@@ -110,6 +149,8 @@ We thus conclude the proof.
     Finally, we have $\gproject(\matching(\pattern)) = R'_3 \Join R'_2 \Join R'_1 \Join \relation{0}$.
     Note that $\relationx{1}{\text{Person}}$ in $R'_2$, as well as $\relationx{2}{\text{Person}}$ and $\relation{\text{Message}}$ in $R'_3$, are redundant and can be safely removed from the final join. By eliminating these redundant relations, we obtain a sequence of joins involving 3 vertex relations and 3 edge relations.
 \end{example}
+
+\enlargethispage{1em}
 
 \subsubsection{Graph-aware Transformation}
 \label{sec:graph-aware}
@@ -141,7 +182,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \begin{figure}
     \centering
-    \includegraphics[width=.6\linewidth]{./figures/decomposition-example.pdf}
+    \includegraphics[width=.55\linewidth]{./figures/decomposition-example.pdf}
     \caption{Example of decomposition trees and the corresponding logical plans.}
     \label{fig:match-decomposition}
 \end{figure}
@@ -156,6 +197,8 @@ Besides, a matching operator located on the left subtree of the join operator is
     }
 \end{example}
 }
+
+\enlargethispage{1em}
 
 \begin{remark}
     \label{rem:graph-agnostic-vs-graph-aware}
@@ -214,6 +257,8 @@ Given a join among $n + m$ relations, the search space for determining the optim
 }
 
 In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
+
+\enlargethispage{1em}
 
 \begin{lemma}
 \label{lem:complexity-of-graph-aware}
@@ -292,9 +337,9 @@ We ultimately obtain the following theorem.
 \end{theorem}
 \begin{proof}
     According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
-    \begin{equation*}
-        \frac{\Omega(4^{m+n-1})}{O(4^{n-1})} = \Omega(4^m).
-    \end{equation*}
+    %\begin{equation*}
+        $\frac{\Omega(4^{m+n-1})}{O(4^{n-1})} $ $= \Omega(4^m)$.
+    %\end{equation*}
 \end{proof}
 
 \begin{remark}
@@ -306,19 +351,7 @@ We ultimately obtain the following theorem.
 %Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges.
 %The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
 
-\begin{figure}[ht]
-    \centering
-    \begin{subfigure}[b]{.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.48\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
-    \end{subfigure}
-    \caption{Search Space Comparison.}
-    \label{fig:exp-search-space}
-\end{figure}
+
 
 %\begin{figure}[ht]
 %    \centering
@@ -338,9 +371,23 @@ We ultimately obtain the following theorem.
 In the graph view, given a vertex $v$, it is efficient to obtain its adjacent edges and vertices (i.e., neighbors). However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations but must be computed via the \EVjoin operations (\refeq{ev-join}). While there are multiple ways to construct the graph view in the literature~\cite{gart,GRFusion}, we refer to the method introduced in GrainDB~\cite{graindb}, which is free from materializing the graph. This approach avoids the extra storage cost associated with graph materialization and ensures compatibility with the relational context,
 Specifically, GrainDB introduces an indexing technique called pre-defined join to improve the performance of join operations. As the pre-defined join essentially materializes the adjacency relationships, we treat it as a \emph{graph index} in this work.
 
-\begin{figure}
+\begin{figure}[t]
     \centering
-    \includegraphics[width=.7\linewidth]{./figures/graph-index-likes.pdf}
+    \begin{subfigure}[b]{.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
+    \end{subfigure}
+    \caption{Search Space Comparison.}
+    \label{fig:exp-search-space}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.62\linewidth]{./figures/graph-index-likes.pdf}
     \caption{The graph index constructed among relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$
     and $\relation{\text{Message}}$ in \reffig{intro-rgmapping-example}(a).}
     \label{fig:graph-index}
@@ -350,12 +397,13 @@ Specifically, GrainDB introduces an indexing technique called pre-defined join t
 \label{sec:graph-index}
 
 As shown in \reffig{graph-index}, given the three relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$, and $\relation{\text{Message}}$, the complete information of ``Person likes messages'' can be obtained by conducting the join:
-
 \[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
+
+\enlargethispage{1em}
 
 GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row ids help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
 
-The VE-index, shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of the tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person. 
+The VE-index in \reffig{graph-index}(b) is created on $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person. 
 %GrainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure that is widely used for maintain adjacency lists in graph store.
 
 We can adopt GrainDB's approach to construct the graph indexes during the \rgmapping process. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $\tau_e \in R_e$ by including $\rowid(\lambda_e^s(\tau_e))$ and $\rowid(\lambda_e^t(\tau_e))$, which are the row ids of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $\tau_{v_s} \in R_{v_s}$ by including the row ids of all tuples $\tau_e \in R_e$ such that $\lambda_e^s(\tau_e) = \tau_{v_s}$, along with the row ids of the corresponding tuples $\tau_{v_t} \in R_{v_t}$ such that $\lambda_e^t(\tau_e) = \tau_{v_t}$.
@@ -378,7 +426,9 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 \label{sec:join-matching-operator}
 We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree.
 
- The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
+\enlargethispage{1em}
+
+The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
 
 The plan is then constructed in a bottom-up manner. As shown in \reffig{match-decomposition}, there are three fundamental cases to consider when implementing the plan.
 
@@ -413,18 +463,18 @@ Consequently, for the tuple $\tau$, the physical \expandintersect~ operator perf
 \begin{enumerate}
 \item For each leaf vertex $u_i \in V_s$ ($1 \leq i \leq k$), apply the \expandedge~ \\ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
-\item Return a new tuple as follows; for the sake of simplicity, the details of the edges are omitted:
+\item Return a new tuple as follows; for the sake of simplicity, the details of the edges are omitted: $(\tau, \bigcap\limits_{1 \leq i \leq k}\adj(v_i))$.
+
 %\[
 %    \left(\tau,\bigcup\limits_{v_c \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_c, \bigcup\limits_{1 \leq i \leq k}\adj^E(v_i, v_c))\right)
 %\]
-\[
-    (\tau, \bigcap_{1 \leq i \leq k}\adj(v_i)).
-\]
 
 \end{enumerate}
 
 Note that the above step (1) and (2) can be computed in a pipeline manner, following a certain order of among the leaf vertices.
 Similar to Case II, we flatten the common edges and vertices and pair them up to obtain the final result.
+
+\enlargethispage{1em}
 
 \begin{example}
     \label{ex:physical-implementation}

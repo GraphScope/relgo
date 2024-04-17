@@ -20,10 +20,12 @@ method for solving the matching operator. We then delve into the converged workf
     \label{fig:framework-workflow}
 \end{figure*}
 
+\enlargethispage{1em}
 
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
-The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\refex{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
+The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\reflem{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks discussed in \refrem{graph-agnostic-vs-graph-aware}.
+%that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
 \subsection{The Converged Approach}
 \label{sec:converged}
@@ -70,6 +72,7 @@ In the absence of a graph index, \hashjoin~ is used for the entire plan, where t
 \stitle{Plan Computation.} Searching for the optimal execution plan in \name remains the same as in \glogs. The optimal plan is obtained by searching for the shortest path in the \glogue from the single-vertex pattern to the queried pattern.  %The process is repeated until the $\pattern$ node is reached, at which point the optimal execution plan is obtained.
 \reffig{framework-workflow}(c) demonstrates a physical plan for matching the given triangle pattern when a graph index is present. The plan reflects the example in~\refex{physical-implementation}, with one exception: the pair of \expandedge~ and \getvertex~ operators is fused into a single \expand~ operator, which will be discussed as a heuristic rule called \joinfuserule.
 
+\enlargethispage{1em}
 
 \subsubsection{The Relational Optimization}
 Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
@@ -83,6 +86,8 @@ The \scangraphtable~ operator acts as a bridge between the graph and relational 
 In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
 
 \stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \constraints)$, introducing constraints within $\constraints$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
+
+\enlargethispage{1em}
 
 Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
 \[
@@ -114,6 +119,8 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 % For example, if subsequent relational operations do not require any vertex properties output by \getvertex~ (e.g., no property projection or filtering), the vertex properties can be trimmed.
 % In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
 % Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
+
+\enlargethispage{1em}
 
 \subsection{System Implementation}
 We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite}, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.

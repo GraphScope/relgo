@@ -8,6 +8,8 @@ Despite its considerable success and broad adoption, SQL has its limitations, pa
 
 In comparison, such a scenario could be succinctly addressed using graph query languages, exemplified by Cypher~\cite{opencypher}, a language where queries are expressed as intuitive and concise graph pattern matching. This discrepancy between the relational and graph querying paradigms has given rise to the innovative SQL/Property Graph Queries (SQL/PGQ), an extension proposed as part of SQL 2023 standard~\cite{sql-pgq}. SQL/PGQ is designed to amalgamate the extensive capabilities of SQL with the inherent benefits of graph pattern matching. With SQL/PGQ, it is now possible to define and query graphs within SQL expressions, transforming otherwise complex relational queries -- characterized by multiple joins -- into simpler and more intuitive graph queries.
 
+\enlargethispage{1em}
+
 \begin{example}
     \label{ex:introduction:sqlpgq}
     Consider the four relational tables in the database: \kk{Person(id, name, place\_id)}, \kk{Message(id, content, date)}, \kk{Like(p\_id, m\_id, date)}, and \kk{Place(id, name)}. Using SQL/PGQ, a property graph $G$ is articulated as a \lstinline{GRAPH_TABLE}, established on the basis of the first three tables. In this mapping, rows from \kw{Person} and \kw{Message} are interpreted as vertices with labels ``Person'' and ``Message'' respectively, while rows from Like represent edges with the label ``Likes''. This mapping process will be formally elaborated in \refdef{rgmapping}. An SQL/PGQ query to discover the friends of a person named ``Tom'' and the place they live in, where ``Tom'' and friends share an affinity for the same message, can be formulated as:
@@ -25,10 +27,13 @@ In comparison, such a scenario could be succinctly addressed using graph query l
         WHERE g.p1_place_id = place.id
         AND  g.p1_name = 'Tom';
     \end{lstlisting}
+    \vspace{-1em}
     In graph $G$, a graph pattern matching is employed to decode the intricate relationships between persons and messages. Upon executing the pattern matching, a \lstinline{COLUMNS} clause projects the results into a tabular format, enumerating essential attributes. This resultant table is then joined with the \kk{Place} table to obtain the place's name.
 \end{example}
 
+
 The SQL/PGQ standard, while a significant leap forward in the realm of relational databases, primarily addresses language constructs. A discernible gap exists in the theoretical landscape, particularly in analyzing, transforming, and optimizing SQL/PGQ queries with hybrid relational and graph semantics. %This gap is mainly due to the absence of a unified framework for optimizing such hybrid queries, a framework that could bridge the divide between the well-established relational optimization techniques and the evolving domain of graph query optimization.
+\enlargethispage{1em}
 
 Relational query optimization has historically leaned on the \spj (selection-projection-join) skeleton~\cite{spj,Chaudhuri98}, which provides a systematic approach for analyzing query complexity~\cite{IbarakiK84,ChatterjiEGY02} , devising heuristic optimization rules~\cite{Chaudhuri99heuristics,goldsteinheuristics}, and
 computing optimal join order~\cite{Haffnerjoinorder,chenjoinorder}. Recently, graph techniques have been introduced to optimize relational queries~\cite{wanderjoin,Haffnerjoinorder,gqfast,graindb}. %In~\cite{wanderjoin}, the authors proposed modeling the joins of multiple tables as a join graph and leveraging the random-walk algorithm for better cardinality estimation. The authors in~\cite{Haffnerjoinorder} reduced the join-order optimization problem to a shortest path problem, facilitating theoretical analysis for the search space while using heuristic rules.
@@ -42,15 +47,16 @@ In this paper, we propose the first converged optimization framework, \name, tha
 
 To address these challenges, \name is proposed to leverage the strengths of both relational and graph query optimization techniques. Building upon the foundation of \spj queries, we introduce the \spjm query skeleton, which extends \spj with a matching operator to represent graph queries. We adapt state-of-the-art graph optimization techniques, such as the decomposition method~\cite{huge} and the cost-based optimizer~\cite{GLogS}, to the relational context, effectively producing worst-case optimal graph subplans for the matching operator. To facilitate efficient execution of the matching operator, we introduce a graph index inspired by GrainDB's predefined join~\cite{graindb} and implement graph-based physical operations. The relational part of the query, together with the optimized graph subplans encapsulated within a special operator called \scangraphtable, is optimized using standard relational optimizers. Finally, we incorporate heuristic rules, such as \filterrule, to optimize cases unique to \spjm queries that involve the interplay between relational and graph semantics.
 
-We have made the following contributions in this paper:
+\enlargethispage{1em}
 
+We have made the following contributions in this paper:
 \begin{enumerate}
 \item We introduce the concept of \rgmapping (\emph{Relational-to-Graph Mapping}), which serves as the foundation for mapping relational data models to property graph models as specified by SQL/PGQ. Based on this concept, we define a new query skeleton called \spjm to better analyze the relational-graph hybrid queries. \hfill(\refsec{preliminaries})
 
 \item We construct the theory for transforming any \spjm query into an \spj query. Such a graph-agnostic approach enables existing relational databases to handle \spjm queries without low-level modifications. We also formally prove that the search space
 of the graph-agnostic approach is exponentially larger than our solution. \hfill(\refsec{optimizing-matching-operator})
 
-\item We introduce \name, a converged optimization framework that leverages the strengths of both relational and graph query optimization techniques to optimize \spjm queries. The framework adapts state-of-the-art graph optimization techniques to the relational context, and implements graph-based physical operations based on graph index for efficient query execution. \hfill(\refsec{optimizations})
+\item We introduce \name, a converged optimization framework that leverages the strengths of both relational and graph query optimization techniques to optimize \spjm queries. \name adapts state-of-the-art graph optimization techniques to the relational context, and implements graph-based physical operations based on graph index for efficient query execution. \hfill(\refsec{optimizations})
 
 \item We develop \name~ by integrating it with the industrial relational optimization framework, Calcite~\cite{calcite}, and employing DuckDB~\cite{duckdb} for execution runtime. We conducted extensive experiments to evaluate its performance. The results on the LDBC Social Network Benchmark~\cite{ldbc_snb} indicate that \name significantly surpasses the performance of the graph-agnostic baseline, with an average speedup of $14.72\times$, and $10\times$ even after graph index is enabled for the baseline. \hfill(\refsec{evaluation})
 
