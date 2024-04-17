@@ -61,10 +61,10 @@ When a graph index is available, there are three physical implementations of $\g
 In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
 
 \modify{
-    \begin{example}
-        As shown in \reffig{framework-workflow}, the join operator between $\matching(\pattern)$ and 
-        is implemented with \expandintersect~operator.
-    \end{example}
+\begin{example}
+    As shown in \reffig{framework-workflow}, since $\matching(\pattern_2)$ is a single-edge pattern, the join operator between $\matching(\pattern_1)$ and $\matching(\pattern_2)$ is implemented using \expandedge~followed by \getvertex.
+    Besides, as $\matching(\pattern_4)$ is a complete star, the join operator bewteen $\matching(\pattern_3)$ and $\matching(\pattern_4)$ is implemented using the \expandintersect~operator.
+\end{example}
 }
 
 \stitle{Plan Computation.} Searching for the optimal execution plan remains the same as in \glogs. The optimal execution plan is obtained by traversing the \glogue~ from the queried pattern $\pattern$ in a top-down manner.
