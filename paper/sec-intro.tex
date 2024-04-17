@@ -240,7 +240,7 @@ An example is shown as follows.
 
     However, as $v_1$ has much fewer neighbors in table \textbf{Repository} than in table \textbf{Contributor}, join order \textbf{p1$\xrightarrow{\textit{getNeighbor}}$r$\xrightarrow{\textit{getNeighbor}}$p2} would be more efficient from the perspective of graph databases.
     Therefore, it suggests that
-    replacing relational operators with graph operators after optimization with relational optimizers can miss optimial execution plans.
+    replacing relational operators with graph operators after optimization with relational optimizers can miss optimal execution plans.
 
     Besides, given the relationships among the tuples as shown in Fig.~\ref{fig:intro-order-case2}, the best join order from the perspective of a relational database like DuckDB can be \textbf{p1$\rightarrow$f$\rightarrow$c$\rightarrow$p2$\rightarrow$r}.
     Then, \textbf{p1$\rightarrow$f} and \textbf{c$\rightarrow$p2} cannot be replaced with \textbf{p1$\xrightarrow{\textit{getNeighbor}}$p2} and some efficient execution plans are missing.
