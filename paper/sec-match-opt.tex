@@ -216,7 +216,7 @@ In contrast, when the graph-aware transformation is applied, the search space is
 
 \begin{lemma}
 \label{lem:complexity-of-graph-aware}
-The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^n)$.
+The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^{n-1})$.
 \end{lemma}
 
 \comment{
@@ -307,7 +307,7 @@ We ultimately obtain the following theorem.
 \begin{figure}[ht]
     \centering
     \includegraphics[width=.8\linewidth]{./figures/exp/compare_search_space.pdf}
-    \caption{Search Space Comparison. Please note that when the path length is greater than 6, the memory usage of the graph-agnostic method exceeds the limit of the server with 251GB of RAM.}
+    \caption{Search Space Comparison.}
     \label{fig:exp-search-space}
 \end{figure}
 
@@ -382,11 +382,11 @@ Furthermore, to obtain $\matching(\pattern')$, we flatten the adjacent edges and
 
 In real-life scenarios, a vertex may be adjacent to multiple types of edges. For example, in \reffig{intro-rgmapping-example}, a \kk{Person} vertex can be connected to both \kk{Likes} and \kk{Knows} edges. To handle such cases, we can record edge's ID instead of just the row ID of the tuple. Given that the edge's ID is a combination of its label and the tuple's row ID, the adjacent edges of a specific label can be easily obtained from the VE-Index.
 
-\stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_s, E_s} \matching(\pattern(u;V_s))$}, where $\pattern(u;V_s)$ is a complete $k$-star pattern. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;V_s)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $V_s = \{u_1, \ldots, u_k\}$.
+\stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_s, E_s} \matching(\pattern(u;V_s))$}, where pattern $\pattern(u;V_s)$ is a complete $k$-star. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;V_s)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $V_s = \{u_1, \ldots, u_k\}$.
 
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
-When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
+When graph indexes are available, the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, can be used to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 
@@ -421,6 +421,7 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     The join operator is implemented as a natural join with constraints on $u_{p_1}$.
 
     Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m_2}, \{u_{m_1}, u_{p_2}\})$ is a complete $2$-star pattern.
+    This join pretains to Case III.
     For simplicity, suppose $(v_{m}, v_{p}, v_p')$ is a tuple in $\matching(\pattern_1)$, where $v_{m}, v_{p}, v_p'$ are vertices that matches $u_{m_1}$, $u_{p_2}$, and $u_{p_1}$ respectively.
     $\adj(v_{m})$, $\adj(v_{p})$ are neighbors of $v_m$ and $v_p$ labeled Message.
     Suppose the graph indexes are available, the physical operator \expandintersect~is applied.
