@@ -56,13 +56,12 @@ The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although cal
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 %The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
-We have the following lemma\footnote{Omitted proofs can be found in the full paper~\cite{full-paper}.}.
+We have the following lemma.%\footnote{Omitted proofs can be found in the full paper~\cite{full-paper}.}.
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
     Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
-\comment{
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -89,7 +88,6 @@ By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e
 
 We thus conclude the proof.
 \end{proof}
-}
 
 
 %Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in
@@ -181,7 +179,6 @@ establishes a lower bound on the search space complexity for this problem:
 Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
-\comment{
 \begin{proof}
     We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
@@ -210,7 +207,6 @@ Given a join among $n + m$ relations, the search space for determining the optim
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
-}
 
 In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
 
@@ -219,8 +215,6 @@ In contrast, when the graph-aware transformation is applied, the search space is
 The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^{n-1})$.
 \end{lemma}
 
-
-\comment{
 \begin{proof}
     To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
     We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
@@ -256,31 +250,6 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Therefore, the search space is at most $O(4^{n-1})$.
     We thus conclude the proof.
 \end{proof}
-}
-
-\comment{
-    \begin{proof}
-        \todo{refine the proof.}
-        Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\empty}$ in $\searchgraph_\pattern(V, E)$.
-        According to Dijkstra's algorithm, the time complexity of the shortest path query problem is $O(|E|)$.
-
-        As the number of edges from patterns in $V_i$ is at most
-        \begin{equation*}
-            \sum\limits_{\pattern_i}(2^i - 2) = \binom{n}{i}(2^i - 2),
-        \end{equation*}
-        the upper bound of the number of edges in $\searchgraph_\pattern$ is
-        \begin{equation*}
-            \begin{split}
-                \sum\limits_{i=2}^{i=n}\binom{n}{i}(2^i - 2) + n
-                < \sum\limits_{i=0}^{i=n}\binom{n}{i}2^i = (2+1)^n
-                 = 3^n.
-            \end{split}
-        \end{equation*}
-
-        Therefore, the time complexity is at most $O(3^n)$.
-        We thus conclude the proof.
-    \end{proof}
-}
 
 We ultimately obtain the following theorem.
 
@@ -354,7 +323,7 @@ As shown in \reffig{graph-index}, given the three relations $\relation{\text{Per
 
 GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row ids help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
 
-The VE-index, shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of the tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person. 
+The VE-index, shown in \reffig{graph-index}(b), is created on the table $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of the tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person.
 %GrainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure that is widely used for maintain adjacency lists in graph store.
 
 We can adopt GrainDB's approach to construct the graph indexes during the \rgmapping process. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $\tau_e \in R_e$ by including $\rowid(\lambda_e^s(\tau_e))$ and $\rowid(\lambda_e^t(\tau_e))$, which are the row ids of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $\tau_{v_s} \in R_{v_s}$ by including the row ids of all tuples $\tau_e \in R_e$ such that $\lambda_e^s(\tau_e) = \tau_{v_s}$, along with the row ids of the corresponding tuples $\tau_{v_t} \in R_{v_t}$ such that $\lambda_e^t(\tau_e) = \tau_{v_t}$.
@@ -386,7 +355,7 @@ be projected into relational tuples until the last stage that obtains the result
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
 
-\modify{When there is no graph index, $\matching(\pattern_e)$ is computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$}.
+When there is no graph index, $\matching(\pattern_e)$ is computed via $R_{\lab(u_s)} \evjoin R_{\lab(e)} \evjoin R_{\lab(u_t)}$.
 %where the first join is to obtain the edge tuples that connect $u_s$, which are encoded into edge objects,
 %and the second join is to obtain the associated vertex tuples of $u_t$, which are encoded into vertex objects.
 This case is then reduced to Case I. %, where a join operation is performed between $\matching(\pattern'_l)$ and the computed $\matching(\pattern_e)$.
