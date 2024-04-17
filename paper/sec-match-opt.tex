@@ -424,7 +424,7 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
 \begin{example}
     \label{ex:physical-implementation}
     Given $\pattern$ in \reffig{match-decomposition}, a decomposition tree and its corresponding logical plan are presented. We illustrate the physical implementation of $\matching(\pattern_1) \gjoin \matching(\pattern_2)$ using \expandintersect when a graph index is available.
-    Consider the tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example. First, the \expandedge and \getvertex operators are applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, resulting in
+    Consider the tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example. First, the \expandedge~ and \getvertex~ operators are applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, resulting in
     \begin{equation*}
         \begin{split}
     &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]), \text{and} \\
