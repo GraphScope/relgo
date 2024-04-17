@@ -407,6 +407,7 @@ Note that the above step (1) and (2) can be computed in a pipeline manner, follo
 Similar to Case II, we flatten the common edges and vertices and pair them up to obtain the final result.
 
 \begin{example}
+    \label{ex:physical-implementation}
     \todo{should better refactor the example using Figure 5, by also drawing the physical plan in Figure 5}
     \todo{moreover, combining Figure 5/6 may be a good idea.}
     Given $\pattern_0$ in \reffig{match-decomposition}, a decomposition tree and the corresponding logical plan is presented.
@@ -416,7 +417,7 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     Then, since $\pattern_5$ is a single-vertex pattern whose vertex exists in $\pattern_6$, the results of the join equals $\matching(\pattern_6)$.
     Otherwise, if a graph index exists, $\matching(\pattern_6)$ can be computed with \expandedge~and \getvertex.
     Analogously, the join operation between $\matching(\pattern_7)$ and $\matching(\pattern_8)$ also pretains to Case II.
-    
+
     Then, $\matching(\pattern_3) \widehat{\Join}_{\{u_{p_1}\}} \matching(\pattern_4)$ pretains to Case I.
     The join operator is implemented as a natural join with constraints on $u_{p_1}$.
 
