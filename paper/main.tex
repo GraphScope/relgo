@@ -45,7 +45,7 @@
 %% for your publication.
 %%
 %%
-\documentclass[sigconf]{acmart}
+\documentclass[sigconf,nonacm]{acmart}
 
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -64,6 +64,8 @@
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{enumitem}
+\settopmatter{printacmref=false}
+\setcopyright{none}
 
 \setlist[itemize]{leftmargin=0.5cm}
 \setlist[enumerate]{leftmargin=0.5cm}
@@ -202,10 +204,9 @@
 %% values in them; it is your responsibility as an author to replace
 %% the commands and values with those provided to you when you
 %% complete the rights form.
-\setcopyright{acmlicensed}
-\copyrightyear{2025}
-\acmYear{2025}
-\acmDOI{XXXXXXX.XXXXXXX}
+%\setcopyright{acmlicensed}
+
+%\acmDOI{XXXXXXX.XXXXXXX}
 
 %% These commands are for a PROCEEDINGS abstract or paper.
 %\acmConference[Conference acronym 'XX]{Make sure to enter the correct
