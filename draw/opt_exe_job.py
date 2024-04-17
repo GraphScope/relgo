@@ -6,7 +6,7 @@ methods = ["RelGo", "GrainDB"]
 
 compile_times = np.array(
     [
-        [91, 23, 21, 17],  # compilation time of RelGo
+        [19, 13, 14, 14],  # compilation time of RelGo
         [1, 1, 1, 1],  # GrainDB
     ]
 )
@@ -28,10 +28,10 @@ group_width = 0.6
 bar_width = group_width / n_methods
 index = np.arange(n_queries)
 
-compile_colors = ["#98df8a", "lightskyblue"]  # Green, Orange, Blue
+compile_colors = ["#98df8a", "salmon"]  # Green, Orange, Blue
 execution_colors = [
     "#C0EAB9",
-    "#BCE9FA",
+    "#FAB3AA",
 ]  # Lighter Green, Lighter Orange, Lighter Blue
 
 for i in range(n_methods):
@@ -54,7 +54,7 @@ for i in range(n_methods):
         bottom=compile_times[i],
     )
 
-plt.xticks(index + group_width / 3, queries, fontsize=28)
+plt.xticks(index + group_width / 4, queries, fontsize=28)
 plt.yticks(fontsize=28)
 
 plt.ylabel("Time Cost (ms)", fontsize=28)

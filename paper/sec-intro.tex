@@ -6,7 +6,7 @@ The ubiquity of these databases has been supported by the advent of Structured Q
 
 Despite its considerable success and broad adoption, SQL has its limitations, particularly when it comes to representing and querying intricately linked data. Consider, for instance, the relational tables of \kk{Person} and \kk{Knows}, the latter symbolizing a many-to-many relationship between instances of the former. Constructing a SQL query to retrieve a group of four persons who are all mutually acquainted is not a straightforward endeavor, potentially leading to a cumbersome and complex SQL expression.
 
-In comparison, such a scenario could be succinctly addressed using graph query languages, exemplified by Cypher~\cite{opencypher}, a language where queries are expressed as intuitive and concise graph pattern matching. This discrepancy between the relational and graph querying paradigms has given rise to the innovative SQL/Property Graph Queries (SQL/PGQ), an extension proposed as part of SQL 2023 standard~\cite{sql-pgq}. SQL/PGQ is designed to amalgamate the extensive capabilities of SQL with the inherent benefits of graph pattern matching. With SQL/PGQ, it is now possible to define and query graphs within SQL expressions, transforming otherwise complex relational queries -- characterized by multiple joins -- into simpler and more intuitive graph queries.
+In comparison, such a scenario could be succinctly addressed using graph query languages, exemplified by Cypher~\cite{opencypher}, a language where queries are expressed as intuitive and concise graph pattern matching. This discrepancy between the relational and graph querying paradigms has given rise to the innovative SQL/Property Graph Queries (SQL/PGQ), an extension \revisewy{formally adopted in the ISO/IEC SQL:2023 standard}~\cite{sql-pgq}. SQL/PGQ is designed to amalgamate the extensive capabilities of SQL with the inherent benefits of graph pattern matching. With SQL/PGQ, it is now possible to define and query graphs within SQL expressions, transforming otherwise complex relational queries -- characterized by multiple joins -- into simpler and more intuitive graph queries.
 
 \begin{example}
     \label{ex:introduction:sqlpgq}
@@ -21,11 +21,11 @@ In comparison, such a scenario could be succinctly addressed using graph query l
                 p1.name AS p1_name,
                 p1.place_id AS p1_place_id,
                 p2.name AS p2_name)
-        ) g JOIN Place place
-            ON g.p1_place_id = place.id
+            ) g
+        JOIN Place p ON g.p1_place_id = p.id
         WHERE g.p1_name = 'Tom';
     \end{lstlisting}
-    In graph $G$, a graph pattern matching is employed to decode the intricate relationships between persons and messages. Upon executing the pattern matching, a \lstinline{COLUMNS} clause projects the results into a tabular format, enumerating essential attributes. This resultant table is then joined with the \kk{Place} table to obtain the place's name.
+    \revisewy{In graph $G$, a {\sc Graph Pattern Matching} is employed to decode the intricate relationships between persons and messages. Upon executing the pattern matching, a \lstinline{COLUMNS} clause projects the results into a tabular format, enumerating essential attributes. Then the {\sc Relational}\lstinline{JOIN} is performed on resultant table \lstinline{g} and \kk{Place} table to obtain the place's name.}
 \end{example}
 
 The SQL/PGQ standard, while a significant leap forward in the realm of relational databases, primarily addresses language constructs. A discernible gap exists in the theoretical landscape, particularly in analyzing, transforming, and optimizing SQL/PGQ queries with hybrid relational and graph semantics. %This gap is mainly due to the absence of a unified framework for optimizing such hybrid queries, a framework that could bridge the divide between the well-established relational optimization techniques and the evolving domain of graph query optimization.

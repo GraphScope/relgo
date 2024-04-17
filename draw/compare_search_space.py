@@ -56,7 +56,7 @@ plt.plot(
 plt.xticks(xlabel, xlabel, fontsize=28)
 plt.yticks(fontsize=28)
 
-plt.xlabel("Edge Number m", fontsize=28)
+plt.xlabel("Edge Number", fontsize=28)
 plt.ylabel("Search Space", fontsize=28)
 
 plt.yscale("log")
@@ -88,11 +88,11 @@ plt.yticks(fontsize=28)
 plt.yscale("log")
 # plt.yticks([10000, 20000, 30000, 40000, 50000, 60000], [, 2, 3, 4, 5, 6], fontsize=28)
 
-plt.xlabel("Edge Number m", fontsize=28)
-plt.ylabel("Search Space Ratio", fontsize=28)
+plt.xlabel("Edge Number", fontsize=28)
+plt.ylabel("Agnostic / Aware", fontsize=28)
 
 plt.grid(linestyle="--", axis="y")
-plt.legend(loc="upper left", fontsize=26)
+# plt.legend(loc="upper left", fontsize=26)
 plt.tight_layout()
 # plt.show()
 
