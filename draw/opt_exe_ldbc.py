@@ -76,7 +76,7 @@ ot_threshold_units = ot_threshold_ms
 #     linestyle="--",
 #     # label=f"OT Threshold ({ot_threshold_ms} ms)",
 # )
-plt.yscale("log")
+# plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
 
 # plt.legend(
