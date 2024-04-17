@@ -252,6 +252,11 @@
 %% end of the preamble, start of the body of the document source.
 
 \input{command}
+\setcopyright{none}
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\pagestyle{plain}
+
 
 \begin{document}
 \title{Towards a Converged Relational-Graph Optimization Framework}
@@ -271,9 +276,10 @@
 
 
 \input{abstract}
+\settopmatter{printacmref=false}
 
-\keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for,
-  Your, Paper}
+
+\keywords{}
 
 \maketitle
 

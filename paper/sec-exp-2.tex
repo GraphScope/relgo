@@ -40,7 +40,7 @@ To ensure a fair comparison, all the following systems use DuckDB as the underly
 \begin{itemize}
 \item DuckDB~\cite{duckdb}: This system optimizes queries using the graph-agnostic approach, leveraging DuckDB's built-in optimizer as described in \refsec{relational-only}. It serves as the naive baseline for extending a relational database system to support \spjm.
 
-\item GrainDB~\cite{duckdb}: This system uses same optimizer as DuckDB but employs the graph index (\refsec{graph-index}) for query execution. It acts as the baseline to demonstrate that solely using graph index is insufficient for optimizing \spjm.
+\item GrainDB~\cite{graindb}: This system uses same optimizer as DuckDB but employs the graph index (\refsec{graph-index}) for query execution. It acts as the baseline to demonstrate that solely using graph index is insufficient for optimizing \spjm.
 
 %\item \relgohash: This system optimizes queries using the graph-agnostic optimizer introduced in \refsec{converged}, without leveraging the graph index for query execution. It serves as the baseline to showcase that, even in the absence of a graph index, the converged optimizer can generate efficient plans with improved join orders by utilizing graph-optimization techniques.
 

@@ -11,7 +11,7 @@ In comparison, such a scenario could be succinctly addressed using graph query l
 \begin{example}
     \label{ex:introduction:sqlpgq}
     Consider the four relational tables in the database: \kk{Person(id, name, place\_id)}, \kk{Message(id, content, date)}, \kk{Like(p\_id, m\_id, date)}, and \kk{Place(id, name)}. Using SQL/PGQ, a property graph $G$ is articulated as a \lstinline{GRAPH_TABLE}, established on the basis of the first three tables. In this mapping, rows from \kw{Person} and \kw{Message} are interpreted as vertices with labels ``Person'' and ``Message'' respectively, while rows from Like represent edges with the label ``Likes''. This mapping process will be formally elaborated in \refdef{rgmapping}. An SQL/PGQ query to discover the friends of a person named ``Tom'' and the place they live in, where ``Tom'' and friends share an affinity for the same message, can be formulated as:
-    \begin{lstlisting}
+    \begin{lstlisting} 
         SELECT p2_name, place.name
         FROM GRAPH_TABLE (G
             MATCH (p1:Person)-[:Likes]->(m:Message),
@@ -20,8 +20,7 @@ In comparison, such a scenario could be succinctly addressed using graph query l
             COLUMNS (
                 p1.name AS p1_name,
                 p1.place_id AS p1_place_id,
-                p2.name AS p2_name
-            )
+                p2.name AS p2_name)
         ) g, Place place
         WHERE g.p1_place_id = place.id
         AND  g.p1_name = 'Tom';
