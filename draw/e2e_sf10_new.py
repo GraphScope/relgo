@@ -5,21 +5,21 @@ xlabel = [
     "1-1",
     "1-2",
     "1-3",
-    "2-1",
+    "2",
     "3-1",
     "3-2",
-    "4-1",
+    "4",
     "5-1",
     "5-2",
     "6-1",
     "6-2",
-    "7-1",
-    "8-1",
+    "7",
+    "8",
     "9-1",
     "9-2",
     "11-1",
     "11-2",
-    "12-1",
+    "12",
 ]
 
 xaxis = np.arange(len(xlabel))
@@ -125,16 +125,17 @@ plt.bar(
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=22, rotation=-20)
+plt.xticks(xaxis_final, xlabel, fontsize=20)
 plt.yticks(fontsize=22)
 plt.yscale("log")
 
 plt.grid(linestyle="--", axis="y")
 
+plt.xlabel("Queries of IC[*]", fontsize=24)
 plt.ylabel("Time Cost (ms)", fontsize=22)
 
 plt.legend(
-    loc="upper center", fontsize=26, ncol=3, bbox_to_anchor=(0.5, 1.27), columnspacing=2
+    loc="upper center", fontsize=26, ncol=3, bbox_to_anchor=(0.5, 1.32), columnspacing=2
 )
 
 plt.tight_layout()
