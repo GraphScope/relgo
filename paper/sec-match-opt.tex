@@ -349,7 +349,6 @@ Specifically, GrainDB introduces an indexing technique called pre-defined join t
 \label{sec:graph-index}
 
 As shown in \reffig{graph-index}, given the three relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$, and $\relation{\text{Message}}$, the complete information of ``Person likes messages'' can be obtained by conducting the join:
-
 \[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
 
 GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row ids help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
