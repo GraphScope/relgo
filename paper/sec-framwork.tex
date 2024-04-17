@@ -104,7 +104,7 @@ It is recommended to apply the \filterrule before graph optimization, as this al
 The \joinfuserule~ amis to streamline a query plan by merging the \expandedge~ and \getvertex~ operators which are commonly coupled in the implementation of matching operations, into a single \expand~ operator that retrieves the neighboring vertices directly.
 However, such a fusion is permissible solely when the output edges by \expandedge~ are deemed unnecessary, so this rule further incorporates a preceded field trim step.
 Specifically, the field trimmer would examine whether any subsequent relational processes rely on these edges, such as utilizing them for property projections or for filtering based on their attributes.
-If no such operations are found, the edges can be trimmed. 
+If no such operations are found, the edges can be trimmed.
 Furthermore, the field trimmer would also consider a special case that the edges might be projected in the \scangraphtable~ operator as part of the matching results, but are subsequently unused in relational operations. In such cases, the edges can be trimmed as well.
 After the field trim step, if the output edges are trimmed, the \expandedge~ operator can be fused with the \getvertex~ operator to form a single \expand~ operator, which can directly retrieve the neighboring vertices efficiently by looking up the VE-index of the source vertex when the graph indices are available.
 
@@ -131,8 +131,8 @@ We have developed the backend of the \name framework using C++, on top of DuckDB
 We integrated graph index support in GrainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
 %Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
 %However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
-With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the predefined join in GrainDB.
-Note that we craft a new implementation called merge sip join for the support of \expandintersect.
+With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the \emph{SIP-Join} in GrainDB.
+Note that we craft a new join on DuckDB called \emph{MERGED-SIP-Join} for the support of \expandintersect.
 Without graph index, the \hashjoin~ operator is used throughout the entire plan.
 To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GrainDB-compatible executable operators.
 %For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.

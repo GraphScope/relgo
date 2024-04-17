@@ -130,7 +130,7 @@ For the total time cost of optimization and execution, \name still achieves $6.5
 %This gap could be more obvious when the dataset scales up (comparing $G_{sf10}$ and $G_{sf30}$), since the optimization time cost is fixed, but a better plan will achieve more efficiency when the dataset scales up.
 These findings suggest that \name's optimization cost is justified, as it generates high-quality plans that are more efficient than those optimized by GrainDB in execution.
 
-To ensure a fair comparison, in the subsequent experiments, we evaluate the efficiency of different systems by considering the total time for both optimization and execution.
+To ensure a fair comparison, in the subsequent experiments, we evaluated the efficiency of different systems by considering the total time for both optimization and execution.
 }
 
 \begin{figure}[ht]
@@ -205,26 +205,16 @@ To ensure a fair comparison, in the subsequent experiments, we evaluate the effi
 
 \noindent\textbf{Advanced Optimization Strategies.}
 \textcolor{blue}{
-In this experiment, we assessed the advanced optimization strategies in \name, including the heuristic \filterrule and \joinfuserule, and the optimized implementation of \intersect~ operator that aims to improve the efficiency of cyclic patterns.
+In this experiment, we assessed the advanced optimization strategies in \name, including the heuristic \filterrule and \joinfuserule, and the optimized implementation of \expandintersect~ operator that aims to improve the efficiency of complete star join.
 }
 
-First we test \filterrule and \joinfuserule, which are two representative heuristic rules employed in \name that captures the optimization opportunities at the interplay of relational and graph optimizations.
-We conduct experiments on $G_{sf10}$ and $G_{sf30}$, with $QR[1]$ and $QR[2]$ to evaluate \filterrule, and $QR[3]$ and $QR[4]$ to test \joinfuserule.
-The results are depicted in \reffig{exp-filter}, where \relgonofi denotes the variants of \name without applying corresponding rules.
-According to the results, \filterrule~ demonstrates a significant improvement in query performance, with an average speedup of 299.4$\times$ and 699.8$\times$ on $G_{sf10}$ and $G_{sf30}$, respectively.
-The \joinfuserule also accelerates the query execution by 2.0$\times$ and 2.3$\times$ on average on $G_{sf10}$ and $G_{sf30}$, respectively.
-These results suggest that the heuristic rules, especially the \filterrule, are effective in enhancing the efficiency of query execution by identifying and exploiting optimization opportunities across relational and graph queries.
+We began by testing \filterrule and \joinfuserule, two representative heuristic rules employed in \name that capture optimization opportunities at the interplay of relational and graph optimizations. We conducted experiments on the $G_{sf10}$ and $G_{sf30}$ datasets, using $QR[1]$ and $QR[2]$ to evaluate \filterrule, and $QR[3]$ and $QR[4]$ to test \joinfuserule. The results, depicted in \reffig{exp-filter}, compared the performance of \name with and without applying these rules, denoted as \name and \relgonofi, respectively.
+The results demonstrate that \filterrule significantly improves query performance, providing an average speedup of 299.4$\times$ on $G_{sf10}$ and 699.8$\times$ on $G_{sf30}$. After applying \joinfuserule, query execution is accelerated by an average of 2.0$\times$ on $G_{sf10}$ and 2.3$\times$ on $G_{sf30}$. These findings suggest that the heuristic rules, particularly \filterrule, are highly effective in enhancing query execution efficiency.
 
-\textcolor{blue}{
-Then we evaluate the effectiveness of the \intersect~ operator, which has an optimized worst case optimal join implementation, focusing on improving the efficiency of cyclic patterns.
-Without this optimization strategy, the \intersect~ operator would be implemented as a traditional multiple join, and we denote this variant as \relgomj.
-We conduct this experiment with queries $QC[1\ldots 3]$ that contain cycles, and compare the performance of \name and \relgomj.
-}
-The performance results depicted in \reffig{exp-expand-intersect} suggest that, compared to \relgomj, \name achieves a speedup of 1.22$\times$ and 1.31$\times$ on average (QC[3] excluded) on $G_{sf10}$ and $G_{sf30}$, respectively.
-% improve the performance of $QC[1]$ and $QC[2]$ by $20.0\%$, and  by $15.7\%$ on $G_{sf10}$, and $23.5\%$ and $24.2\%$ on $G_{sf30}$, respectively.
-Notably, for $QC[3]$, which is a complex 4-clique, the plans optimized by \relgomj have an excessive memory overhead and cause an OOM error.
-The reason is that applying worst-case optimal joins will generate much fewer intermediate results than applying multiple joins, since numerous results that will not appear in the intersection are prematurely deleted.
-The results of this experiment indicate that the \intersect~ with optimized implementation can not only enhance query performance, but also significantly reduce the spatial overhead.
+
+Next, we evaluated the effectiveness of the \expandintersect, which focuses on improving the efficiency of complete star join. Without this optimization strategy, the \expandintersect~ operator would be implemented as a traditional multiple join, and we denote this variant as \relgomj. We conducted this experiment with queries $QC[1 \ldots 3]$ that contain cycles and compared the performance of \name and \relgomj.
+The performance results, depicted in \reffig{exp-expand-intersect}, suggest that, compared to \relgomj, \name achieves an average speedup of 1.22$\times$ on $G_{sf10}$ and 1.31$\times$ on $G_{sf30}$ (excluding $QC[3]$). Notably, for $QC[3]$, which is a complex 4-clique, the plans optimized by \relgomj confront an out-of-memory (OOM) error. %The reason is that applying worst-case optimal joins generates significantly fewer intermediate results than applying multiple joins, as numerous results that will not appear in the intersection are prematurely eliminated.
+The results of this experiment indicate that the \expandintersect~ operator with an optimized implementation not only enhances query performance but also significantly reduces the spatial overhead.
 
 \begin{figure}[ht]
     \centering
