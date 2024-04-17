@@ -43,7 +43,8 @@ To ensure a fair comparison, all the following systems use DuckDB as the underly
 
 %\item \relgohash: This system optimizes queries using the graph-agnostic optimizer introduced in \refsec{converged}, without leveraging the graph index for query execution. It serves as the baseline to showcase that, even in the absence of a graph index, the converged optimizer can generate efficient plans with improved join orders by utilizing graph-optimization techniques.
 
-\item \name: This system optimizes queries using the graph-agnostic optimizer presented in \refsec{converged} and utilizes the graph index for query execution. It demonstrates the full range of techniques introduced in this paper.
+\item \name: This system optimizes queries using the graph-agnostic optimizer presented in \refsec{converged} and utilizes the graph index for query execution. It demonstrates the full range of techniques introduced in this paper. There are some variants
+of \name~ for verifying the effectiveness of the proposed techniques, which will be introduced in the corresponding experiments.
 \end{itemize}
 %We compare \name against two state-of-art baseline systems: DuckDB~\cite{duckdb} as a representative of $Rel$ optimizers, and GrainDB~\cite{graindb} as a representative of $Rel^+$ optimizers.
 %For fair comparison, we use DuckDB as the underlying relational engine for all compared systems.

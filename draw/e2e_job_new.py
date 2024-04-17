@@ -120,7 +120,7 @@ xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
 
-total_width, n = 0.8, 3
+total_width, n = 0.7, 3
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
@@ -180,7 +180,7 @@ xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
 
-total_width, n = 0.8, 3
+total_width, n = 0.7, 3
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2

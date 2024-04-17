@@ -89,7 +89,7 @@ y_ours = [
     338.06,
 ]
 
-total_width, n = 0.8, 3
+total_width, n = 0.7, 3
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2

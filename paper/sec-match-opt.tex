@@ -104,13 +104,13 @@ $m$ edge tables, as illustrated in the following example.
     \end{equation*}
 
     Finally, we have $\gproject(\matching(\pattern)) = R'_3 \Join R'_2 \Join R'_1 \Join \relation{0}$.
-
+    Note that $\relationx{1}{\text{Person}}$ in $R'_2$, as well as $\relationx{2}{\text{Person}}$ and $\relation{\text{Message}}$ in $R'_3$, are redundant and can be safely removed from the final join. By eliminating these redundant relations, we obtain a sequence of joins involving 3 vertex relations and 3 edge relations.
 \end{example}
 
 \subsubsection{Graph-aware Transformation}
 \label{sec:graph-aware}
-The graph-agnostic transformation may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations,
-preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
+%The graph-agnostic transformation may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations,
+%preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
 
 We introduce a graph-aware transformation that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is a sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
 The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to nondivisible patterns directly solvable with specific physical operations
