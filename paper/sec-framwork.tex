@@ -76,7 +76,7 @@ The \scangraphtable~ operator acts as a bridge between the graph and relational 
 \subsubsection{Heuristic Optimization Rules}
 In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
 
-\stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \Omega)$, introducing constraints within $\Omega$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
+\stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \constraints)$, introducing constraints within $\constraints$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
 
 Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
 \[
@@ -87,10 +87,10 @@ There is wasteful computation if the selection is applied after the costly patte
 %An extra benefit of doing so is that the optimizer can leverage the constraints to recalculate the cost, potentially generating better execution plans.
 The \filterrule is formally defined as:
 \begin{equation*}
-\sigma_{\Omega} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern)) \\
-\equiv \sigma_{\Omega'} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching((\pattern, \{d_v\}))),
+\sigma_{\constraints} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern)) \\
+\equiv \sigma_{\constraints'} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching((\pattern, \{d_v\}))),
 \end{equation*}
-where $\Omega' = \Omega \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
+where $\constraints' = \constraints \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is the corresponding constraints that are appended to the pattern $\pattern$.
 
 It is recommended to apply the \filterrule before graph optimization, as this allows the optimizer to leverage the pushed-down constraints to recalculate the cost, potentially generating more efficient execution plans. \reffig{framework-workflow}(b) showcases the effects of applying the \filterrule, where the selection predicate \kk{g.p1\_name = ``Tom''} is pushed down into the matching operator.
 

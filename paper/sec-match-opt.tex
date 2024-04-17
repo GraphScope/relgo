@@ -8,7 +8,7 @@ while physical implementation focuses on how the matching operator can be effici
 
 \subsection{Logical Transformation}
 \label{sec:handling-match-operator}
-We commence with an intuitive, graph-agnostic method before
+We commence with an intuitive, graph-agnostic transformation before
 introducing a graph-aware technique grounded on the concept of decomposition tree, which
 is the key to the optimization of graph pattern matching in the literature~\cite{huge,GLogS}.
 
@@ -29,7 +29,7 @@ It is important to note that \refeq{join-pattern} is also applicable to alternat
 %Firstly, an intuitive method is presented and then an advanced method based on matching decomposition is proposed.
 %For simplicity, the pattern graph given in matching operators are assumed to be connected in this section.
 
-\subsubsection{Graph-agnostic Method}
+\subsubsection{Graph-agnostic Transformation}
 \label{sec:intuitive-method}
 If the matching operator can be transformed into purely relational operations, the \spjm query becomes a
 standard \spj query, which can then be optimized using existing relational optimizers (\refsec{relational-only}). This graph-agnostic
@@ -97,22 +97,22 @@ $m$ edge tables, as illustrated in the following example.
   Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_2}, u_{p_1})$, $e_3 = (u_{p_1}, u_m)$, and $e_4 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
   \begin{equation*}
     \begin{split}
-    R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relationx{1}{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
-    R'_2 &= \relationx{2}{\text{Person}} \Join_{\text{person\_id}=\text{pid2}} \relationx{2}{\text{Knows}} \Join_{\text{pid1}=\text{person\_id}} \relationx{1}{\text{Person}}, \\
-    R'_3 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{1}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}, \\
-    R'_4 &= \relationx{2}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{2}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}.
+    R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relation{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
+    R'_2 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{1}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}, \\
+    R'_3 &= \relationx{2}{\text{Person}} \Join_{\text{person\_id}=\text{pid}} \relationx{2}{\text{Likes}} \Join_{\text{mid}=\text{message\_id}} \relation{\text{Message}}.
     \end{split}
     \end{equation*}
 
-    Finally, we have $\gproject(\matching(\pattern)) = R'_4 \Join R'_3 \Join R'_2 \Join R'_1 \Join \relation{0}$.
+    Finally, we have $\gproject(\matching(\pattern)) = R'_3 \Join R'_2 \Join R'_1 \Join \relation{0}$.
 
 \end{example}
 
-\subsubsection{Graph-aware Method}
+\subsubsection{Graph-aware Transformation}
 \label{sec:graph-aware}
-The graph-agnostic method may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations, preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
+The graph-agnostic transformation may be inefficient because relational optimizers treat relations representing vertices and edges equally as the other relations,
+preventing the optimizer from utilizing graph-specific optimization techniques. %Furthermore, relational optimizers are known to struggle with queries containing a large number of joins, which is a common case in graph pattern matching.
 
-We introduce a graph-aware method that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is a sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
+We introduce a graph-aware transformation that incorporates key ideas from the literature on graph optimization. Following \refeq{join-pattern}, we can recursively decompose $\pattern$, forming a tree structure called the \emph{decomposition tree}. The tree has a root node that represents $\pattern$, and each non-leaf \emph{intermediate} node is a sub-pattern (a subgraph of the pattern) $\pattern' \subset \pattern$, which has a left and right child node, denoted as $\pattern'_l$ and $\pattern'_r$, respectively. %The condition of the intermediate pattern being induced
 The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc), correspond to nondivisible patterns directly solvable with specific physical operations
 as will be introduced in~\refsec{physical-operators}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
@@ -155,25 +155,31 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \begin{remark}
     \label{rem:graph-agnostic-vs-graph-aware}
-    The graph-aware method is fundamentally different from its graph-agnostic counterpart. While the graph-agnostic approach consistently converts pattern matching operations into relational joins between vertex and edge relations, the graph-aware method does not, due to the constraints imposed by pattern decomposition. While the graph-agnostic approach is straightforward, it has the following drawbacks:
+    The graph-aware transformation is fundamentally different from its graph-agnostic counterpart. While the graph-agnostic approach consistently converts pattern matching operations into relational joins between vertex and edge relations,
+    the graph-aware transformation does not, due to the constraints imposed by pattern decomposition. While the graph-agnostic approach is straightforward, it has the following drawbacks:
     \begin{itemize}
-    \item \textbf{Poor Join Order}: It may cause the relational optimizer to change the order of joining vertex and edge relations, potentially missing opportunities to leverage graph indexes for the efficient computation of adjacent edges and vertices, as will be further discussed in \refsec{graph-index}.
+    \item \textbf{Graph-unaware Join Order}: It may cause the relational optimizer to change the order of joining vertex and edge relations, potentially missing opportunities to leverage graph indexes for the efficient computation of adjacent edges and vertices, as will be further discussed in \refsec{graph-index}.
     \item \textbf{Suboptimal Join Plans}: It generates plans that consistently reflect edge-based join plans that have been shown to be suboptimal in terms of worst-case performance~\cite{lai2015scalable}.
-    \item \textbf{Increased Search Space}: Compared to the graph-aware method, it can lead to an exponentially larger search space when computing optimal plans, which will be elaborated upon in the following subsection.
+    \item \textbf{Increased Search Space}: Compared to the graph-aware transformation, it can lead to an exponentially larger search space when computing optimal plans, which will be elaborated upon in the following subsection.
     \end{itemize}
 \end{remark}
 
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
-The optimization of the matching operator, after transforming it using graph-agnostic and graph-aware methods, is equivalent to performing pure relational optimization and graph optimization, respectively. We compare the search space of the two optimizations rather than their time complexity using advanced optimizers for several reasons. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
+After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the letter is exponentially more efficient in terms of search space.
+%Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
-According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among $n$ vertex relations and $m$ edge relations, which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma establishes a lower bound on the search space complexity for this problem:
+According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
+which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma\footnote{The proofs of \reflem{complexity-of-volcano}
+and \reflem{complexity-of-graph-aware} are in the full paper~\cite{full_paper}.}
+establishes a lower bound on the search space complexity for this problem:
 
 \begin{lemma}
 \label{lem:complexity-of-volcano}
 Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
+\comment{
 \begin{proof}
     We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
@@ -202,15 +208,16 @@ Given a join among $n + m$ relations, the search space for determining the optim
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
+}
 
-
-In contrast, when the graph-aware method is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware method:
+In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
 
 \begin{lemma}
 \label{lem:complexity-of-graph-aware}
 The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^n)$.
 \end{lemma}
 
+\comment{
 \begin{proof}
     To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
     We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
@@ -246,6 +253,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Therefore, the search space is at most $O(4^{n-1})$.
     We thus conclude the proof.
 \end{proof}
+}
 
 \comment{
     \begin{proof}
@@ -275,7 +283,7 @@ We ultimately obtain the following theorem.
 
 \begin{theorem}
     \label{thm:compare-search-space}
-    The graph-aware method yields a search space that is exponentially smaller than that of the graph-agnostic method,
+    The graph-aware transformation yields a search space that is exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
 \begin{proof}
@@ -287,7 +295,7 @@ We ultimately obtain the following theorem.
 
 \begin{remark}
     \label{rem:search-space}
-    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n$ vertices and $n - 1$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{micro_experiment}, confirm the significant difference in search space size between the two methods.
+    It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n$ vertices and $n - 1$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $n$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
 \end{remark}
 
 %To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method.

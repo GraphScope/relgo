@@ -132,7 +132,7 @@ which encapsulate the three most frequently employed operations in database mana
 These operations form the backbone of many relational queries. Given a set of relations \(R_1, R_2, \ldots, R_m\),
 an \spj query is formally represented as:
 \[
-Q = \pi_A(\sigma_\Omega(R_1 \Join \cdots \Join R_m)).
+Q = \pi_A(\sigma_\constraints(R_1 \Join \cdots \Join R_m)).
 \]
 
 Inspired from the \spj paradigm, we introduce a novel category of queries, termed \spjm queries, to logically formulate SQL/PGQ~\cite{sql-pgq} queries that
@@ -143,7 +143,7 @@ an \spjm query is articulated as:
 
 \begin{equation}
     \label{eq:spjm}
-Q = \pi_A(\sigma_\Omega(R_1 \Join \cdots \Join R_m \Join (\widehat{\pi}_{A*}\matching_G(\pattern))))
+Q = \pi_A(\sigma_\constraints(R_1 \Join \cdots \Join R_m \Join (\widehat{\pi}_{A*}\matching_G(\pattern))))
 \end{equation}
 In this formulation, \(\widehat{\pi}_{A*}\matching_G(\pattern)\) is the \emph{graph component} of
 the query, while the remaining part of the query is an \spj expression referred to as the \emph{relational component}.
@@ -194,7 +194,7 @@ In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
             \hline
             $\matching(GR, \pattern)$, $\matching(\pattern)$  & matching $\pattern$ on a graph relation $GR$ or a graph $G$ \\
             \hline
-            $\pi_{A}$, $\sigma_\Omega$, $\Join$  & projection, selection, and join operators over relations \\
+            $\pi_{A}$, $\sigma_\constraints$, $\Join$  & projection, selection, and join operators over relations \\
             \hline
             $\gproject$, $\gjoin$  & projection and join operators over graph relations \\
             \hline
