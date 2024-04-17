@@ -19,22 +19,40 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.bar(xaxis, y_aware, color='lightgreen', edgecolor='k', width=width, hatch='-', label='Graph-Aware Method')
-plt.bar(xaxis + width, y_agnos, color='salmon', edgecolor='k', width=width, hatch='\\', label='Graph-Agnostic Method')
+plt.figure(figsize=(15, 5))
+
+plt.bar(
+    xaxis,
+    y_aware,
+    color="lightgreen",
+    edgecolor="k",
+    width=width,
+    label="Graph-Aware Method",
+)
+plt.bar(
+    xaxis + width,
+    y_agnos,
+    color="salmon",
+    edgecolor="k",
+    width=width,
+    label="Graph-Agnostic Method",
+)
 
 
-plt.xticks(xaxis_final, xlabel, fontsize=22)
-plt.yticks(fontsize=22)
+plt.xticks(xaxis_final, xlabel, fontsize=28)
+plt.yticks(fontsize=28)
 
 plt.margins(0.08)
 
-plt.xlabel("Path Length", fontsize=22)
-plt.ylabel("Search Space", fontsize=22)
+plt.xlabel("Path Length", fontsize=28)
+plt.ylabel("Search Space", fontsize=28)
 
-plt.yscale('log')
+plt.yscale("log")
 
-plt.legend(loc="upper left", fontsize=16)
+plt.grid(linestyle="--", axis="y")
+
+plt.legend(loc="upper left", fontsize=28)
 plt.tight_layout()
 # plt.show()
 
-plt.savefig('../paper/figures/exp/compare_search_space.pdf', bbox_inches='tight')
+plt.savefig("../paper/figures/exp/compare_search_space.pdf", bbox_inches="tight")
