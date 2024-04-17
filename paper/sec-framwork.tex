@@ -101,10 +101,13 @@ where $\constraints' = \constraints \setminus \{d'_{v_a}\}$, and $\{d_v\}$ is th
 It is recommended to apply the \filterrule before graph optimization, as this allows the optimizer to leverage the pushed-down constraints to recalculate the cost, potentially generating more efficient execution plans. \reffig{framework-workflow}(b) showcases the effects of applying the \filterrule, where the selection predicate \kk{g.p1\_name = ``Tom''} is pushed down into the matching operator.
 
 \stitle{\joinfuserule.}
-The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, where these two operators are typically paired in the physical implementation of the matching operator. This rule aims to combine the two operators into a single \expand~ operator that retrieves the neighboring vertices directly, to enhance the plan's efficiency.
-However, this fusion strategy is conditional and precedes a critical examine-and-trim step to verify the necessity of edge properties provided by \expandedge.
-If subsequent relational operations do not require any edge properties output by \getvertex~ (e.g., no property projection or filtering), the edge properties can be trimmed.
-In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, which can directly retrieve the neighboring vertices by looking up the VE-index of the source vertex when the graph indices are available.
+The \joinfuserule~ amis to streamline a query plan by merging the \expandedge~ and \getvertex~ operators which are commonly coupled in the implementation of matching operations, into a single \expand~ operator that retrieves the neighboring vertices directly.
+However, such a fusion is permissible solely when the output edges by \expandedge~ are deemed unnecessary, so this rule further incorporates a preceded field trim step.
+Specifically, the field trimmer would examine whether any subsequent relational processes rely on these edges, such as utilizing them for property projections or for filtering based on their attributes.
+If no such operations are found, the edges can be trimmed. 
+Furthermore, the field trimmer would also consider a special case that the edges might be projected in the \scangraphtable~ operator as part of the matching results, but are subsequently unused in relational operations. In such cases, the edges can be trimmed as well.
+After the field trim step, if the output edges are trimmed, the \expandedge~ operator can be fused with the \getvertex~ operator to form a single \expand~ operator, which can directly retrieve the neighboring vertices efficiently by looking up the VE-index of the source vertex when the graph indices are available.
+
 %
 % The \joinfuserule~ aims to optimize the query plan by fusing \expandedge, which expands edges, and \getvertex, which retrieves the associated vertices, into a single \expand, which retrieves the neighboring vertices directly, to enhance the plan's efficiency.
 % However, the fusion logical is not universally applicable, but relies on a preceded exam-and-trim procedure to determine whether the properties of the output vertices and edges are essential.
