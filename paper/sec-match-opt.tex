@@ -154,7 +154,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 }
 
 \begin{remark}
-    \label{re:graph-agnostic-vs-graph-aware}
+    \label{rem:graph-agnostic-vs-graph-aware}
     The graph-aware method is fundamentally different from its graph-agnostic counterpart. While the graph-agnostic approach consistently converts pattern matching operations into relational joins between vertex and edge relations, the graph-aware method does not, due to the constraints imposed by pattern decomposition. While the graph-agnostic approach is straightforward, it has the following drawbacks:
     \begin{itemize}
     \item \textbf{Poor Join Order}: It may cause the relational optimizer to change the order of joining vertex and edge relations, potentially missing opportunities to leverage graph indexes for the efficient computation of adjacent edges and vertices, as will be further discussed in \refsec{graph-index}.
@@ -286,12 +286,12 @@ We ultimately obtain the following theorem.
 \end{proof}
 
 \begin{remark}
-    \label{re:search-space}
-    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n + 1$ vertices and $n$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two methods.
+    \label{rem:search-space}
+    It is worth noting that the search space after applying the graph-aware method, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $n$ vertices and $n - 1$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware methods while varying $n$. The results, shown in \reffig{micro_experiment}, confirm the significant difference in search space size between the two methods.
 \end{remark}
 
-%To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method. 
-%Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges. 
+%To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method.
+%Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges.
 %The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
 
 \begin{figure}[ht]
@@ -340,23 +340,23 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 \end{remark}
 }
 
-With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
-When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
-However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
-\modify{In \refsec{experiment-opt}, we demonstrated through experiments that using this index can be about twice as fast compared to not using the index.}
-Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
-\modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
+%With the graph indexes constructed, we can efficiently compute the \EVjoin operation in \refeq{ev-join}.
+%When using the graph-agnostic method to transform the \spjm query into \spj, as shown in \refeq{graph-agnostic}, and optimizing the entire \spj query with a relational optimizer, we can replace all the \emph{remaining} \EVjoin operations with GrainDB's pre-defined joins. This allows us to take advantage of the graph indexes provided by GrainDB. We consider this approach as the baseline ``GrainDB'' solution in our experiments.
+%However, as mentioned earlier, any pair of edge and vertex relations in an \EVjoin operation can be separated during the optimization process, preventing the utilization of graph indexes.
+%\modify{In \refsec{experiment-opt}, we demonstrated through experiments that using this index can be about twice as fast compared to not using the index.}
+%Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
+%\modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
 
 \subsubsection{The Graph-Aware Execution Plan}
 \label{sec:join-matching-operator}
-We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree, and its selection is determined by the underlying optimizer (\refsec{optimizer}).
+We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree.
 
- The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes (\todo{refer to the FieldTrimmer}). The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
+ The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
 
 The plan is then constructed in a bottom-up manner. As shown in \reffig{match-decomposition}, there are three fundamental cases to consider when implementing the plan.
 
 \stitle{Case I: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_o, E_o} \matching(\pattern'_r)$}, where $\pattern_l'$ and $\pattern'_r$ are both intermediate patterns in the decomposition tree. The implementation of such a join is similar to a conventional relational join. The join is constrained to a natural join, where the join condition is simply the equality of the common vertices $V_o$ and edges $E_o$ between $\pattern_l'$ and $\pattern_r'$. During the implementation of the join, the identifiers of the vertices and edges can serve as the keys for comparison. Note that the input and output of the join are both graph relations, which will not
-be projected into relational tuples until the last stage that obtain the results $\matching(\pattern)$.
+be projected into relational tuples until the last stage that obtains the results $\matching(\pattern)$.
 
 \stitle{Case II: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{u_s} \matching(\pattern_e)$}, where $\pattern_e$ is a single-edge pattern, and $u_s$ is the source vertex in $\pattern'_l$ from which the edge $e = (u_s, u_t)$ is expanded. Note that it's not possible for both $u_s$ and $u_t$ to be in $\pattern'_l$, as it would violate the fact that $\pattern'_l$ is either a single vertex or an induced sub-pattern.
 
@@ -372,9 +372,9 @@ Furthermore, to obtain $\matching(\pattern')$, we flatten the adjacent edges and
 
 In real-life scenarios, a vertex may be adjacent to multiple types of edges. For example, in \reffig{intro-rgmapping-example}, a \kk{Person} vertex can be connected to both \kk{Likes} and \kk{Knows} edges. To handle such cases, we can record edge's ID instead of just the row ID of the tuple. Given that the edge's ID is a combination of its label and the tuple's row ID, the adjacent edges of a specific label can be easily obtained from the VE-Index.
 
-\stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{S, E_S} \matching(\pattern(u;S))$}, where $\pattern(u;S = [u_1, \ldots, u_k])$ is a complete $k$-star pattern. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;S)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $S = [u_1, \ldots, u_k]$.
+\stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_s, E_s} \matching(\pattern(u;V_s))$}, where $\pattern(u;V_s)$ is a complete $k$-star pattern. In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;V_s)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $V_s = \{u_1, \ldots, u_k\}$.
 
-When there is no graph index, solving Case III involves continuously joining $|S|$ single-edge patterns.
+When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
 When graph indexes are available, we can use the \expandintersect~ operator, introduced in the literature~\cite{huge,GLogS,mhedhbi2019optimizing}, to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;S)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
