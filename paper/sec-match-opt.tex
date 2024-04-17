@@ -393,15 +393,14 @@ Consequently, for the tuple $\tau$, the physical \expandintersect~ operator perf
 \begin{enumerate}
 \item For each leaf vertex $u_i \in V_s$, where $1 \leq i \leq k$, apply the \expandedge~ and \getvertex~ operators to obtain the adjacent edges and neighbors of the corresponding vertices $v_i$ respectively.
 \item Compute the intersections of all adjacent edges and neighbors returned by the \expandedge~ and \getvertex~ operators.
-\item Return a new tuple as
+\item Return a new tuple as follows, where the information of edges is ommited for simplicity.
+%\[
+%    \left(\tau,\bigcup\limits_{v_c \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_c, \bigcup\limits_{1 \leq i \leq k}\adj^E(v_i, v_c))\right)
+%\]
 \[
-    \left(\tau,\bigcup\limits_{v_c \in \bigcap\limits_{1 \leq i \leq k} \adj(v_i)} (v_c, \bigcup\limits_{1 \leq i \leq k}\adj^E(v_i, v_c))\right)
+    (\tau, \bigcap_{1 \leq i \leq k}\adj(v_i)).
 \]
 
-
-%\[
-%    (\tau, \adj^E(v_i), \cdots, \adj^E(v_k), \bigcap_{1 \leq i \leq k}\adj(v_i)).
-%\]
 \end{enumerate}
 
 Note that the above step (1) and (2) can be computed in a pipeline manner, following a certain order of among the leaf vertices.
@@ -418,14 +417,15 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     Otherwise, if a graph index exists, $\matching(\pattern_6)$ can be computed with \expandedge~and \getvertex.
     Analogously, the join operation between $\matching(\pattern_7)$ and $\matching(\pattern_8)$ also pretains to Case II.
     
-    Then, $\matching(\pattern_3) \widehat{\Join}_{\{v_{p_1}\}} \matching(\pattern_4)$ pretains to Case I.
-    The join operator is implemented as a natural join with constraints on $v_{p_1}$.
+    Then, $\matching(\pattern_3) \widehat{\Join}_{\{u_{p_1}\}} \matching(\pattern_4)$ pretains to Case I.
+    The join operator is implemented as a natural join with constraints on $u_{p_1}$.
 
-    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (v_{m_2}, \{v_{m_1}, v_{p_2}\})$ is a complete $2$-star pattern.
-    Without loss of generality, let $m_1$ and $p_1$ be vertices in $\matching(\pattern_1)$ that matches $v_{m_1}$ and $v_{p_2}$, respectively.
+    Finally, $\matching(\pattern_1)$ and $\matching(\pattern_2)$ are joined together, where $\pattern_2 = (u_{m_2}, \{u_{m_1}, u_{p_2}\})$ is a complete $2$-star pattern.
+    For simplicity, suppose $(v_{m}, v_{p}, v_p')$ is a tuple in $\matching(\pattern_1)$, where $v_{m}, v_{p}, v_p'$ are vertices that matches $u_{m_1}$, $u_{p_2}$, and $u_{p_1}$ respectively.
+    $\adj(v_{m})$, $\adj(v_{p})$ are neighbors of $v_m$ and $v_p$ labeled Message.
     Suppose the graph indexes are available, the physical operator \expandintersect~is applied.
-    Specifically, \expandedge~and \getvertex~operators are applied to obtain the adjacent edges and neigbors of $m_1$ and $p_1$, and the obtained tuples are $(m_1, [e_{l_1}, e_{l_2}], [v_{m_1}, v_{m_2}])$ and $(p_1, [e_{s_1}, e_{s_2}], [v_{m_2}, v_{m_3}])$.
-    Then, these tuples are intersected and the result is $(m_1, p_1, [(v_{m_2}, e_{l_1}, e_{s_1})])$.
-    Then, the return tuple is $(\tau, [(v_{m_2}, e_{l_1}, e_{s_1})])$.
-    $m_1$ and $p_1$ are included in $\tau$.
+    Specifically, \expandedge~and \getvertex~operators are applied to obtain the adjacent edges and neighbors of $v_m$ and $v_p$, and the obtained tuples are $(v_m, \adj(v_m))$ and $(v_p, \adj(v_p))$.
+    Then, these two tuples are intersected and a new tuple $(v_m, v_p, \adj(v_m) \cup \adj(v_p))$ is obtained.
+    Finanlly, this tuple is concatenated with $\tau$ and tuple $(v_m, v_p, v_p', \adj(v_m) \cup \adj(v_p))$ is returned.
+    This returned tuple can be flattened if necessary.
 \end{example}
