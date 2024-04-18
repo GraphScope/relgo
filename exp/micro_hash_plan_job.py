@@ -4,7 +4,7 @@ import numpy as np
 xlabel = []
 
 for i in range(1, 11):
-    xlabel.append(str(i) + "a")
+    xlabel.append(str(i))
 
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
@@ -70,7 +70,7 @@ plt.ylim((20, 9000))
 
 plt.margins(0.08)
 
-# plt.xlabel("JOB Query", fontsize=28)
+plt.xlabel("Queries of JOB[*]", fontsize=28)
 plt.ylabel("Time Cost (ms)", fontsize=28)
 
 plt.yscale("log")
