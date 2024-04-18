@@ -1,6 +1,6 @@
 \section{The Converged Optimization Framework}
 \label{sec:optimizations}
-\enlargethispage{1em}
+%\enlargethispage{1em}
 This section presents \name, a converged relational/graph optimization framework designed to optimize the query
 processing of \spjm queries. We begin by introducing a naive solution built upon the graph-agnostic
 method for solving the matching operator. We then delve into the converged workflow of \name, which leverages the graph-aware method for solving the matching operator and introduces a complete workflow that aims to integrate techniques from both relational and graph optimization modules.
@@ -37,7 +37,7 @@ In addition to the core workflow, we further explore heuristic rules that highli
 
 %In addition to the primary component, we finally demonstrate the necessity of applying a \emph{preposition optimizer} component prior to the primary component.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 \subsubsection{The Graph Optimization}
 \label{sec:graph-optimizer}
@@ -47,7 +47,7 @@ In this work, we adopt the graph optimization techniques developed in \glogs~\ci
 
  Each vertex $\pattern'$ in the \glogue maintains $|\matching(\pattern')|$, denoting the cardinality of the pattern. To reduce computation costs, \glogs employs a sparsification technique that constructs a smaller subgraph $G'$. The cardinality of the pattern can then be estimated using $|\matching_{G'}(\pattern')|$, computed based on the subgraph $G'$. In our work, we adapt this sparsification technique to construct the \glogue. To do so, we sample a subset of vertex and edge relations during the \rgmapping process. Once the subset of relations is obtained, they can serve as the input tables to the techniques presented in~\cite{gart} for constructing the sparsified graph $G'$.
 
- \enlargethispage{1em}
+ %\enlargethispage{1em}
 
 \stitle{Cost Calculation.} The optimization process is essentially searching for the execution plan that incurs the minimal cost. Let the cost of an execution plan $\Phi$ for computing $\matching(\pattern)$ be $\cost_\Phi(\pattern)$. %The graph optimizer aims to find an optimal execution plan such that $\cost_\Phi(\pattern)$ is minimized. Clearly, this can be solved using dynamic programming~\cite{GLogS}.
 
@@ -90,7 +90,7 @@ In real-life use cases, heuristic rules may involve non-trivial interactions bet
 
 \stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \constraints)$, introducing constraints within $\constraints$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
 \[
@@ -123,7 +123,7 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 % In this case, the \expandedge~ can be fused with the \getvertex~ to form a single \expand~ operator, and this fusion helps to eliminate the unnecessary join operation between the edge table and the associated vertex table to find the neighboring vertices, since the associated vertex ids (and labels) are already available in the adjacent edge table.
 % Similarly, if the edge properties output by \expandedge~ are not required, it further optimize the fused \expand~ operation (with no edge properties required) by retrieving the neighboring vertices directly when the graph indices are available, which further eliminates the unnecessary join operation with the adjacent edge table.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 
 \subsection{System Implementation}

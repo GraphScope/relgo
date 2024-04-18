@@ -8,7 +8,7 @@ Despite its considerable success and broad adoption, SQL has its limitations, pa
 
 In comparison, such a scenario could be succinctly addressed using graph query languages, exemplified by Cypher~\cite{opencypher}, a language where queries are expressed as intuitive and concise graph pattern matching. This discrepancy between the relational and graph querying paradigms has given rise to the innovative SQL/Property Graph Queries (SQL/PGQ), an extension \revisewy{formally adopted in the ISO SQL:2023 standard}~\cite{sql-pgq}. SQL/PGQ is designed to amalgamate the extensive capabilities of SQL with the inherent benefits of graph pattern matching. With SQL/PGQ, it is now possible to define and query graphs within SQL expressions, transforming otherwise complex relational queries -- characterized by multiple joins -- into simpler and more intuitive graph queries.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 \begin{example}
     \label{ex:introduction:sqlpgq}
@@ -32,7 +32,7 @@ In comparison, such a scenario could be succinctly addressed using graph query l
 
 
 The SQL/PGQ standardization, while a significant leap forward in the realm of relational databases, primarily addresses language constructs. A discernible gap exists in the theoretical landscape, particularly in analyzing, transforming, and optimizing SQL/PGQ queries with hybrid relational and graph semantics. %This gap is mainly due to the absence of a unified framework for optimizing such hybrid queries, a framework that could bridge the divide between the well-established relational optimization techniques and the evolving domain of graph query optimization.
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 Relational query optimization has historically leaned on the \spj (selection-projection-join) skeleton~\cite{spj,Chaudhuri98}, which provides a systematic approach for analyzing query complexity~\cite{IbarakiK84,ChatterjiEGY02} , devising heuristic optimization rules~\cite{Chaudhuri99heuristics,goldsteinheuristics}, and
 computing optimal join order~\cite{Haffnerjoinorder,chenjoinorder}. Recently, graph techniques have been introduced to optimize relational queries~\cite{wanderjoin,Haffnerjoinorder,gqfast,graindb}. %In~\cite{wanderjoin}, the authors proposed modeling the joins of multiple tables as a join graph and leveraging the random-walk algorithm for better cardinality estimation. The authors in~\cite{Haffnerjoinorder} reduced the join-order optimization problem to a shortest path problem, facilitating theoretical analysis for the search space while using heuristic rules.
@@ -49,7 +49,7 @@ In this paper, we propose the first converged optimization framework, \name, tha
 
 To address these challenges, \name is proposed to leverage the strengths of both relational and graph query optimization techniques. Building upon the foundation of \spj queries, we introduce the \spjm query skeleton, which extends \spj with a matching operator to represent graph queries. We adapt state-of-the-art graph optimization techniques, such as the decomposition method~\cite{huge} and the cost-based optimizer~\cite{GLogS}, to the relational context, effectively producing worst-case optimal graph subplans for the matching operator. To facilitate efficient execution of the matching operator, we introduce graph index inspired by GrainDB's predefined join~\cite{graindb}, based on which graph-based physical operations are implemented. The relational part of the query, together with the optimized graph subplans encapsulated within a special operator called \scangraphtable, is then optimized using standard relational optimizers. Finally, we incorporate heuristic rules, such as \filterrule, to handle cases unique to \spjm queries that involve the interplay between relational and graph components.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 We have made the following contributions in this paper:
 \begin{enumerate}

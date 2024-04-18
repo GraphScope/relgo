@@ -42,7 +42,7 @@ while physical implementation focuses on how the matching operator can be effici
     % \vspace{-.05in}
 \end{table}
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 \subsection{Logical Transformation}
 \label{sec:handling-match-operator}
 We commence with an intuitive, graph-agnostic transformation before
@@ -65,7 +65,7 @@ It is important to note that \refeq{join-pattern} is also applicable to alternat
 %Firstly, an intuitive method is presented and then an advanced method based on matching decomposition is proposed.
 %For simplicity, the pattern graph given in matching operators are assumed to be connected in this section.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 \subsubsection{Graph-agnostic Transformation}
 \label{sec:intuitive-method}
@@ -148,7 +148,7 @@ We thus conclude the proof.
     Note that $\relationx{1}{\text{Person}}$ in $R'_2$, as well as $\relationx{2}{\text{Person}}$ and $\relation{\text{Message}}$ in $R'_3$, are redundant and can be safely removed from the final join. By eliminating these redundant relations, we obtain a sequence of joins involving 3 vertex relations and 3 edge relations.
 \end{example}
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 \subsubsection{Graph-aware Transformation}
 \label{sec:graph-aware}
@@ -196,7 +196,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 \end{example}
 }
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 \begin{remark}
     \label{rem:graph-agnostic-vs-graph-aware}
@@ -212,7 +212,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
 After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. 
-In this subsection, we analyze the gap between the two search space and conclude that the graph-aware approach is exponentially more efficient in terms of search space.
+In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach is exponentially more efficient in this regard.
 %In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
@@ -335,6 +335,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     The graph-aware transformation yields a search space that is exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
+\comment{
 \begin{proof}
     % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     %\begin{equation*}
@@ -362,12 +363,13 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Furthermore, the new plans generated from different logical plans $pl_g \in \mathbb{PL}_g$ are themselves distinct.
     Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
 \end{proof}
-
-\enlargethispage{1em}
+}
+%\enlargethispage{1em}
 
 \begin{remark}
     \label{rem:search-space}
-    It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $m$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $m$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
+    %It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. 
+    To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $m$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $m$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
 \end{remark}
 
 %To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method.
@@ -421,7 +423,7 @@ Specifically, GrainDB introduces an indexing technique called pre-defined join t
 As shown in \reffig{graph-index}, given the three relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$, and $\relation{\text{Message}}$, the complete information of ``Person likes messages'' can be obtained by conducting the join:
 \[ \relation{\text{Person}} \Join_\text{person\_id = pid} \relation{\text{Likes}} \Join_\text{mid = message\_id} \relation{\text{Message}}. \]
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 GrainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row ids help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
 
@@ -448,7 +450,7 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 \label{sec:join-matching-operator}
 We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree.
 
-\enlargethispage{1em}
+%\enlargethispage{1em}
 
 The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
 
