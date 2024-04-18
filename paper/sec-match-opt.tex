@@ -92,14 +92,13 @@ The \EVjoin regarding $\lambda_{\lab(e)}^t$ is defined analogously. Although cal
 
 %Such a transformation, as indicated by the following lemma, maintains the integrity of the data and relationships, ensuring a lossless conversion process.
 %The following lemma demonstrates that, in an \spjm query, the matching operation can be losslessly transformed into a sequence of purely relational operations.
-We have the following lemma\footnote{Omitted proofs can be found in the supplementary material.}.
+We have the following lemma.%\footnote{Omitted proofs can be found in the supplementary material.}.
 
 
 \begin{lemma}
     \label{lem:spjm-to-spj}
     Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
-\comment{
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -126,7 +125,7 @@ By induction, denoting $R'_i = \relation{\lab(u_{s_i})} \evjoin \relation{\lab(e
 
 We thus conclude the proof.
 \end{proof}
-}
+
 
 
 %Given that edges may connect to common vertices, it's obvious that there are some redundant joins in \refeq{graph-agnostic}. Removing these redundancies results in
