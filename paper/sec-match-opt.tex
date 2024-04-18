@@ -211,9 +211,12 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
-After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
+After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. 
+In this subsection, we analyze the gap between the two search space and conclude that the graph-aware approach is exponentially more efficient in terms of search space.
+%In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
+\comment{
 According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
 which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma
 establishes a lower bound on the search space complexity for this problem:
@@ -223,7 +226,7 @@ establishes a lower bound on the search space complexity for this problem:
 Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
 \end{lemma}
 
-\comment{
+
 \begin{proof}
     We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
 
@@ -252,7 +255,7 @@ Given a join among $n + m$ relations, the search space for determining the optim
 
     Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
 \end{proof}
-}
+
 
 In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
 
@@ -263,7 +266,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 \end{lemma}
 
 
-\comment{
+
 \begin{proof}
     To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
     We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
@@ -299,9 +302,9 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     Therefore, the search space is at most $O(4^{n-1})$.
     We thus conclude the proof.
 \end{proof}
-}
 
-\comment{
+
+
     \begin{proof}
         \todo{refine the proof.}
         Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\empty}$ in $\searchgraph_\pattern(V, E)$.
@@ -325,7 +328,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     \end{proof}
 }
 
-We ultimately obtain the following theorem.
+% We ultimately obtain the following theorem.
 
 \begin{theorem}
     \label{thm:compare-search-space}
@@ -333,10 +336,31 @@ We ultimately obtain the following theorem.
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
 \begin{proof}
-    According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
+    % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     %\begin{equation*}
-        $\frac{\Omega(4^{m+n-1})}{O(4^{n-1})} $ $= \Omega(4^m)$.
+    %    $\frac{\Omega(4^{m+n-1})}{O(4^{n-1})} $ $= \Omega(4^m)$.
     %\end{equation*}
+    \modify{
+    Given a matching operator $\matching(\pattern)$, where $\pattern$ has $n$ vertices and $m$ edges, according to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among the $n$ vertex relations and $m$ edge relations.
+    Then, the search space of the graph-agnostic method is equivalent to the number of possible logical plans for the sequence of joins.
+    The set of the possible logical plans is denoted by $\mathbb{PL}_r$.}
+    
+    In contrast, the graph-aware approach decomposes $\pattern$ and its search space equals the number of possible decomposition trees.
+    Specifically, we further flatten the MMCs that are complete stars to single-vertex patterns containing only the root vertex.
+    Under this method, the flattened decomposition trees are considered logical plans obtained by the graph-aware method, and they are denoted by $\mathbb{PL}_g$.
+    Note that the main difference between the logical plans in $\mathbb{PL}_g$ and those in $\mathbb{PL}_r$ is that edge relations are not included in the plans in $\mathbb{PL}_g$.
+    This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern.
+    Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary.
+
+
+    Then, we try to convert $\mathbb{PL}_g$ to $\mathbb{PL}_r$.
+    Specifically, this can be achieved by adding edge relations to the logical plans in $\mathbb{PL}_g$. 
+    For each logical plan $pl_g \in \mathbb{PL}_g$, a logical plan $pl_r \in \mathbb{PL}_r$ can be obtained as follows:
+    Suppose $e = (u_s, u_t)$ is an edge in $\pattern$.
+    By joining $\relation{\lab(e)}$ with $\relation{\lab(u_s)}$ and $\relation{\lab(u_t)}$ in $pl_g$ respectively, at least two new plans can be obtained.
+    Since there are $m$ edge relations, at least $2^m$ logical plans in $\mathbb{PL}_r$ can be generated.
+    Furthermore, the new plans generated from different logical plans $pl_g \in \mathbb{PL}_g$ are themselves distinct.
+    Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
 \end{proof}
 
 \enlargethispage{1em}
