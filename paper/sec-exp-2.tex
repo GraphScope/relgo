@@ -11,7 +11,7 @@
     $IMDB$ & 14 & 7 & 1,030,853 & 8,536,891 & 3.7G \\
     \hline
     \end{tabular}
-    \caption{Statistics of the datasets. In detail, \#$R_v$ is the number of vertex relations and Avg.\#$R_v$ is the average number of tuples in a vertex relation.}
+    \caption{Statistics of the datasets. In detail, \#$R_v$ (resp.~\#$R_e$) is the number of vertex (resp.~edge) relations and Avg.~\#$R_v$ (Avg.~\#$R_e$) is the average number of tuples in a vertex (resp.~edge) relation.}
     \label{table:experiment-datasets}
 \end{table}
 
@@ -37,8 +37,8 @@
 The details of the dataset statistics are summarized in Table \ref{table:experiment-datasets}.
 We manually implement the queries using SQL/PGQ, which are presented in the artifact~\cite{artifact}.
 "In addition, we adhered to the same procedures for data loading and graph index construction as those described in~\cite{graindb}. 
-The \rgmapping{s} are defined following 
-The \rgmapping{s} are defined according to the graph indexes.
+The \rgmapping{s} are defined to ensure the effectiveness of the graph index defined in graindb.
+
 
 \noindent\textbf{Compared Systems. }
 To ensure a fair comparison, all the following systems use DuckDB as the underlying relational execution engine. They differ in the adoption of the optimizer.
