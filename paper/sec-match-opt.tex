@@ -215,7 +215,7 @@ In this subsection, we analyze the gap between the two search spaces and conclud
 %In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
-\comment{
+
 According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
 which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma
 establishes a lower bound on the search space complexity for this problem:
@@ -325,7 +325,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
         Therefore, the time complexity is at most $O(3^n)$.
         We thus conclude the proof.
     \end{proof}
-}
+
 
 % We ultimately obtain the following theorem.
 
@@ -334,6 +334,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     The graph-aware transformation yields a search space that is exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
+
 \begin{proof}
     % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     %\begin{equation*}
@@ -345,10 +346,60 @@ The search space for determining the optimal decomposition tree for pattern $\pa
         On the other hand, the graph-aware approach decomposes $\pattern$, and its search space is equal to the number of possible decomposition trees. Consider the \mmcs in a decomposition tree. We know that an \mmc must be either a single-vertex pattern $\pattern_u$ or a complete star $\pattern(u'; V_s)$. We transform the decomposition tree as follows: we replace each \mmc with a vertex relation, such that $\pattern_u$ becomes $\relation{\lab(u)}$ and $\pattern(u'; V_s)$ becomes $\relation{\lab(u')}$. We ignore the intermediate patterns in this transformation. The resulting set of transformed decomposition trees is denoted by $\mathbb{PL}_g$. Note that after this transformation, the size of $|\mathbb{PL}_g|$ is equivalent to the search space of the graph-aware approach.
 
 
-        To prove the theorem, it suffices to show that there are an exponential number of $pl_r \in \mathbb{PL}_r$ that can be obtained from a single $pl_g \in \mathbb{PL}_g$. Consider a specific $pl_g$. We can add edge relations to $pl_g$ to obtain a logical plan $pl_r \in \mathbb{PL}_r$ as follows: Let $e = (u_s, u_t)$ be an edge in $\pattern$. By joining $\relation{\lab(e)}$ with $\relation{\lab(u_s)}$ and $\relation{\lab(u_t)}$ in $pl_g$, respectively, we can obtain at least two new plans. Since there are $m$ edge relations, at least $2^m$ logical plans in $\mathbb{PL}_r$ can be generated from a single $pl_g$. Furthermore, the new plans generated from different logical plans $pl_g \in \mathbb{PL}_g$ are themselves distinct.
+        To prove the theorem, it suffices to show that there are an exponential number of $pl_r \in \mathbb{PL}_r$ that can be obtained from a single $pl_g \in \mathbb{PL}_g$. 
+        Consider a specific $pl_g$. 
+        We traverse the non-leaf nodes of $pl_g$ in a bottom-up manner.
 
+        \stitle{Case I: If the child nodes of the non-leaf node $\matching(\pattern')$ are both leaf nodes}, these two leaf nodes represent two relations $\relation{\lab(u)}$ and $\relation{\lab(v)}$, respectively. 
+        Without loss of generality, suppose there exists an edge $e = (u, v)$ between $u$ and $v$ in $\pattern$.
+        Then, we can obtain at least two new plans by $\relation{\lab(e)} \Join \relation{\lab(u)}$ and $\relation{\lab(u)} \Join \relation{\lab(e)}$.
+
+        \stitle{Cast II: If only one of the child nodes of the non-leaf node $\matching(\pattern')$ \\ is a leaf node}, according to the definition of \mmcs, the leaf node should be the right child node of $\matching(\pattern')$.
+        Denote the left and right child nodes of $\matching(\pattern')$ by $\matching(\pattern'_l)$ and $\relation{\lab(v)}$, respectively.
+        There should be at least one edge between vertices in $\pattern'_l$ and $v$ in $\pattern$, and denote the set of such edges by $E_{lv}$.
+        Then, $\forall e_i \in E_{lv} = (u_i, v)$, we can obtain two new plans with $\relation{\lab(e_i)} \Join \relation{\lab(u_i)}$ and $\relation{\lab(u_i)} \Join \relation{\lab(e_i)}$.
+
+        \stitle{Case III: If both child nodes of the non-leaf node $\matching(\pattern')$ are non-leaf nodes}, denote the leaf and right childs of $\matching(\pattern')$ by $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, respectively.
+        $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$ should share some common vertices and optionally share common edges.
+        Let $V_o$ and $E_o$ be the sets of vertices and edges shared by $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, respectively.
+        Let $E_{ext} = \{e | e \in E_{\pattern'_r} \land e \text{ is adjacent to one vertex in } V_o\} - E_o$.
+        $\forall e = (u, v) \in E_{ext}$, if $u \in V_o$, we no longer join $\relation{\lab(e)}$ with $\relation{\lab(u)}$.
+        Instead, we join $\relation{\lab(e)}$ with $\relation{\lab(v)}$, and obtain $\relation{\lab(e)} \Join \relation{\lab(v)}$ and $\relation{\lab(v)} \Join \relation{\lab(e)}$ in the subtree of $\matching(\pattern'_r)$.
+        Otherwise, if $v \in V_o$, we join $\relation{\lab(e)}$ with $v$ in the subtree of $\matching(\pattern'_l)$.
+        Besides, we need to remove nodes related to vertices in $V_o$ and edges in $E_{o}$ from the subtree of $\matching(\pattern'_r)$.
+        
+        According to the above method, at least $2^{m}$ plans in $\mathbb{PL}_r$ can be obtained form $pl_g$.
         Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
 \end{proof}
+
+\iffalse
+\begin{proof}
+    % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
+    %\begin{equation*}
+    %    $\frac{\Omega(4^{m+n-1})}{O(4^{n-1})} $ $= \Omega(4^m)$.
+    %\end{equation*}
+    
+        Let $\matching(\pattern)$ be a matching operator, where $\pattern$ has $n$ vertices and $m$ edges. According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among the $n$ vertex relations and $m$ edge relations. The search space of the graph-agnostic method is then equivalent to the number of possible join orders for this sequence of joins, with each join order corresponding to a logical plan. We denote the set of possible logical plans for the graph-agnostic method by $\mathbb{PL}_r$. 
+    
+        On the other hand, the graph-aware approach decomposes $\pattern$, and its search space is equal to the number of possible decomposition trees. Consider the \mmcs in a decomposition tree. We know that an \mmc must be either a single-vertex pattern $\pattern_u$ or a complete star $\pattern(u'; V_s)$. We transform the decomposition tree as follows: we replace each \mmc with a vertex relation, such that $\pattern_u$ becomes $\relation{\lab(u)}$ and $\pattern(u'; V_s)$ becomes $\relation{\lab(u')}$. We ignore the intermediate patterns in this transformation. The resulting set of transformed decomposition trees is denoted by $\mathbb{PL}_g$. Note that after this transformation, the size of $|\mathbb{PL}_g|$ is equivalent to the search space of the graph-aware approach.
+
+
+        To prove the theorem, it suffices to show that there are an exponential number of $pl_r \in \mathbb{PL}_r$ that can be obtained from a single $pl_g \in \mathbb{PL}_g$. Consider a specific $pl_g$. We can add edge relations to $pl_g$ to obtain a logical plan $pl_r \in \mathbb{PL}_r$ as follows: Let $e = (u_s, u_t)$ be an edge in $\pattern$. With $\relation{\lab(e)} \Join \relation{\lab(u_s)}$ and $\relation{\lab(u_s)} \Join \relation{\lab(e)}$, we can obtain at least two new plans. Since there are $m$ edge relations, at least $2^m$ logical plans in $\mathbb{PL}_r$ can be generated from a single $pl_g$. Furthermore, the new plans generated from different logical plans $pl_g \in \mathbb{PL}_g$ are themselves distinct.
+        
+        The above method is correct if all the non-leaf nodes in the decomposition tree have at least one child node that is an \mmc.
+        However, if there is a non-leaf node $\matching(\pattern')$ whose two child nodes $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$ are both non-leaf nodes, some common vertices and edges are shared by $\pattern'_l$ and $\pattern'_r$, and the sets of the shared vertices and edges are denoted as $V_o$ and $E_o$ respectively.
+        Then, following the above method, in the corresponding transformed decomposition tree $pl_g$, the relations of vertices in $V_o$ will appear more than once, and the new plans generated by adding edges relations to the tree are not logicals plan in $\mathbb{PL}_r$.
+
+        Therefore, we need to convert such tansformed decompostion trees with duplicate relations more carefully.
+        An alternative approach is as follows:
+        Given a matching operator $\matching(\pattern)$ and a transformed decomposition tree $pl_g$ of it with duplicate relations, let $e = (u_s, u_t)$ be an edge in $\pattern$. 
+        If there exists a non-leaf node $\matching(\pattern')$ in $pl_g$ with two non-leaf child nodes $\matching(\pattern'_l)$ and $\matching(\pattern'_r)$, satisfying that $u_s \in V_{\pattern'_l} \cap V_{\pattern'_r}$ (resp.~$u_t \in V_{\pattern'_l} \cap V_{\pattern'_r}$) and $u_t \notin V_{\pattern'_l} \cap V_{\pattern'_r}$ (resp.~$u_s \notin V_{\pattern'_l} \cap V_{\pattern'_r}$), we can obtain at least two new plans by $\relation{\lab(e)} \Join \relation{\lab(u_t)}$ and $\relation{\lab(u_t)} \Join \relation{\lab(e)}$.
+        Meanwhile, $u_s$ is removed from the 
+        Otherwise, if there is not such a non-leaf node, edge relations are added following the original method.
+        
+        Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
+\end{proof}
+\fi
 
 %\enlargethispage{1em}
 
