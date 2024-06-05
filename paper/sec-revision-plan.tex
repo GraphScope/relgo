@@ -36,6 +36,7 @@ In terms of adjusting descriptions based on importance, we plan to revise this p
 \begin{itemize}
     \item We will introduce the higher-order graph statistics in more detail. (R1-O1, M-C4)
     \item We will explain more about new optimization techniques especially for RelGo in this revision. (R2-i.3, M-C5)
+    \item We will add statements to emphasize that the intersection evaluation using worst-case optimial join is implemented on relational tables. (R2-i.5)
     \item We will simplify the contents about the definition of RGMapping, simplify the needed notation, and remove RGMapping from the contributions of this paper. (R2-i.6, R3-O1.1, R3-O1.2, R3-M1, R3-C1, M-C6)
     \item We will add the versions of DuckDB and GrainDB used in the experiments. (R2-iii.2)
     \item We will introduce the procedures for data loading and graph index construction in this paper in more detail. (R3-O2.2)
@@ -131,8 +132,13 @@ Thank you for you suggestion! We will compare Umbra with RelGo in the revision. 
 i.5. The intersection evaluation using WCOJ is very similar to that in [34] and it is hard to tell the difference. My understanding is there is no relational tables in that case.}
 
 \textbf{\textit{Response: }}
-????
-[34] Oracle. 2023. Property Graph Queries (SQL/PGQ). International Organization for Standardization. Retrieved June, 2023 from https://www.iso.org/standard/79473.html
+Thank you for your comment! It seems that citation [34] is the standard of SQL/PGQ and wcoj is not mentioned in that standard.
+Perhaps you are talking about citation [43] in the paper, i.e., Zhengyi Yang, Longbin Lai, Xuemin Lin, Kongzhang Hao, and Wenjie Zhang.
+2021. HUGE: An Efficient and Scalable Subgraph Enumeration System.
+
+Then, your are correct that the intersection evaluation using worst-case optimal (wco) join in [43] is for graphs and that in this paper is implemented on relational tables.
+We will add some statements to emphasize this difference in the revision.
+
 
 \textbf{
 i.6. Most of the mapping work is assumed based on the SQL spec and is in use already as per [40] and [41] which is why I do not see it as a contribution. Cypher-based systems like Kuzu do this mapping in their DDL as well and are able to query from relational stores directly.}
@@ -279,6 +285,7 @@ The authors short the extensive depth, methods, and literature on relational que
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We will explain how and why we limit our focus in the ways we do in this paper in the revision.
 
+[More Discussion]
 
 
 \textbf{M1. I would recommend moving Table 1 earlier; and also simplifying the needed notation. I think the query example on page 1 would be better as a figure float. }
