@@ -41,7 +41,7 @@ In terms of adjusting descriptions based on importance, we plan to revise this p
     \item We will add the versions of DuckDB and GrainDB used in the experiments. (R2-iii.2)
     \item We will introduce the procedures for data loading and graph index construction in this paper in more detail. (R3-O2.2)
     \item We will explain some confusing statements in this paper more carefully. (R3-O2.5)
-    \item We will discuss about the non-declarative issue and explain how and why we limit the extensive depth, methods, and literature on relational query optimization in this paper. (R3-O3.1, R3-O4.1, R3-C3)
+    \item We will discuss about how to extend RelGo to deal with queries without explicit PGQ component, and explain why we limit the extensive depth, methods, and literature on relational query optimization in this paper. (R3-O3.1, R3-O4.1, R3-C3)
 \end{itemize}
 
 Finally, in terms of polishing this paper, we plan to make the following modifications:
@@ -100,6 +100,7 @@ In my opinion, the core insight is that major reductions in the optimization sea
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We will conduct some experiments to show that some commonly used optimizers in practice may cost a long time for query optimization, which shows the importance of reducing the time of query optimization. (Calcite v.s. RelGo)
 
+[More Discussion]
 
 \textbf{
 i.1. The core optimization of tree decomposition is quiet similar to techniques used by EmptyHeaded [r3] and CTJ [r4] but there is no mention of connection to such decomposition approaches. I think it is important to mention the differences that exist between these techniques and the one in this manuscript.}
@@ -119,6 +120,7 @@ Thank you for your comment! As stated in paper [40], ``DuckPGQ translates SQL/PG
 Thank you for your comment! We do not use FilterIntoMatchRule as a global optimization approach because to the best of our knowledge, it seems always efficient to do filtering earlier, which is also proved by our experiments in Section 5.2. We will add this explanation in this revision.
 Besides, we have also proposed some new optimization techniques especially for RelGo, and we will introduce them in detail in the revision.
 
+[More Discussion]
 
 \textbf{
 i.4. The state of the art relation join optimization uses the heuristic approach in Umbra [r2] to generate worst-case optimal joins. This is an important baseline as the goal is to have a graph-aware optimizer that is better than the relational one by relying on the query language hints when introducing a MATCH clause. We need a possible comparison to Umbra and perhaps making it apple-to-apple means obtaining the plan from Umbra and hardcoding it to run within your DuckDB implementation.
@@ -151,7 +153,9 @@ ii.1 verifying that truly this notion of graph-aware optimization is what lead t
 It is unclear what is given up when using the tree decomposition approach proposed. Can you show that it leads to minimizing the search space over the top k plans in some examples/empirical sense?}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! In this revision, we will give an example to show what is given up when using the tree decomposition approach. [?]
+Thanks for your suggestion! In this revision, we will give an example to show what is given up when using the tree decomposition approach. 
+
+[More Discussion]
 
 
 \textbf{
@@ -165,7 +169,7 @@ Thanks for your suggestion. In the revision, we will add Umbra as a new baseline
 iii.2 Note further that DuckDB and GrainDB are possibly of different versions and so is the authors implementation. This level of detail is not reflected in the experimental section.}
 
 \textbf{\textit{Response: }}
-Thank you for your comment! In the experiments, to ensure a fair comparison, we have implemented GrainDB on DuckDB v0.9.2, which is the version of DuckDB used in other experiments. We will add the explanations in the revision.
+Thank you for your comment! In the experiments, to ensure a fair comparison, we have implemented GrainDB on DuckDB v0.9.2, which is the version of DuckDB used in other experiments. We will add the statements in the revision.
 
 
 \textbf{
@@ -283,7 +287,12 @@ We will discuss about this in the revision.
 The authors short the extensive depth, methods, and literature on relational query optimization. While the authors are constrained by space and focus by the conference paper format, explanation of how and why they limit their focus in the ways they do should be offered. }
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! We will explain how and why we limit our focus in the ways we do in this paper in the revision.
+Thanks for your suggestion! 
+We short the descriptions about relational query optimizations because RelGo is not targeted at any specific relational optimizer.
+It means that once the graph optimizer has computed the optimal execution plan for matching operators, this plan can be integrated with the remaining relational operators, and RelGo can use any existing relational optimizer to optimize these remaining operators.
+Therefore, we do not discuss much about relational query optimization.
+
+We will explain this in more detail in the revision.
 
 [More Discussion]
 
