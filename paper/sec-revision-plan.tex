@@ -13,9 +13,11 @@ According to the comments\footnote{In this section, ``Ri-xxx'' represents a comm
 
 In terms of adding experiments, we plan to revise this paper from the following aspects:
 \begin{itemize}
-    \item We will add Umbra as a new baseline and conduct experiments on LDBC SNB and JOB to compare the efficiency of Umbra and RelGo. (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1)
+    \item We will add Umbra as a new baseline and conduct comprehensive experiments. In detail, we plan to generate query plans on LDBC SNB and JOB benchmarks optimized with Umbra's optimizer, and then hardcode the plans to run within DuckDB for a fair comparison. (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1). Please note that to the best of our knowledge, Umbra is not open-sourced. We have sent an email to the authors of Umbra requesting the source code, but we are not sure whether we will be able to obtain it and have enough time to conduct experiments with it.
+    Therefore, if we cannot obtain the code, we may conduct experiments on another baseline, i.e., EmptyHeaded\footnote{Christopher R. Aberger, Susan Tu, Kunle Olukotun, Christopher Ré: EmptyHeaded: A Relational Engine for Graph Processing. SIGMOD Conference 2016: 431-446.} or LevelHeaded\footnote{Christopher R. Aberger, Andrew Lamb, Kunle Olukotun, Christopher Ré:
+    LevelHeaded: A Unified Engine for Business Intelligence and Linear Algebra Querying. ICDE 2018: 449-460.} (if available), which also support worst-case optimal joins. In that case, Umbra in this revision plan will be replaced with the new baseline.
     \item We will conduct comprehensive experiments on a larger instance, i.e., LDBC $G_{sf100}$ to make the conclusions more convincing. (R3-O2.6, R3-C2)
-    \item We will conduct some more experiments to show the importance of reducing the time cost of query optimization. (R2-S1, M-C5).
+    \item We will conduct some more experiments on Calcite to show the importance of reducing the time cost of query optimization. (R2-S1, R2-ii.1, M-C5).
 \end{itemize}
 
 In terms of providing additional related works, we plan to modify this paper from the following aspects:
@@ -35,13 +37,14 @@ In terms of adding examples, we plan to modify this paper from the following asp
 In terms of adjusting descriptions based on importance, we plan to revise this paper from the following aspects:
 \begin{itemize}
     \item We will introduce the higher-order graph statistics in more detail. (R1-O1, M-C4)
-    \item We will explain more about new optimization techniques especially for RelGo in this revision. (R2-i.3, M-C5)
+    \item We will explain more about global optimization and local optimizations applied in RelGo in more detail. (R2-i.3, M-C5)
     \item We will add statements to emphasize that the intersection evaluation using worst-case optimial join is implemented on relational tables. (R2-i.5)
     \item We will simplify the contents about the definition of RGMapping, simplify the needed notation, and remove RGMapping from the contributions of this paper. (R2-i.6, R3-O1.1, R3-O1.2, R3-M1, R3-C1, M-C6)
     \item We will add the versions of DuckDB and GrainDB used in the experiments. (R2-iii.2)
     \item We will introduce the procedures for data loading and graph index construction in this paper in more detail. (R3-O2.2)
     \item We will explain some confusing statements in this paper more carefully. (R3-O2.5)
-    \item We will discuss about how to extend RelGo to deal with queries without explicit PGQ component, and explain why we limit the extensive depth, methods, and literature on relational query optimization in this paper. (R3-O3.1, R3-O4.1, R3-C3)
+    \item We will discuss about how to extend RelGo to deal with queries without explicit PGQ component. (R3-O3.1, R3-C3) 
+    \item We plan to explain why we limit the extensive depth, methods, and literature on relational query optimization in this revision and add more descriptions about relational query optimizations. (R3-O4.1, R3-C3)
 \end{itemize}
 
 Finally, in terms of polishing this paper, we plan to make the following modifications:
@@ -53,32 +56,27 @@ Finally, in terms of polishing this paper, we plan to make the following modific
 
 Our detailed responses to reviewers and the meta-reviewer are as follows.
 
-Please note that Umbra is a crucial baseline to be added according to the feedback from the reviewers. However, to the best of our knowledge, Umbra is not open-sourced. We have sent an email to the authors of Umbra requesting the source code, but we are not sure whether we will be able to obtain it and have enough time to conduct experiments with it.
-
-Therefore, if we cannot obtain the code, we may conduct experiments on another baseline, i.e., EmptyHeaded or LevelHeaded (if available), which also support worst-case optimal joins. In that case, Umbra in this revision plan will be replaced with the new baseline.
-
 
 \section{Detailed Response to the Feedbacks}
 \subsection{Response to Reviewer \#1}
 
-\textbf{O1. Costing and cardinality estimation is the key part of the design, but I did not understand from the discussion in section 4.2 what are all types of statistics that are maintained to support the optimization. Does the converged approach work with common types of statistics used on relational data or some adjustments were necessary? Did GLogue data structure also require adjustments compared to the graph native design? I would appreciate more details in this area of the design, especially around the higher-order graph statistics.}
+\textbf{O1. I did not understand from the discussion in section 4.2 what are all types of statistics that are maintained to support the optimization. Does the converged approach work with common types of statistics used on relational data or some adjustments were necessary? Did GLogue data structure also require adjustments compared to the graph native design? I would appreciate more details in this area of the design, especially around the higher-order graph statistics.}
 
-\begin{mdframed}[linewidth=0.5pt, linecolor=black]
+%\begin{mdframed}[linewidth=0.5pt, linecolor=black]
 \textbf{\textit{Response: }}
 Thank you for your suggestion! We will introduce the higher-order graph statistics in more detail and explain the relationship between the statistics used in this work and those used in relational databases and graph databases in the revision.
-\end{mdframed}
+%\end{mdframed}
 
 
 
-\textbf{O2. The achieved speedups are quite impressive, but it is not clear to me what are typical shapes of the plans that lead to such speedups. It would be nice to include representative examples of more efficient plans.}
+\textbf{O2. It is not clear to me what are typical shapes of the plans that lead to such speedups. It would be nice to include representative examples of more efficient plans.}
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We will add an example in the revision, which includes the execution plans obtained by our converged optimizer and the baseline optimizers, respectively, to explain the reason for the efficiency of our method.
 
-\textbf{D1. D\&I compliance. 
-The paper is mostly compliant, but many aspects of the presentation of figures can be improved: \\
-(1) Workflow illustrations on figures 1,2 and 5 have tiny graphs which makes the figures very hard to comprehend, so information on them should either taken a level up in abstraction or fonts need to enlarged \\
-(2) Figures 6--10 showing experimental results use tiny fonts which makes them hard to read when paper is printed out.}
+\textbf{D1. Many aspects of the presentation of figures can be improved: 
+(1) Workflow illustrations on figures 1,2 and 5 have tiny graphs
+(2) Figures 6--10 showing experimental results use tiny fonts.}
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion ! We will polish the figures in the revision and enlarge the font sizes.
@@ -87,9 +85,9 @@ Thanks for your suggestion ! We will polish the figures in the revision and enla
 \textbf{M1. As DRAM nowadays comes in sizes that are multiple of 32GB, it is quite unusual to have 251GB. Is this a typo?}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! We will double check the size of the DRAM and write the correct number in the revision.
+Thanks for your suggestion! We will double check the size of the DRAM and report the correct number in the revision.
 
-\textbf{M2. Performance results reported in figure 10 are quite hard to understand due to different time scales of running time of various queries. Please consider normalizing all runtimes to one system, perhaps DuckDB, and plotting speedups achieved by the other two.}
+\textbf{M2. Please consider normalizing all runtimes to one system, perhaps DuckDB, and plotting speedups achieved by the other two in figure 10.}
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We will redraw Figure 10 and normalize the time cost as you have advised.
@@ -97,17 +95,15 @@ Thanks for your suggestion! We will redraw Figure 10 and normalize the time cost
 
 \subsection{Response to Reviewer \#2}
 
-\textbf{S1. Summary of contribution (in a few sentences). 
-The paper introduces a new optimization framework that aims to add query optimization techniques employed in "subgraph matching" to optimize SQL/PGQ queries. The core thesis is that making the optimization approach graph-aware and using the approach of tree decomposition for join ordering can lead to significant gains as shown on LDBC and JOBs benchmarks.
-In my opinion, the core insight is that major reductions in the optimization search space can be obtained if the MATCH clause is optimized separately when adding further traditional techniques such filter push-down. However given how read-heavy the queries are, I wonder if the query optimization time matters in practice. On top of query optimization, systems can rely on indexes joining vertices through edges, so called pre-defined joins, which can be materialized on-the-fly or pre-computed as shown by GrainDB. I want to highlight that there is a huge implementation component here and kudos to the implementers in getting the techniques within a popular system to showcase their effectiveness instead of relying on a prototype engine built from scratch.}
+\textbf{S1. However given how read-heavy the queries are, I wonder if the query optimization time matters in practice.}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! We will conduct some experiments to show that some commonly used optimizers in practice may cost a long time for query optimization, which shows the importance of reducing the time of query optimization. (Calcite v.s. RelGo)
+Thanks for your suggestion! We will conduct some experiments to show that some commonly used optimizers in practice (e.g., Calcite) may cost a long time for query optimization, which shows the importance of reducing the time of query optimization. 
 
-[More Discussion]
+
 
 \textbf{
-i.1. The core optimization of tree decomposition is quiet similar to techniques used by EmptyHeaded [r3] and CTJ [r4] but there is no mention of connection to such decomposition approaches. I think it is important to mention the differences that exist between these techniques and the one in this manuscript.}
+i.1. I think it is important to mention the differences that exist between the techniques used by EmptyHeaded [r3] and CTJ [r4]  and tree decomposition in this manuscript.}
 
 \textbf{\textit{Response: }}
 Thanks for your comment! We will discuss about the differences between these techniques and RelGo proposed in this paper in more detail in the revision.
@@ -116,18 +112,18 @@ Thanks for your comment! We will discuss about the differences between these tec
 \textbf{i.2. How do you contrast your approach with the query evaluation where the DuckDB team introduces SQL/PGQ through the extension framework in [40] and [41].}
 
 \textbf{\textit{Response: }}
-Thank you for your comment! As stated in paper [40], ``DuckPGQ translates SQL/PGQ queries into a pure SQL query plan which gets executed by DuckDB as a normal query (with some UDF calls)''. Therefore, for LDBC SNB IC queries and JOB queries without UDF calls, the optimizer of DuckPGQ degrades into that of DuckDB, which is already tested in this paper. In the revision, we will explain the relationships between DuckPGQ and DuckDB in more detail.
+Thank you for your comment! As stated in paper [40], ``DuckPGQ translates SQL/PGQ queries into a pure SQL query plan which gets executed by DuckDB as a normal query (with some UDF calls)''. Therefore, for LDBC SNB IC queries and JOB queries without UDF calls, the optimizer of DuckPGQ degrades into that of DuckDB, which is already tested in this paper. In the revision, we will explain the relationships between DuckPGQ and DuckDB.
 
 \textbf{i.3. filter push-down, called `FilterIntoMatchRule` is an artifact of separating the evaluation into a matching operator instead of a global optimization approach and is seen as necessity in my opinion and not a new optimization technique.}
 
 \textbf{\textit{Response: }}
-Thank you for your comment! We do not use FilterIntoMatchRule as a global optimization approach because to the best of our knowledge, it seems always efficient to do filtering earlier, which is also proved by our experiments in Section 5.2. We will add this explanation in this revision.
-Besides, we have also proposed some new optimization techniques especially for RelGo, and we will introduce them in detail in the revision.
+Thank you for your comment! FilterIntoMatchRule is indeed necessary in practice, which has also been proved by our experimenal results in Section 5.2.
+Besides, such a rule can be applied conveniently due to our efficient converged optimizer.
 
-[More Discussion]
+We will talk more about the local and global optimizations applied in RelGo and explain their relationships in more detail.
 
 \textbf{
-i.4. The state of the art relation join optimization uses the heuristic approach in Umbra [r2] to generate worst-case optimal joins. This is an important baseline as the goal is to have a graph-aware optimizer that is better than the relational one by relying on the query language hints when introducing a MATCH clause. We need a possible comparison to Umbra and perhaps making it apple-to-apple means obtaining the plan from Umbra and hardcoding it to run within your DuckDB implementation.
+i.4. We need a comparison to Umbra and perhaps making it apple-to-apple means obtaining the plan from Umbra and hardcoding it to run within your DuckDB implementation.
 }
 
 \textbf{\textit{Response: }}
@@ -154,12 +150,11 @@ Thanks for your comment! Actually, we use the mapping in this paper to formally 
 
 \textbf{
 ii.1 verifying that truly this notion of graph-aware optimization is what lead to the gains requires a clear discussion of i) and further highlighting important design goals that make the smaller search space aspect appealing.
-It is unclear what is given up when using the tree decomposition approach proposed. Can you show that it leads to minimizing the search space over the top k plans in some examples/empirical sense?}
+It is unclear what is given up when using the tree decomposition approach proposed.}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! In this revision, we will give an example to show what is given up when using the tree decomposition approach. 
-
-[More Discussion]
+Thanks for your suggestion! In this revision, we will compare the time cost of query optimization with commonly-used Calcite and RelGo to show the importance of accelerating the process of query optimization.
+Besides, we will give an example to show what is given up when using the tree decomposition approach. 
 
 
 \textbf{
@@ -167,10 +162,10 @@ iii.1 using DuckDB as a baseline can be misleading in the results
 as DuckDB doesn't not contain a state of the art query optimizer, the focus of this paper, and does not support worst-case optimal joins.}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion. In the revision, we will add Umbra as a new baseline, which supports worst-case optimal joins.
+Thanks for your suggestion. We will add Umbra as a new baseline, which supports worst-case optimal joins.
 
 \textbf{
-iii.2 Note further that DuckDB and GrainDB are possibly of different versions and so is the authors implementation. This level of detail is not reflected in the experimental section.}
+iii.2 DuckDB and GrainDB are possibly of different versions and so is the authors implementation. This level of detail is not reflected in the experimental section.}
 
 \textbf{\textit{Response: }}
 Thank you for your comment! In the experiments, to ensure a fair comparison, we have implemented GrainDB on DuckDB v0.9.2, which is the version of DuckDB used in other experiments. We will add the statements in the revision.
@@ -183,13 +178,15 @@ C1. Generate Umbra plans, hardcode these plans within the authors solution using
 Thanks for you suggestion! In the revision, we will generate Umbra plans and conduct experiments on LDBC SNB and JOB queries. The results will be compared with RelGo.
 
 \textbf{
-C2. Add some of the work that I mention as missing to the related work section with the goal of explaining how tree decomposition in your approach defers from that of EmptyHeaded. }
+C2. Add some of the work that I mention as missing to the related work section.}
+% with the goal of explaining how tree decomposition in your approach defers from that of EmptyHeaded. }
 
 \textbf{\textit{Response: }} Thanks for your suggestion! We will add the related works you mentioned to the related work section in the revision. Besides, we will explain the difference between our tree decomposition in RelGo with that of EmptyHeaded in more detail.
 
 
 \textbf{
-C3. Getting rough numbers from Umbra and Kuzu as sanity checks would be nice to have but not necessary. Umbra shows that this system does move things forward when compared with a pure RDBMS. Kuzu would potentially show either that such systems have less value as SQL/PGQ is adopted or that it has certain optimizations or plans that your system or RDBMSs more generally cannot generate. }
+C3. Getting rough numbers from Umbra and Kuzu as sanity checks would be nice to have but not necessary.}
+% Umbra shows that this system does move things forward when compared with a pure RDBMS. Kuzu would potentially show either that such systems have less value as SQL/PGQ is adopted or that it has certain optimizations or plans that your system or RDBMSs more generally cannot generate. }
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion. We will add the experiments about Umbra in this revision. Moreover, since Kuzu is a graph database, which is not our focus in this paper, it may be not suitable to be used as a baseline in this paper. Therefore, we will add it as a related work in the revision.
@@ -198,43 +195,41 @@ Thanks for your suggestion. We will add the experiments about Umbra in this revi
 \subsection{Response to Reviewer \#3}
 
 \textbf{
-O1.1 UNHELPFUL FORMALISM
-SQL/PGQ presented in an obtusely formal way that adds little to the paper or the readers' understanding, but rather works against it. 
-Meanwhile, the explication misses some seemingly rather important points. \\
-For instance, zeta for vertex and edge mappings? These are introduced, but then never used again. The notation doesn't even appear in the notation glossary (Table 1) that is kindly provided. (I would suggest to move that glossary earlier.) But really, the authors spend much realestate to formalize the SQL/PGM mapping, when that is not a contribution of the paper, but rather is the responsibility of the SQL/PGM standards. What should be introduced here should just be enough that the casual but knowledgeable reader should understand the concept.}
+O1.1 The explication misses some seemingly rather important points.
+For instance, zeta for vertex and edge mappings? These are introduced, but then never used again. But really, the authors spend much realestate to formalize the SQL/PGM mapping, when that is not a contribution of the paper.}
 
 \textbf{\textit{Response: }}
 Thank you for your comment! We will simplify the formal definition of RGMapping for better understanding of this paper and remove the notations that never used in the paper.
 
 
 \textbf{
-O1.2 I personally feel the standard is fraught with issues, but these are not the authors' responsibility. There is no guaranteed bijection here. The relational model does not use object IDs; graph data models do. The introduction of UUIDs skirts the issue, to be replaced shortly later in the paper with row-IDs (which again, are not part of the relational model). It seems rather that one would want to insist that any table manifested as an labeled edge set via GRAPH\_TABLE have foreign keys to both the node sets / entity tables it is being used to bridge. This could be conveyed more simply perhaps in E-R terms. \\
-(I do realize my suggestions here in O1 are somewhat at odds with my request following in O3. These would have to be balanced.)}
+O1.2 There is no guaranteed bijection here. The relational model does not use object IDs; graph data models do. The introduction of UUIDs skirts the issue, to be replaced shortly later in the paper with row-IDs. It seems rather that one would want to insist that any table manifested as an labeled edge set via GRAPH\_TABLE have foreign keys to both the node sets / entity tables it is being used to bridge. This could be conveyed more simply perhaps in E-R terms.}
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! From our perspective, vertex mappings can be bijective functions if for a vertex relation, we map rows with different values of the primary key to vertices with different IDs. Besides, the row-IDs are implicit primary keys for vertex relations, and we use it especially for quickly retrieving tuples from the table. Besides, we agree that it seems more reasonable to ensure that ``any table manifested as an labeled edge set via GRAPH\_TABLE have foreign keys to both the node sets / entity tables it is being used to bridge''. In the revision, we will add this constraint to the definition of edge mappings.
 
 
-\textbf{O2.1 MORE COMPREHENSIVE EXPERIMENTS, EXAMPLES, \& DISCUSSION
-No concrete insight is offered into the test queries, nor concrete examples: "We manually implement the queries using SQL/PGQ, which are presented in the artifact [6]." I recognize there are no standard benchmarks here, but relegating all of this to outside the paper I do not find proper. The reader cannot gauge whether this is an effective testing of the techniques. }
+\textbf{O2.1 No concrete insight is offered into the test queries, nor concrete examples. }
 
 \textbf{\textit{Response: }}
 Thanks for you suggestion! We will move some representative SQL/PGQ queries used in this paper to the Evaluation section and explain how these queries are generated.
 
 
 \textbf{
-O2.2 Also, "In addition, we adhered to the same procedures for data loading and graph index construction as those described in [21]." Not everyone will be familiar with [21]. The paper needs to be self-contained. }
+O2.2 Not everyone will be familiar with [21]. The paper needs to be self-contained. }
 
 \textbf{\textit{Response: }}
 Thank you for your suggestion! We will introduce the procedures for data loading and graph index construction in this paper in more detail to make this paper more self-contained.
 
 \textbf{ 
-O2.3 The same is with the small set of state-of-the-art comparisons. While DuckDB has become quite popular, I doubt many would argue that it sets the gold standard for relational query optimization. I recommend that at least an additional relational engine be included, perhaps PostgreSQL, in the comparisons. The authors extended a front-end to DuckDB to handle SQL/PGQ queries, although I do not understand why. Poor translation of the queries into plain SQL — DuckDB is used to represent the graph-agnostic approach — could be what hinders its performance. The reader presently cannot discern. Instead, having pairs in the test suite of SQL and SQL/PGO that are semantically equivalent but manually composed I believe would be fairer. And these could be used, say, for PostgreSQL without needing to reinstrument it.}
+O2.3 I recommend that at least an additional relational engine be included, perhaps PostgreSQL, in the comparisons. The authors extended a front-end to DuckDB to handle SQL/PGQ queries, although I do not understand why. Instead, having pairs in the test suite of SQL and SQL/PGO that are semantically equivalent but manually composed I believe would be fairer. And these could be used, say, for PostgreSQL without needing to reinstrument it.}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! We agree that add an additional relational engine is a good idea to make the conclusions more solid. However, it needs a lot of efforts since we need to implement graph indices on the new engine and hardcode all the execution plans on LDBC SNB and JOB queries generated by different optimizers (e.g., RelGo, DuckDB, GrainDB) to those executable by the new engine. Actually, we are going to make implementing RelGo as an embedded optimizer as our future work so that different relational engines can use the capability of RelGo with few efforts.
+Thanks for your suggestion! 
+We use DuckDB as the back-end because it is a well-known and commonly-used open-sourced relational database.
+Adding an additional relational engine can indeed make the conclusions more solid, but it needs a lot of extra efforts since we need to implement graph indices on the new engine and hardcode all the execution plans on LDBC SNB and JOB queries generated by different optimizers (e.g., RelGo, DuckDB, GrainDB) to those executable by the new engine. We are going to implement RelGo as an embedded optimizer in the future so that different relational engines can use the capability of RelGo with few efforts.
 
-Moreover, to make the conclusions more reliable, we add Umbra as a new baseline. Umbra is a relational database that supports worst-case optimal joins and is related to RelGo. To be more specific, RelGo supports worst-case optimial joins when optimizing graph queries while Umbra supports that from the relational perspective. Therefore, we add Umbra as a new baseline to show the efficiency of RelGo.
+Moreover, to make the conclusions more reliable, we will add Umbra as a new baseline. Umbra is a relational database that supports worst-case optimal joins. 
 
 
 \textbf{
@@ -245,60 +240,42 @@ Thanks for your suggestion! We will add an example of a converged query plan in 
 
 
 \textbf{
-O2.5 And a less simplistic discussion of the plans and operators. For example, at "In the absence of a graph index, HASH\_JOIN is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined," I lost the narrative somewhat. No, no one would employ a hash join in the case a near cross product would result. A block nested loops join in the least would be a less expensive option. }
+O2.5 And a less simplistic discussion of the plans and operators. For example, at "In the absence of a graph index, HASH\_JOIN is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined," I lost the narrative somewhat. }
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We agree that this sentence is a bit confusing. In fact, it means that when we are dealing with the matching operators, the joins obtained by decompostion are implemented as HASH\_JOINs. As these joins connect vertices to their adjacent edges, it is always far from cross product. We will explain it in more detail in the revision to avoid confusion.
 
 
 \textbf{
-O2.6 The experiments appear to be run on somewhat small data instances, especially in light of much work on graph databases. The paper could be strengthened by adding significantly larger data instances.}
+O2.6 The paper could be strengthened by adding significantly larger data instances.}
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! In this revision, we will conduct comprehensive experiments on a much larger data instance, i.e., $G_{sf100}$ with scale factor 100, generated by the official LDBC Data Generator.
 
 
-\textbf{O3.1 NON-DECLARATIVE
-While SQL/PGQ promise programmers more natural ways in some cases to write queries, it also goes against the declarative ideal of "state what you want, not how to do it." This is in the same way specifying JOIN in the the FROM clause locks the optimizer into that choice. \\
-Could RelGo be extended to additionally rewrite SQL/PGQ queries, and SQL queries with no explicit PGO component in some cases, to consider "SPJR" query plans? This would move back to the declarative ideal, allowing programmers to write the queries they way they want, but bringing in the full array of optimization opportunties that RelGo's "SPJR" offers. \\
-To do this work and present it in addition for this paper might be too much, but providing the discussion and a roadmap for doing so would greatly strengthen the contributions.}
+\textbf{O3.1 SQL/PGQ goes against the declarative ideal of "state what you want, not how to do it." 
+Could RelGo be extended to additionally rewrite SQL/PGQ queries, and SQL queries with no explicit PGO component in some cases, to consider "SPJR" query plans? 
+Providing the discussion and a roadmap for doing so would greatly strengthen the contributions.}
 
 \textbf{\textit{Response: }}
 Thank you for your suggestion! 
-In our idea, although SQL/PGQ goes against the declarative ideal, it facilitates the expression of some graph queries.
-For example, suppose we are going to find five persons that know each other.
-Following SQL, the users need to join five PERSON tables together and specifying the related ten join conditions.
-However, following SQL/PGQ, the users only need to write five vertices connected with edges labeled ``KNOWS'', withou specifying the join keys.
-This is very convenient for users.
-
-However, it does have the problem you state, i.e., going against the declarative ideal.
-From our perspective, it is possible to extend RelGo to consider ``SPJR'' query plans.
+It is an interesting idea and from our perspective, it is possible to extend RelGo to consider ``SPJR'' query plans.
 First of all, the optimizer should know how to convert relational tables to vertices and edges in graphs.
-A intuitive way is provided by [r1].
-In practice, whether a relational table can be converted to edges is determined by the graph indexes.
+A intuitive way is provided by Boudaoud\footnote{Boudaoud A, Mahfoud H, Chikh A. Towards a Complete Direct Mapping from Relational Databases to Property Graphs. International Conference on Model and Data Engineering 2022: 222-235.}.
+In practice, whether a relational table can be converted to edges is determined by the existence of graph indexes.
 Without the existence of corresponding graph indexes, a relational table can never be converted to edges.
 
 Given a SQL query, by transforming arbitrary relational tables into vertices or edges, the original SQL query is converted into a SQL/PGQ-like query with several matching operators, where each matching operator contains a connected pattern graph.
 The results of the matching operators are joined together to get the final results.
-Since the cost of matching operators and relaional operators are computable, by traversing different methods to transforming relational tables into vertices and edges according to the existence of graph indexes, we can find a method the best execution plan.
-However, the problem of this method lies in the vast search space.
+Since the cost of matching operators and relaional operators are computable, by traversing different methods to transforming relational tables into vertices and edges according to the existence of graph indexes, we can find the best execution plan.
+However, the problem of this method lies in the vast search space and it needs further study. We will add discussion like this in the revision.
 
-We will discuss about this in the revision.
-
-[r1] Towards a Complete Direct Mapping FromRelational Databases To Property Graphs
-
-\textbf{O4.1 GLOSSING OVER DEPTH OF RELATIONAL QUERY OPTIMIZATION
-The authors short the extensive depth, methods, and literature on relational query optimization. While the authors are constrained by space and focus by the conference paper format, explanation of how and why they limit their focus in the ways they do should be offered. }
+\textbf{O4.1 The authors short the extensive depth, methods, and literature on relational query optimization. While the authors are constrained by space and focus by the conference paper format, explanation of how and why they limit their focus in the ways they do should be offered. }
 
 \textbf{\textit{Response: }}
 Thanks for your suggestion! 
-We short the descriptions about relational query optimizations because RelGo is not targeted at any specific relational optimizer.
-It means that once the graph optimizer has computed the optimal execution plan for matching operators, this plan can be integrated with the remaining relational operators, and RelGo can use any existing relational optimizer to optimize these remaining operators.
-Therefore, we do not discuss much about relational query optimization.
-
-We will explain this in more detail in the revision.
-
-[More Discussion]
+We short the descriptions of relational query optimizations because any relational optimizer can be plugged into RelGo.
+In the revision, we will add more descriptions of relational query optimizations.
 
 
 \textbf{M1. I would recommend moving Table 1 earlier; and also simplifying the needed notation. I think the query example on page 1 would be better as a figure float. }
@@ -307,10 +284,10 @@ We will explain this in more detail in the revision.
 Thank you for your suggestion! We will move Table 1 earlier and simplify the needed notation in the revision. Moreover, we will make the query example on Page 1 a figure float.
 
 \textbf{
-C1. My O1 and O2. The paper presently tries to be both a formal take on SQL/PGQ, where it makes no contributions, and on an inetgrated query-optimization platform, where its contributions lay. At present, I do not believe the paper conveys enough in concrete terms how their approach works overall that the reader can take concrete knowledge away from it. The abundance of the formal discussions of SQL/PGO can be traded to provide more in depth, concrete insight into RelGo's optimizator.}
+C1. My O1 and O2. The paper does not convey enough in concrete terms how their approach works overall that the reader can take concrete knowledge away from it. The abundance of the formal discussions of SQL/PGO can be traded to provide more in depth, concrete insight into RelGo.}
 
 \textbf{\textit{Response: }}
-Thank you for your suggestion! We will simplify the formal discussions of SQL/PGQ and focus more on our contributions.
+Thanks for your suggestion! We will simplify the formal discussions of SQL/PGQ and focus more on our contributions.
 
 
 \textbf{
@@ -329,10 +306,10 @@ Thank you for your comment! We will try our vest to address O3 \& O4 as describe
 \subsection{Response to the Meta Reviewer}
 
 \textbf{
-C1. In the discussion among reviewers, comparison with prior work in particular Umbra emerged as an important consideration among other required improvements listed below.}
+C1. Comparison with prior work in particular Umbra emerged as an important consideration among other required improvements listed below.}
 
 \textbf{\textit{Response: }}
-Thank you for your suggestion! We will add Umbra as a new baseline and compare it with our converged optimizer, i.e., RelGo.
+Thanks for your suggestion! We will add Umbra as a new baseline and compare it with our converged optimizer.
 
 
 \textbf{
@@ -344,7 +321,7 @@ a. Add reference, discussion, and comparison with [r1–r5] from R2a-iii.
 Thanks for your comment! In the revision, we will add the references to [r1--r5] from R2a-iii and make some discussion and comparison w.r.t.~these studies.
 
 
-\textbf{C2. b. Add experimental evaluation comparing against Umbra and Kùzu. Redo the experiments with larger instances. [R2-i,iii; R3-O2]}
+\textbf{C2. b. Add experimental evaluation comparing against Umbra and Kùzu. Redo the experiments with larger instances.}
 
 \textbf{\textit{Response: }}
 Thank you for your suggestion! We will add Umbra as a new baseline in this revision and conduct experiments on both LDBC SNB and JOB benchmarks. 
@@ -363,20 +340,20 @@ a. Add concrete examples of queries and query plans used in the experiments. [R1
 Thanks for your suggestion! In this revision, we will add a case study to demonstrate why plans generated by RelGo are better.
 Besides, we plan to add examples to show what is given up when using the tree decomposition approach in RelGo.
 Moreover, we will move some representative queries used in the experiments to the text.
-Furthermore, we will add a converged query plan in the revision.
+Furthermore, we will add a converged query plan.
 
 \textbf{
 C4. b. State clearly “all types of statistics that are maintained to support the optimization.” [R1-O1]}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! In this revision, we will explain the higher-order graph statistics used in RelGo in more detail.
+Thanks for your suggestion! We will explain the higher-order graph statistics used in RelGo in more detail.
 
 
 \textbf{
-C5. c. Be much clearer in discussion about the tradeoffs being made here between local and global optimization. And that involved in restricting to a smaller search space. Show that the optimization time is relevant in practice. [R2-i,ii; R3-O3]}
+C5. c. Be much clearer in discussion about the tradeoffs being made here between local and global optimization. And that involved in restricting to a smaller search space. Show that the optimization time is relevant in practice.}
 
 \textbf{\textit{Response: }}
-Thank you for your suggestion! In this revision, we will explain more about why FilterIntoMatchRule is used as a local optimization. 
+Thank you for your suggestion! In this revision, we will explain more about the global and local optimizations applied in RelGo.
 Besides, we will conduct some experiments to show the importance of reducing the time cost of query optimization.
 
 
