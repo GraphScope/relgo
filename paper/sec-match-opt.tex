@@ -6,41 +6,6 @@ the matching operator: logical transformation and physical implementation. Logic
 responsible for transforming a matching operator into a logically equivalent representation,
 while physical implementation focuses on how the matching operator can be efficiently executed.
 
-\begin{table}[t]
-    \centering
-   \caption{Frequently used notations.}
-   \label{tab:notations}
-    \scalebox{0.9}{
-        \begin{tabular}{|m{0.26\linewidth}|m{0.74\linewidth}|}
-            \hline
-            Notation                 & Definition                                                                                       \\
-            \hline
-            $R$    & a relation or relational table   \\
-            \hline
-            $\tau$ and $\tau.attr$    & a tuple in a relation, and the value of an attribute of $\tau$ \\
-            \hline
-            $G(V,E)$         & a property graph with $V$ and $E$                                                          \\
-            \hline
-            $\pattern(V, E)$   & a pattern graph with $V$ and $E$  \\
-            \hline
-            $\id(\epsilon)$, $\lab(\epsilon)$, $\epsilon$.attr  & the identifier, label, and the value of given attribute of a graph element $\epsilon$ \\
-            \hline
-            $\adj(u)$ and $\adj^E(u)$           & neighbors and adjacent edges of $u$           \\
-            \hline
-            $GR$   & a graph relation     \\
-            \hline
-            $\matching(GR, \pattern)$, $\matching(\pattern)$  & matching $\pattern$ on a graph relation $GR$ or a graph $G$ \\
-            \hline
-            $\pi_{A}$, $\sigma_\constraints$, $\Join$  & projection, selection, and join operators over relations \\
-            \hline
-            $\gproject$, $\gjoin$  & projection and join operators over graph relations \\
-            \hline
-            $\lambda^s_\lab(e)$, $\lambda^t_\lab(e)$  & the total functions for mapping tuples in an edge relation to source and target vertex relations \\
-            \hline
-        \end{tabular}
-    }
-    % \vspace{-.05in}
-\end{table}
 
 %\enlargethispage{1em}
 \subsection{Logical Transformation}
@@ -73,7 +38,7 @@ If the matching operator can be transformed into purely relational operations, t
 standard \spj query, which can then be optimized using existing relational optimizers (\refsec{relational-only}). This graph-agnostic
 approach is intuitive and easy to implement on top of existing relational databases, making it a straightforward
 choice in prototyped systems~\cite{apache-age,DuckPGQ,DuckPGQ-VLDB}. However, there is no theoretical guarantee that
-such a transformation is lossless in the context of \rgmapping (\refdef{rgmapping}). In this subsection,
+such a transformation is lossless in the context of \rgmapping. In this subsection,
 we bridge this gap by demonstrating the lossless transformation of the matching
 operator under \rgmapping.
 % aim to
@@ -159,6 +124,8 @@ The leaf nodes of the tree are called \emph{Minimum Matching Components} (\mmc),
 as will be introduced in~\refsec{physical-operators}. The decomposition tree naturally forms a logical plan for solving $\matching(\pattern)$, as demonstrated in \reffig{match-decomposition}. For any non-leaf node $\pattern'$, there exists a relationship $\matching(\pattern') = \matching(\pattern'_l) \gjoin \matching(\pattern'_r)$ according to \refeq{join-pattern}. The plan allows for the recursive computation of the entire pattern.
 
 Following state-of-the-art graph optimizers~\cite{huge,GLogS}, to guarantee a \emph{worst-case optimal} execution plan~\cite{ngo2018worst}, all intermediate sub-patterns in the decomposition tree must be induced subgraphs of $\pattern$. Furthermore, \mmc is restricted to be a single-vertex pattern and a \emph{complete star}. A star-shaped pattern is denoted as $\pattern(u;V_s)$, where $u$ is the root vertex and $V_s$ is the set of leaf vertices\footnote{Edge directions between $u$ and $V_s$ are not important, and we assume they all point from $u$ to $V_s$.}. In the decomposition tree, given $\pattern' = \pattern'' \cup \pattern(u;V_s)$, $\pattern(u;V_s)$ is a complete star if and only if it is a right child and $V_s \subseteq V_{\pattern'}$, meaning that the leaf vertices of the complete star must all be common vertices for the decomposition. A single-edge pattern is a special case of a complete star. The complete star logically represents the physical operations of \expandintersect, which will be discussed in \refsec{physical-operators}. As shown in \reffig{match-decomposition}, a single-edge pattern, such as $\pattern_3$, is further decomposed into a single-vertex pattern and the pattern itself, allowing the optimizer to select from which vertex the edge can be expanded.
+\revise{The intermediate sub-patterns pruned from the decomposition tree are also presented in \reffig{match-decomposition}}.
+\revise{Some previous studies, such as EmptyHeaded \cite{Aberger2016Sigmod} and CLFTJ \cite{Kalinsky2017EDBT}, also generate decomposition trees. However, our method differs significantly from theirs. Specifically, these previous methods operate on hypergraphs, where the vertices correspond to attributes and the edges correspond to relations. In contrast, our decomposition tree is for property graphs, where both vertices and edges correspond to relations. Additionally, in those methods, the leaf nodes do not necessarily have to be a \mmc}.
 
 
 %The complete star is a logical representation of the physical operations of \expand~and \intersect, which are key to the implementation worst-case optimal join algorithm~\cite{mhedhbi2019optimizing} for graph pattern matching, as will be discussed in \refsec{xx}.
@@ -179,8 +146,8 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \begin{figure}
     \centering
-    \includegraphics[width=.7\linewidth]{./figures/decomposition-example.pdf}
-    \caption{Example of decomposition trees and the corresponding logical plans.}
+    \includegraphics[width=\linewidth]{./figures/decomposition-example.pdf}
+    \caption{Example of decomposition trees and the corresponding logical plans. \revise{Note that sub-pattern $u_{p_1}\rightarrow u_m \leftarrow u_{p_2}$ can serve as a leaf node, but it cannot be an intermediate node}.}
     \label{fig:match-decomposition}
 \end{figure}
 
@@ -208,12 +175,13 @@ Besides, a matching operator located on the left subtree of the join operator is
     \end{itemize}
 \end{remark}
 
+
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
 After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. 
 In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach is exponentially more efficient in this regard.
 %In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
-%Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{astarjoin,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
+%Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{Haffnerjoinorder,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
 \comment{
 According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
@@ -358,6 +326,34 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $m$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $m$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
 \end{remark}
 
+\subsubsection{Comparison of Optimization Time}
+\revise{To facilitate a more intuitive comparison of the optimization speed between graph-agnostic and graph-aware approaches, we implement the optimizer named \name based on the graph-aware method and select Apache Calcite,, a widely-used optimizer employing graph-agnostic techniques. We then compare their optimization time. This comparison employs two different benchmarks (namely, LDBC-SNB and JOB) and is conducted on two datasets. Detailed descriptions of these benchmarks and datasets will be provided in \refsec{evaluation}. 
+Please note that the codes of \name and Calcite are both written in Java, and VolcanoPlanner of Calcite with default rules is leveraged.
+If optimization for a query is not finished in 10 minutes, the process is early stopped and the time cost of such optimization is recorded as 10 minutes.
+The results are shown in Fig.~\ref{fig:exp-optimization}}.
+
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[b]{0.8\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
+        \caption{Optimization Time Cost on $G_{sf30}$.}
+        \label{fig:exp-optimization-sf30}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.8\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{./figures/exp/optimization_job.pdf}
+        \caption{Optimization Time Cost on IMDB.}
+        \label{fig:exp-optimization-job}
+    \end{subfigure}
+    \caption{Experiments on the time cost of optimization.}
+    \label{fig:exp-optimization}
+\end{figure}
+
+The experimental results demonstrate the superiority of \name, which outperforms Calcite exponentially in query optimization speed. For instance, when querying IC[5-1] on $LDBC30$, the optimization time using \name is more than $10^4$ times faster compared to Calcite. Additionally, \name can optimize all queries within 10 minutes, whereas some queries with Calcite exceed the 10-minute limit, which highlights the significance of optimization efficiency.
+
+
 %To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method.
 %Specifically, we consider the case where the pattern in the matching operator consists of a path formed by $n+1$ nodes and $n$ edges.
 %The experimental results are shown in \reffig{exp-compare-search-space-and-time}.
@@ -462,7 +458,9 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
-When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join. Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
+When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join. 
+\revise{Unlike HUGE \cite{huge}, \expandintersect~ is implemented on a relational database}.
+Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 

@@ -39,12 +39,12 @@ plt.bar(
     label="RelGoNoEI",
 )
 
-plt.xticks(xaxis_final, xlabel, fontsize=28)
-plt.yticks(fontsize=28)
+plt.xticks(xaxis_final, xlabel, fontsize=32)
+plt.yticks(fontsize=32)
 
 plt.margins(0.08)
 
-plt.ylabel("Time Cost (ms)", fontsize=28)
+plt.ylabel("Time Cost (ms)", fontsize=32)
 
 plt.yscale("log")
 

@@ -11,11 +11,11 @@ xaxis_final = np.arange(len(xlabel))
 
 y_duckdb = [379, 424, 1383, 782, 387, 932, 1120, 1349, 2541, 1745]
 
-y_back_to_hash = [329, 288, 1040, 480, 128, 946, 737, 1376, 2337, 1728]
+y_back_to_hash = [329, 286, 1112, 231, 135, 905, 721, 1304, 2138, 1790]
 
 y_graindb = [224, 221, 594, 517, 366, 330, 451, 613, 1082, 714]
 
-y_ours = [35, 143, 320, 348, 49, 53, 107, 455, 770, 620]
+y_ours = [35, 138, 313, 72, 49, 50, 102, 392, 380, 501]
 
 
 total_width, n = 0.8, 4
@@ -64,14 +64,14 @@ plt.bar(
 )
 
 
-plt.xticks(xaxis_final, xlabel, fontsize=28)
+plt.xticks(xaxis_final, xlabel, fontsize=32)
 plt.yticks(fontsize=28)
 plt.ylim((20, 9000))
 
 plt.margins(0.08)
 
-plt.xlabel("Queries of JOB[*]", fontsize=28)
-plt.ylabel("Time Cost (ms)", fontsize=28)
+plt.xlabel("Queries of JOB[*]", fontsize=32)
+plt.ylabel("Time Cost (ms)", fontsize=32)
 
 plt.yscale("log")
 

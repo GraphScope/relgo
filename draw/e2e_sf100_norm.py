@@ -26,14 +26,15 @@ xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
-with open('e2e_sf10.txt', 'r') as f:
+with open('e2e_sf100.txt', 'r') as f:
     lines = f.readlines()
     y_duckdb = [float(x) for x in lines[0].split(',')]
     y_graindb = [float(x) for x in lines[1].split(',')]
     y_umbra = [float(x) for x in lines[2].split(',')]
-    y_ours = [float(x) for x in lines[3].split(',')]
+    y_kuzu = [float(x) for x in lines[3].split(',')]
+    y_ours = [float(x) for x in lines[4].split(',')]
 
-total_width, n = 0.7, 4
+total_width, n = 0.7, 5
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
@@ -42,7 +43,7 @@ plt.figure(figsize=(15, 5))
 
 plt.bar(
     xaxis,
-    y_ours,
+    [b/a for a, b in zip(y_ours, y_duckdb)],
     color="lightgreen",
     edgecolor="k",
     width=width,
@@ -52,7 +53,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width,
-    y_umbra,
+    [b/a for a, b in zip(y_umbra, y_duckdb)],
     color="black",
     edgecolor="k",
     width=width,
@@ -62,7 +63,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 2,
-    y_graindb,
+    [b/a for a, b in zip(y_graindb, y_duckdb)],
     color="salmon",
     edgecolor="k",
     width=width,
@@ -72,26 +73,33 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 3,
-    y_duckdb,
+    [b/a for a, b in zip(y_duckdb, y_duckdb)],
     color="lightskyblue",
     edgecolor="k",
     width=width,
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=20)
-plt.yticks(fontsize=22)
+
+plt.bar(
+    xaxis + width * 4,
+    [b/a if a != 0 else 0 for a, b in zip(y_kuzu, y_duckdb)],
+    color="gold",
+    edgecolor="k",
+    width=width,
+    # hatch="/",
+    label="Kùzu",
+)
+
+plt.xticks(xaxis_final, xlabel, fontsize=26)
+plt.yticks(fontsize=26)
 plt.yscale("log")
 
 plt.grid(linestyle="--", axis="y")
 
-plt.xlabel("Queries of IC[*]", fontsize=24)
-plt.ylabel("Time Cost (ms)", fontsize=22)
-
-plt.legend(
-    loc="upper center", fontsize=26, ncol=4, bbox_to_anchor=(0.5, 1.32), columnspacing=2
-)
+plt.xlabel("Queries of IC[*]", fontsize=28)
+plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 
 plt.tight_layout()
 # plt.show()
-plt.savefig("../paper/figures/exp/e2e_sf10.pdf", bbox_inches="tight")
+plt.savefig("../paper/figures/exp/e2e_sf100.pdf", bbox_inches="tight")

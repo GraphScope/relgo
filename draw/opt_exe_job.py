@@ -6,14 +6,14 @@ methods = ["RelGo", "GrainDB"]
 
 compile_times = np.array(
     [
-        [19, 13, 14, 14],  # compilation time of RelGo
+        [9, 1, 5, 5],  # compilation time of RelGo
         [1, 1, 1, 1],  # GrainDB
     ]
 )
 
 execution_times = np.array(
     [
-        [35, 143, 320, 348],  # execution time of RelGo
+        [35, 138, 313, 72],  # execution time of RelGo
         [224, 221, 594, 517],  # GrainDB
     ]
 )
@@ -54,10 +54,10 @@ for i in range(n_methods):
         bottom=compile_times[i],
     )
 
-plt.xticks(index + group_width / 4, queries, fontsize=28)
-plt.yticks(fontsize=28)
+plt.xticks(index + group_width / 4, queries, fontsize=32)
+plt.yticks(fontsize=32)
 
-plt.ylabel("Time Cost (ms)", fontsize=28)
+plt.ylabel("Time Cost (ms)", fontsize=32)
 plt.grid(linestyle="--", axis="y")
 
 # plt.yscale('log')

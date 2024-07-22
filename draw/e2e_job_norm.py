@@ -21,12 +21,12 @@ xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
 
-total_width, n = 0.7, 4
+total_width, n = 0.7, 5
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 4))
+plt.figure(figsize=(15, 5))
 y_ours = y_ours_complete[:17]
 y_kuzu = y_kuzu_complete[:17]
 y_umbra = y_umbra_complete[:17]
@@ -35,7 +35,7 @@ y_duckdb = y_duckdb_complete[:17]
 
 plt.bar(
     xaxis,
-    y_ours,
+    [b/a for a, b in zip(y_ours, y_duckdb)],
     color="lightgreen",
     edgecolor="k",
     width=width,
@@ -45,7 +45,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width,
-    y_umbra,
+    [b/a for a, b in zip(y_umbra, y_duckdb)],
     color="black",
     edgecolor="k",
     width=width,
@@ -55,7 +55,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 2,
-    y_graindb,
+    [b/a for a, b in zip(y_graindb, y_duckdb)],
     color="salmon",
     edgecolor="k",
     width=width,
@@ -65,19 +65,30 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 3,
-    y_duckdb,
+    [b/a for a, b in zip(y_duckdb, y_duckdb)],
     color="lightskyblue",
     edgecolor="k",
     width=width,
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=22)
-plt.yticks(fontsize=22)
+
+plt.bar(
+    xaxis + width * 4,
+    [b/a for a, b in zip(y_kuzu, y_duckdb)],
+    color="gold",
+    edgecolor="k",
+    width=width,
+    # hatch="/",
+    label="Kùzu",
+)
+
+plt.xticks(xaxis_final, xlabel, fontsize=26)
+plt.yticks(fontsize=26)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
-plt.xlabel("Queries of JOB[*]", fontsize=24)
-plt.ylabel("Time Cost (ms)", fontsize=22)
+plt.xlabel("Queries of JOB[*]", fontsize=28)
+plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 
 plt.tight_layout()
 # plt.show()
@@ -94,12 +105,12 @@ xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
 
-total_width, n = 0.7, 4
+total_width, n = 0.7, 5
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 4))
+plt.figure(figsize=(15, 5))
 y_ours = y_ours_complete[17:]
 y_kuzu = y_kuzu_complete[17:]
 y_umbra = y_umbra_complete[17:]
@@ -108,7 +119,7 @@ y_duckdb = y_duckdb_complete[17:]
 
 plt.bar(
     xaxis,
-    y_ours,
+    [b/a for a, b in zip(y_ours, y_duckdb)],
     color="lightgreen",
     edgecolor="k",
     width=width,
@@ -118,7 +129,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width,
-    y_umbra,
+    [b/a for a, b in zip(y_umbra, y_duckdb)],
     color="black",
     edgecolor="k",
     width=width,
@@ -128,7 +139,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 2,
-    y_graindb,
+    [b/a for a, b in zip(y_graindb, y_duckdb)],
     color="salmon",
     edgecolor="k",
     width=width,
@@ -138,19 +149,30 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 3,
-    y_duckdb,
+    [b/a for a, b in zip(y_duckdb, y_duckdb)],
     color="lightskyblue",
     edgecolor="k",
     width=width,
     # hatch="\\",
     label="DuckDB",
 )
-plt.xticks(xaxis_final, xlabel, fontsize=22)
-plt.yticks(fontsize=22)
+
+plt.bar(
+    xaxis + width * 4,
+    [b/a for a, b in zip(y_kuzu, y_duckdb)],
+    color="gold",
+    edgecolor="k",
+    width=width,
+    # hatch="/",
+    label="Kùzu",
+)
+
+plt.xticks(xaxis_final, xlabel, fontsize=26)
+plt.yticks(fontsize=26)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
-plt.xlabel("Queries of JOB[*]", fontsize=24)
-plt.ylabel("Time Cost (ms)", fontsize=22)
+plt.xlabel("Queries of JOB[*]", fontsize=28)
+plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 
 plt.tight_layout()
 # plt.show()

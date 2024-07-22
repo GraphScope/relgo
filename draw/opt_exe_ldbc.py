@@ -7,7 +7,7 @@ methods = ["RelGo", "GrainDB"]
 
 compile_times = np.array(
     [
-        [55, 11, 55, 19],  # compilation time of RelGo
+        [20, 7, 21, 13],  # compilation time of RelGo
         # [10201, 394, 25839, 60000],  # Calcite
         [1.04, 0.69, 1.61, 0.96],  # GrainDB
     ]
@@ -15,7 +15,7 @@ compile_times = np.array(
 
 execution_times = np.array(
     [
-        [376.78, 374.47, 64.15, 39.51],  # execution time of RelGo
+        [295.71, 374.47, 64.15, 39.51],  # execution time of RelGo
         # [
         #     259.75,
         #     11217.25,
@@ -63,10 +63,10 @@ for i in range(n_methods):
         bottom=compile_times[i],
     )
 
-plt.xticks(index + group_width / 4, queries, fontsize=28)
-plt.yticks(fontsize=28)
+plt.xticks(index + group_width / 4, queries, fontsize=32)
+plt.yticks(fontsize=32)
 
-plt.ylabel("Time Cost (ms)", fontsize=28)
+plt.ylabel("Time Cost (ms)", fontsize=32)
 
 ot_threshold_ms = 60000
 ot_threshold_units = ot_threshold_ms

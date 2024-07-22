@@ -64,7 +64,13 @@ When a graph index is available, there are three physical implementations of $\g
 \item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
 
-In the absence of a graph index, \hashjoin~ is used for the entire plan, where the cost is simply the product of the cardinalities of the two relations being joined.
+\revise{In the absence of a graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
+The cost of \hashjoin~ is simply the product of the cardinalities of the two relations being joined}.
+
+%when we are dealing
+%with the matching operators, the joins obtained by decompostion
+%are implemented as HASH_JOINs. As these joins connect vertices
+%to their adjacent edges, it is always far from cross product.
 
 \comment{
 \begin{example}
@@ -78,15 +84,21 @@ In the absence of a graph index, \hashjoin~ is used for the entire plan, where t
 
 
 \subsubsection{The Relational Optimization}
-Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. Any existing relational optimizer can be used for this purpose.
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. 
+\revise{After years of research and exploration, relational optimization has become a mature field, yielding numerous significant results \cite{Chaudhuri98,Haffnerjoinorder}. Since relational optimization is not the focus of this paper and various relational optimizers can be seamlessly plugged into \name for this purpose, we will only discuss how relational and graph optimizers are utilized concurrently within \name}.
+%Any existing relational optimizer can be used for this purpose.
 
 %It's important to note that before $\matching(\pattern)$ can be integrated with the remaining relational component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
 
-To prevent the relational optimizer delve into the internal details of the graph pattern matching process, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
+Specifically, to prevent the relational optimizer delve into the internal details of the graph pattern matching process, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
 The \scangraphtable~ operator acts as a bridge between the graph and relational components of the query. From the perspective of the relational optimizer, \scangraphtable~ behaves like a standard \scan~ operator, providing a relational interface to the matched results. %This abstraction allows the relational optimizer to treat \scangraphtable~ as a regular relational operator, without the need to delve into the internal details of the graph pattern matching process.
 
 \subsubsection{Heuristic Optimization Rules}
 In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
+\revise{Note that \filterrule is a global optimization rule relevant to both graph optimization and relational optimization., while \joinfuserule is a local optimization rule specifically for graph optimization.
+The effectiveness of these two rules is validated in \refsec{experiment-opt}. In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule that avoids the final join for aggregate operations and \subtaskremoverule that converts some where conditions to anti joins and semi joins.
+}
+
 
 \stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \constraints)$, introducing constraints within $\constraints$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.
 
@@ -135,6 +147,10 @@ Following the formation of the logical plan, the frontend invokes the converged 
 For the relational-graph interplay optimizations, we incorporate heuristic rules such as \filterrule and \joinfuserule into Calcite's rule-based HepPlanner, by specifying the activation conditions and consequent transformations of each rule.
 For more nuanced optimization, we rely on the VolcanoPlanner, the cost-based planner in Calcite, to optimize the \lstinline{ScanGraphTableRelNode}.
 We devised a top-down search algorithm that assesses the most efficient physical plan based on a cost model outlined in \refsec{graph-optimizer}, combined with high-order statistics from \glogue for more accurate cost estimation.
+\revise{
+    While low-order statistics primarily focus on the cardinalities of relational tables representing vertices and edges, high-order statistics also include the frequencies of sub-patterns with at least three vertices, which aids in more accurate cost estimation. It is important to note that \name remains functional with only low-order statistics, but the efficiency of the generated plan may decrease due to less accurate cost estimation.
+}
+
 For the remaining relational operators in the query, we leverage Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques.
 Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
 

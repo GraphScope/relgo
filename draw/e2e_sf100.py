@@ -26,7 +26,7 @@ xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
-with open('e2e_sf10.txt', 'r') as f:
+with open('e2e_sf100.txt', 'r') as f:
     lines = f.readlines()
     y_duckdb = [float(x) for x in lines[0].split(',')]
     y_graindb = [float(x) for x in lines[1].split(',')]
@@ -38,7 +38,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 5))
+plt.figure(figsize=(15, 4))
 
 plt.bar(
     xaxis,
@@ -88,10 +88,6 @@ plt.grid(linestyle="--", axis="y")
 plt.xlabel("Queries of IC[*]", fontsize=24)
 plt.ylabel("Time Cost (ms)", fontsize=22)
 
-plt.legend(
-    loc="upper center", fontsize=26, ncol=4, bbox_to_anchor=(0.5, 1.32), columnspacing=2
-)
-
 plt.tight_layout()
 # plt.show()
-plt.savefig("../paper/figures/exp/e2e_sf10.pdf", bbox_inches="tight")
+plt.savefig("../paper/figures/exp/e2e_sf100.pdf", bbox_inches="tight")

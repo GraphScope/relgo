@@ -1,6 +1,44 @@
 \section{Preliminaries}
 \label{sec:preliminaries}
 
+\begin{table}[t]
+    \centering
+   \caption{Frequently used notations.}
+   \label{tab:notations}
+    \scalebox{0.9}{
+        \begin{tabular}{|m{0.26\linewidth}|m{0.74\linewidth}|}
+            \hline
+            Notation                 & Definition                                                                                       \\
+            \hline
+            $R$    & a relation or relational table   \\
+            \hline
+            $\tau$ and $\tau.attr$    & a tuple in a relation, and the value of an attribute of $\tau$ \\
+            \hline
+            $G(V,E)$         & a property graph with $V$ and $E$                                                          \\
+            \hline
+            $\pattern(V, E)$   & a pattern graph with $V$ and $E$  \\
+            \hline
+            $\id(\epsilon)$, $\lab(\epsilon)$, $\epsilon$.attr  & the identifier, label, and the value of given attribute of a graph element $\epsilon$ \\
+            \hline
+            $\adj(u)$ and $\adj^E(u)$           & neighbors and adjacent edges of $u$           \\
+            \hline
+            $GR$   & a graph relation     \\
+            \hline
+            $\matching(GR, \pattern)$, $\matching(\pattern)$  & matching $\pattern$ on a graph relation $GR$ or a graph $G$ \\
+            \hline
+            $\pi_{A}$, $\sigma_\constraints$, $\Join$  & projection, selection, and join operators over relations \\
+            \hline
+            $\gproject$, $\gjoin$  & projection and join operators over graph relations \\
+            \hline
+            $\lambda^s_\lab(e)$, $\lambda^t_\lab(e)$  & the total functions for mapping tuples in an edge relation to source and target vertex relations \\
+            \hline
+        \end{tabular}
+    }
+    % \vspace{-.05in}
+\end{table}
+
+\revise{In this section, we propose the utilized data model and define the SPJM query processed in this paper. Frequently used notations in this paper are summarized in \reftable{notations}.}
+
 \subsection{Data Model}
 \label{sec:data-model}
 
@@ -8,8 +46,9 @@ A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attribu
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(\tau = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(\tau\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
 Moreover, for any tuple \(\tau\) in the relation \(R\), the notation \(\tau.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(\tau\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
 
-We define a \emph{Property Graph} as $G = (V_G, E_G)$,
+We define a \emph{Property Graph} as $G = (V_G, E_G)$, 
 where
+
 \begin{itemize}
     \item $V$ stands for the set of vertices.
     \item Let $E \subseteq V \times V$ denote the set of edges in the graph. An edge $e \in E$ is represented as an ordered pair $e = (v_s, v_t)$, where $v_s \in V$ is the source vertex and $v_t \in V$ is the target vertex, indicating that the edge $e$ connects from $v_s$ to $v_t$.
@@ -25,9 +64,29 @@ Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph
 
 To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
+Specifically, \revise{an \rgmapping that maps relations to a property graph $G = (V, E)$ comprises a vertex mapping and an edge mapping. 
+The vertex mapping maps tuples in relations to unique vertices in $V$ while the edge mapping maps tuples to unique edges.
+Suppose a tuple $\tau$ in relation $R$ is mapped to a vertex $v \in V$ (resp.~edge $e = (v_s, v_t) \in E$), it is assigned an ID $\id(v)$ that matches the name of $R$ (resp.~$\id(e)$), a label $\lab(v)$ (resp.~$\lab(e)$), and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$ (resp.~$e.attr*$).
+Relations mapped to vertices and edges in the graph are referred to as vertex relations and edge relations, respectively}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.7\linewidth]{./figures/erd.pdf}
+    \caption{An example of ER diagram representing the relationships between vertex relations and edge relations.}
+    \label{fig:er-diagram}
+\end{figure}
+
+For \revise{each edge relation $R_e$, there should be two corresponding vertex relations $R_{p_s}$ and $R_{p_t}$, statisfying that $R_e$ have two foreign keys referencing the primary keys of $R_{p_s}$ annd $R_{p_t}$ respectively as shown in \reffig{er-diagram}.
+Note that the cardinality type does not necessarily have to be many-to-many; in fact, it can be of any cardinality type (e.g., one-to-one).
+We further define two total functions: $\lambda_{q_i}^s: R_{q_i} \to R_{p_s}$ and $\lambda_{e}^t: R_{q_i} \to R_{p_t}$, which maps a tuple $\tau \in R_{e}$ to a tuple $\tau_s \in R_{p_s}$ and a tuple $\tau_t \in R_{p_t}$, respectively.
+The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function}.
+ 
+
+
 %\enlargethispage{1em}
 
 %Given two relations, \(R_1\) and \(R_2\), each with its own schema. Let there be a bijective relation mapping, \(\lambda: R_1 \mapsto R_2 \).
+\iffalse
 \begin{definition}[\rgmapping]
 \label{def:rgmapping}
 Given two sets of relations $\{R_{p_1}, \ldots,$ $R_{p_n}\}$ and $\{R_{q_1}, \ldots, R_{q_m}\}$,
@@ -46,6 +105,7 @@ The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectivel
 The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as edge relations.
 \end{itemize}
 \end{definition}
+\fi
 
 \begin{figure*}
     \centering
@@ -144,7 +204,7 @@ Q = \pi_A(\sigma_\constraints(R_1 \Join \cdots \Join R_m)).
 Inspired from the \spj paradigm, we introduce a novel category of queries, termed \spjm queries, to logically formulate SQL/PGQ~\cite{sql-pgq} queries that
 blend relational and graph operations. Our focus is not on an exhaustive exploration of SQL/PGQ, which encompasses a broad spectrum of operations such as shortest-path, but rather on understanding and enhancing the core functional elements of such queries.
 The \spjm framework augments \spj queries by incorporating a matching operator, thereby enriching the query's expressive power to seamlessly navigate both relational and graph data domains.
-Given the set of relations and a property graph \(G\) constructed from these relations via an \rgmapping (\refdef{rgmapping}),
+Given the set of relations and a property graph \(G\) constructed from these relations via an \rgmapping, %(\refdef{rgmapping}),
 an \spjm query is articulated as:
 \begin{equation}
     \label{eq:spjm}
@@ -174,8 +234,6 @@ In this paper, we study the problem of optimizing \spjm queries in \refeq{spjm}.
     %Specifically, Tom, who is German, and Bob know each other and like the same message $m_1$.
 \end{example}
 }
-
-\reftable{notations} summarizes frequently used notations in this paper.
 
 %is a relation generated by projecting the outputs of the matching operator $\mathcal{M}$ to relations of properties.
 %Besides, $GR_i$ is the graph relation that contains the data graphs that pattern matching is conducted on and $\mathcal{P}_i$ is the pattern.

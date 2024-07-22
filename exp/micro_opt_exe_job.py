@@ -10,7 +10,7 @@ compile_times = np.array([
 ])
 
 execution_times = np.array([
-    [35, 143, 320, 348], # execution time of RelGo
+    [35, 138, 313, 72], # execution time of RelGo
     [224, 221, 594, 517], # GrainDB
 ])
 
@@ -33,11 +33,12 @@ for i in range(n_methods):
 
 plt.legend()
 
-plt.xticks(index + group_width / 3, queries)
+plt.xticks(index + group_width / 3, queries, fontsize=26)
+plt.yticks(fontsize=26)
 
-plt.ylabel('Time Cost (ms)')
+plt.ylabel('Time Cost (ms)', fontsize=26)
 
-plt.legend()
+# plt.legend()
 
 # plt.yscale('log')
 # plt.show()

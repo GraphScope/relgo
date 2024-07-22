@@ -18,11 +18,11 @@
 %Join order optimization was a traditional and crucial topic for query optimization in relational databases. 
 %The order in which joins were conducted could influence the execution time significantly and had attained substantial accomplishments. 
 Various studies of query optimization for relational databases were proposed to find the optimal join order.
-Ibaraki et al.\cite{nested-tods-1984} proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
-%Ibaraki et al.\cite{nested-tods-1984} proposed that there were usually fewer than ten tables involved in a typical query, and dealt with joins using nested-loops join. Specifically, they proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
+Ibaraki et al.\cite{IbarakiK84} proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
+%Ibaraki et al.\cite{IbarakiK84} proposed that there were usually fewer than ten tables involved in a typical query, and dealt with joins using nested-loops join. Specifically, they proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
 Then, Krishnamurthy et al.\cite{optimize-nested-vldb-1986} optimized the algorithm and proposed an algorithm with a time complexity of $O(N^2)$ by reusing the computation results.
 %Besides, the authors emphasized that since finding the optimal join order was a complex problem, it was more important to avoid the worst plan.
-Moreover, Haffner et al.\cite{astarjoin} converted the problem of join order optimization to that of finding the shortest path on directed graphs and solved the problem with the A* algorithm. 
+Moreover, Haffner et al.\cite{Haffnerjoinorder} converted the problem of join order optimization to that of finding the shortest path on directed graphs and solved the problem with the A* algorithm. 
 %In detail, four heuristics were designed to estimate the remaining cost. 
 %Furthermore, 
 Kossmann et al.\cite{data-dependency-join} summarized the methods to optimize queries with data dependencies, such as uniqueness constraints, foreign key constraints, and inclusion dependencies.
@@ -48,6 +48,7 @@ We follow the join-based methods such as~\cite{huge,GLogS} due to their compatib
 
 \stitle{Bridging Relational and Graph Models.} There is a growing interest in studying the interaction between relational and graph models.
 DuckPGQ~\cite{DuckPGQ,DuckPGQ-VLDB} has demonstrated support for SQL/PGQ within the DuckDB~\cite{duckdb}, utilizing the straightforward, graph-agnostic approach to transform and process pattern matching.
+\revise{Since DuckPGQ converts SQL/PGQ queries into standard SQL query plans, it loses the opportunity to optimize the query from a graph query perspective}.
 Index-based methods, such as GQ-Fast \cite{gqfast} and GrainDB \cite{graindb}, work towards construct graph-like index on relational databases to improve the performance of join execution. \name leveraged GrainDB's indexing technique for implementing physical graph operations. In contrast, methods like GRFusion \cite{GRFusion} and Gart~\cite{gart} work towards materializing graph from the relational tables,
 so that graph queries can be executed directly on the materialized graph. Such methods incur additional storage costs and potential inconsistencies between relational and graph data.
 %We prefer index-based techniques over materialization techniques due to their ability to work seamlessly with relational databases. % GRFusion builds an in-memory graph view based on relational tables and supports queries on both tables and graph views. This allows some relational joins to be replaced with graph traversals, enabling the application of graph-level optimizations. Similarly, in the work of Gart, the authors develop ETL tools to convert and import relational data into a graph store, upon which any graph processing system can be plugged in for efficient graph analysis. We prefer index-based techniques over materialization techniques due to their ability to work directly with relational databases, avoid additional storage costs, and ensure consistency between relational and graph data, making them more suitable for the relational context in which \name operates.
