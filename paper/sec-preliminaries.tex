@@ -46,7 +46,7 @@ A schema, denoted as \(S = (a_1, a_2, \ldots, a_n)\), is a collection of attribu
 A relation \(R\) is defined as a set of tuples. We consider \(R\) to be a relation over schema \(S\), if and only if, every tuple \(\tau = (d_1, d_2, \ldots, d_n)\) in \(R\) adheres to the schema's constraints, such that the value \(d_i\) for each position in the tuple corresponds to the data domain \(D_i\) of the attribute \(a_i\) in \(S\). In other words, each value \(d_i\) in a tuple \(\tau\) is drawn from the appropriate data domain \(D_i\) for its corresponding attribute \(a_i\).
 Moreover, for any tuple \(\tau\) in the relation \(R\), the notation \(\tau.a_i = d_i\) signifies that the attribute \(a_i\) in tuple \(\tau\) has the value \(d_i\). A table is a representation of a relation, where each row corresponds to a tuple in the relation, and each column represents an attribute in the schema. In this paper, we use the terms of relation and table interchangeably.
 
-We define a \emph{Property Graph} as $G = (V_G, E_G)$, 
+We define a \emph{Property Graph} as $G = (V_G, E_G)$,
 where
 
 \begin{itemize}
@@ -64,9 +64,9 @@ Considering two graphs \(G_1\) and \(G_2\), we assert that \(G_2\) is a subgraph
 
 To formalize the integration of graph syntax within the realm of relational data, we introduce the concept of a \textit{Relations-to-Graph Mapping} (i.e. \rgmapping), to facilitate the transformation of relational data structures into a property graph.
 
-Specifically, \revise{an \rgmapping that maps relations to a property graph $G = (V, E)$ comprises a vertex mapping and an edge mapping. 
-The vertex mapping maps tuples in relations to unique vertices in $V$ while the edge mapping maps tuples to unique edges.
-Suppose a tuple $\tau$ in relation $R$ is mapped to a vertex $v \in V$ (resp.~edge $e = (v_s, v_t) \in E$), it is assigned an ID $\id(v)$ that matches the name of $R$ (resp.~$\id(e)$), a label $\lab(v)$ (resp.~$\lab(e)$), and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$ (resp.~$e.attr*$).
+Specifically, \revise{an \rgmapping that maps relations to a property graph $G = (V, E)$ comprises a vertex mapping and an edge mapping.
+The vertex mapping maps tuples in relations to unique vertices in $V$, while the edge mapping maps tuples to unique edges.
+Suppose a tuple $\tau$ in relation $R$ is mapped to a vertex $v \in V$ (or~edge $e = (v_s, v_t) \in E$), it is assigned an ID $\id(v)$ that matches the name of $R$ (or~$\id(e)$), a label $\lab(v)$ (or~$\lab(e)$), and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$ (or~$e.attr*$).
 Relations mapped to vertices and edges in the graph are referred to as vertex relations and edge relations, respectively}.
 
 \begin{figure}
@@ -76,11 +76,11 @@ Relations mapped to vertices and edges in the graph are referred to as vertex re
     \label{fig:er-diagram}
 \end{figure}
 
-For \revise{each edge relation $R_e$, there should be two corresponding vertex relations $R_{p_s}$ and $R_{p_t}$, statisfying that $R_e$ have two foreign keys referencing the primary keys of $R_{p_s}$ annd $R_{p_t}$ respectively as shown in \reffig{er-diagram}.
-Note that the cardinality type does not necessarily have to be many-to-many; in fact, it can be of any cardinality type (e.g., one-to-one).
+For \revise{each edge relation $R_e$, there should be two corresponding vertex relations $R_{p_s}$ and $R_{p_t}$. $R_e$ must have two foreign keys referencing the primary keys of $R_{p_s}$ and $R_{p_t}$, respectively, as shown in \reffig{er-diagram}.
+Note that the cardinality type does not necessarily have to be many-to-many; in fact, it can be of any cardinality type (e.g., one-to-one) ({\color{red} comment(Robin): this Cardinality type is strange}).
 We further define two total functions: $\lambda_{q_i}^s: R_{q_i} \to R_{p_s}$ and $\lambda_{e}^t: R_{q_i} \to R_{p_t}$, which maps a tuple $\tau \in R_{e}$ to a tuple $\tau_s \in R_{p_s}$ and a tuple $\tau_t \in R_{p_t}$, respectively.
-The vertices $v_s$ and $v_t$ corresponding to $\tau_s$ and $\tau_t$, respectively, are obtained by applying the vertex mapping function}.
- 
+Applying the vertex mapping, $\tau_s$ and $\tau_t$ are transformed into vertices $v_s$ and $v_t$, respectively}.
+
 
 
 %\enlargethispage{1em}
