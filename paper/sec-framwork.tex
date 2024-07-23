@@ -64,7 +64,7 @@ When a graph index is available, there are three physical implementations of $\g
 \item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
 
-\revise{In the absence of a graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
+\revise{In the absence of graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
 The cost of \hashjoin~ is simply the product of the cardinalities of the two relations being joined}.
 
 %when we are dealing
@@ -84,7 +84,7 @@ The cost of \hashjoin~ is simply the product of the cardinalities of the two rel
 
 
 \subsubsection{The Relational Optimization}
-Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. 
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators.
 \revise{After years of research and exploration, relational optimization has become a mature field, yielding numerous significant results \cite{Chaudhuri98,Haffnerjoinorder}. Since relational optimization is not the focus of this paper and various relational optimizers can be seamlessly plugged into \name for this purpose, we will only discuss how relational and graph optimizers are utilized concurrently within \name}.
 %Any existing relational optimizer can be used for this purpose.
 
