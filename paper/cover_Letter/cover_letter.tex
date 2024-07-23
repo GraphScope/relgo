@@ -1,0 +1,201 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Long letter 南京大学版 Nanjing University Version
+% Version 1.0 (2022-03-27)
+
+% This template was revised by Zheng-hu Nie(brian.nie@gmail.com) based on Fanchao Chen (chenfc@fudan.edu.cn).
+% This template originates from:
+% https://www.LaTeXTemplates.com
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS 文档基础配置
+%----------------------------------------------------------------------------------------
+
+\documentclass{article}
+
+
+\usepackage{amsmath,amsfonts}
+% \usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{bbold}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{subfig}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{multirow}
+\usepackage{bbding}
+\usepackage{wrapfig}
+\usepackage{array}
+\usepackage[noend]{algpseudocode}
+\usepackage[
+	a4paper, % Paper size
+	top=1in, % Top margin
+	bottom=1in, % Bottom margin
+	left=1in, % Left margin
+	right=1in, % Right margin
+	%showframe % Uncomment to show frames around the margins for debugging purposes
+]{geometry}
+
+\setlength{\parindent}{0pt} % Paragraph indentation
+\setlength{\parskip}{1em} % Vertical space between paragraphs
+
+\usepackage{graphicx} % Required for including images
+
+\usepackage{fancyhdr} % Required for customizing headers and footers
+
+\fancypagestyle{firstpage}{%
+	\fancyhf{} % Clear default headers/footers
+	\renewcommand{\headrulewidth}{0pt} % No header rule
+	\renewcommand{\footrulewidth}{1pt} % Footer rule thickness
+}
+
+\fancypagestyle{subsequentpages}{%
+	\fancyhf{} % Clear default headers/footers
+	\renewcommand{\headrulewidth}{1pt} % Header rule thickness
+	\renewcommand{\footrulewidth}{1pt} % Footer rule thickness
+}
+
+\AtBeginDocument{\thispagestyle{firstpage}} % Use the first page headers/footers style on the first page
+\pagestyle{subsequentpages} % Use the subsequent pages headers/footers style on subsequent pages
+
+%----------------------------------------------------------------------------------------
+
+\input{../command}
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	FIRST PAGE HEADER
+%----------------------------------------------------------------------------------------
+
+% \includegraphics[width=0.25\textwidth]{nju.png} % Logo
+
+\vspace{-1em} % Pull the rule closer to the logo
+
+\rule{\linewidth}{1pt} % Horizontal rule
+
+\begin{center}
+	\begin{tabular}{c}
+		\huge
+		Cover Letter of
+	\end{tabular}
+	\\
+	\vspace{.15in}
+	\Large
+	``Towards a Converged Relational-Graph Optimization Framework''
+	\large
+	\\
+	\vspace{.1in}
+	Anonymous Authors
+\end{center}
+
+%----------------------------------------------------------------------------------------
+%	YOUR NAME AND CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+% \hfill
+% \begin{tabular}{l @{}}
+% \hfill \today \bigskip\\ % Date
+% \hfill Pizza Cat \\
+% \hfill Email: xxx@nju.edu.cn \\
+% \hfill 163 Xianlin Road, Qixia District,\\
+% \hfill Nanjing, Jiangsu Province, 210023, China \\ % Address
+% \end{tabular}
+
+% \bigskip % Vertical whitespace
+
+% %----------------------------------------------------------------------------------------
+% %	ADDRESSEE AND GREETING
+% %----------------------------------------------------------------------------------------
+
+% \begin{tabular}{@{} l}
+% 	Professor\ Chandeller Bing \\
+% 	Editor-in-chief \\
+% 	\textit{Journal of Old Friends}
+% \end{tabular}
+
+\bigskip % Vertical whitespace
+
+Dear Reviewers and Meta Reviewer,
+\bigskip % Vertical whitespace
+
+%----------------------------------------------------------------------------------------
+%	LETTER CONTENT
+%----------------------------------------------------------------------------------------
+
+We have modified our submission ``Towards a Converged Relational-Graph Optimization Framework'' according to the comments and advice from reviewers and the meta reviewer.
+
+We summarize the major modifications in this revision version as follows:
+
+
+In Section 1, we mainly make the following modifications:
+\begin{enumerate}
+	\item We have make the query example on Page 1 (in the original manuscript) a figure float. (R3-M1)
+	\item We have removed \rgmapping from the contributions of this paper. (R2-i.6, R3-O1.1)
+\end{enumerate}
+
+In Section 2, we make the modifications as follows:
+\begin{enumerate}
+	\item We move Table 1 earlier to make the notations in this section easier to understand. (R3-M1)
+	\item We have simplified the contents about the definition of \rgmapping. (R2-i.6, R3-O1.1, R3-M1, R3-C1, M-C7)
+	\item We add a new figure, i.e., Figure 2 in this revision, to illustrate the relationships between vertex relations and edge relations in E-R terms. (R3-O1.1)
+	\item We have enlarged the font sizes in Figure 3 (Figure 1 in the original manuscript) from 28pt to 32pt. (R1-D1)
+\end{enumerate}
+
+In Section 3, we have mainly made the following modifications:
+\begin{enumerate}
+	\item We have enlarged the font sizes in Figure 4 (Figure 2 in the original manuscript) from 24pt to 28pt. (R1-D1)
+	\item We add more contents in Figure to show what is given up when using the tree decomposition approach in \name. (R2-ii.1, M-C4)
+	\item We add several sentences to discuss the differences between tree decomposition applied in this paper and the techniques used by EmptyHeaded and CLFTJ. (R2-i.1, M-C2)
+	\item We add a new subsection (i.e., Section 3.1.4) to compare the optimization of \name and Calcite and add a new figure, i.e.~Figure 5, to show the experimental results. (R2-S1, R2-ii.1, M-C6)
+	\item We add a sentence to emphasize that the intersection evaluation using worst-case optimal join is implementaed on relational tables. (R2-i.5)
+\end{enumerate}
+
+In Section 4, we have made the following modifications:
+\begin{enumerate}
+	\item We have enlarged the font sizes in Figure 8 (Figure 5 in the original manuscript) from 28pt to 32pt. (R1-D1)
+	\item We add a new paragraph to explain why HASH\_JOIN is used for the entire plan in the absence of a graph index. (R3-O2.5)
+	\item We explain why we limit the extensive depth, methods, and literature on relational query optimization. (R3-O4.1, R3-C3)
+	\item We add several sentences to explain that \filterrule is a global optimization while \fusionrule is a local optimization rule. Besides, we briefly describe two more optimization rules we applied in \name. (R2-i.3)
+	\item We introduce the higher-order graph statistics in more detail. (R1-O1, M-C5)
+\end{enumerate}
+
+In Section 5, we have made the following modifications:
+\begin{enumerate}
+	\item We add two new baselines, i.e., Umbra and Kùzu, add description about them, and conduct compreshensive experiments on them. The experimental results are shown in the revision and compared with \name. (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1, M-C3).
+	\item We conduct new compreshensive experiments on a larger instance, i.e., LDBC100 to make the conclusions more convincing. Besides, we add the statistics of LDBC100 to Table 2. (R3-O2.6, R3-C2)
+	\item We have add some explanations about the procedures for data loading and graph index construction in thie revision. (R3-O2.2)
+	\item We add the description about the versions of DuckDB used in the experiments. (R2-iii.2)
+	\item We have fixed the typo in this revision and modified the size of the RAM to 256GB.
+	\item We enlarge the font sizes in Figures 9--13 (Figures 6--10 in the original manuscript) from 20/22pt to 26/28pt. (R1-D1)
+	\item We have redrawn Figure 13 (Figure 10 in the original manuscript), normalized all runtimes to that of DuckDb, and plot speedups achieved by \name and the baselines. (R1-M2)
+	\item We add two paragraphs to discuss how to extend \name to deal with queries wihout explicit PGQ component. Besides, we explain about the potential tradeoffs between global and local optimizations (R2-i.3, M-C6, R3-O3.1, R3-C3)
+	\item We add a new section, i.e., Section 5.4 (Case Study), and a new figure (i.e., Figure 15) to demonstrate why plans generated by \name are better than those generated by the baselines. (R1-O2, M-C4)
+	\item We provide the query statement for a representative SQL/PGQ query (i.e. JOB[17]) in Figure 14 in Section 5.4. (R3-O2.1, M-C4)
+\end{enumerate}
+
+In Section 6, we have made the following modifications:
+\begin{enumerate}
+	\item We add the citations of the related work mentioned by Reviewer \#2 in this section and describe these works briefly. (R2-C2)
+	\item We explain the relationships between DuckPGQ and DuckDB in more detail in this revision. (R2-i.2, R2-C2, M-C2)
+\end{enumerate}
+
+
+
+\bigskip % Vertical whitespace
+
+Sincerely yours,
+
+\vspace{20pt} % Vertical whitespace
+
+Anonymous Authors
+% Pizza Cat Ph.D.\\
+% Professor of Getting Fat\\
+% School of Dorm Keeper, Nanjing University. China
+
+\end{document}
+
+% To PIZZA, a famous fat-ass cat who lived in Dorm 12.
