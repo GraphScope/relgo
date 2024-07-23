@@ -69,17 +69,10 @@ The vertex mapping maps tuples in relations to unique vertices in $V$, while the
 Suppose a tuple $\tau$ in relation $R$ is mapped to a vertex $v \in V$ (or~edge $e = (v_s, v_t) \in E$), it is assigned an ID $\id(v)$ that matches the name of $R$ (or~$\id(e)$), a label $\lab(v)$ (or~$\lab(e)$), and attributes $v.attr*$ that mirror the attributes $attr*$ of $\tau$ (or~$e.attr*$).
 Relations mapped to vertices and edges in the graph are referred to as vertex relations and edge relations, respectively}.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=.7\linewidth]{./figures/erd.pdf}
-    \caption{An example of ER diagram representing the relationships between vertex relations and edge relations.}
-    \label{fig:er-diagram}
-\end{figure}
-
-For \revise{each edge relation $R_e$, there should be two corresponding vertex relations $R_{p_s}$ and $R_{p_t}$. $R_e$ must have two foreign keys referencing the primary keys of $R_{p_s}$ and $R_{p_t}$, respectively, as shown in \reffig{er-diagram}.
-Note that the cardinality type does not necessarily have to be many-to-many; in fact, it can be of any cardinality type (e.g., one-to-one) ({\color{red} comment(Robin): this Cardinality type is strange}).
-We further define two total functions: $\lambda_{q_i}^s: R_{q_i} \to R_{p_s}$ and $\lambda_{e}^t: R_{q_i} \to R_{p_t}$, which maps a tuple $\tau \in R_{e}$ to a tuple $\tau_s \in R_{p_s}$ and a tuple $\tau_t \in R_{p_t}$, respectively.
-Applying the vertex mapping, $\tau_s$ and $\tau_t$ are transformed into vertices $v_s$ and $v_t$, respectively}.
+\revise{Given an edge relation $R_{e}$ and two vertex relations $R_{p_s}$ and $R_{p_t}$, we further define two total functions: $\lambda_{e}^s: R_{e} \to R_{p_s}$ and $\lambda_{e}^t: R_{e} \to R_{p_t}$, which maps a tuple $\tau \in R_{e}$ to a tuple $\tau_s \in R_{p_s}$ and a tuple $\tau_t \in R_{p_t}$, respectively.
+Applying the vertex mapping, $\tau_s$ and $\tau_t$ are transformed into vertices $v_s$ and $v_t$, respectively.
+Normally, these total functions can generally be established through primary-foreign key relationships.
+For example, an ER diagram is shown in Fig.~\ref{fig:intro-rgmapping-example}(a), and it indicates two total functions w.r.t.~$\relation{\text{Likes}}$, i.e., $\lambda_{\text{Likes}}^s: \relation{\text{Likes}} \to \relation{\text{Person}}$ and $\lambda_{\text{Likes}}^t: \relation{\text{Likes}} \to \relation{\text{Message}}$}.
 
 
 
@@ -109,7 +102,7 @@ The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as
 
 \begin{figure*}
     \centering
-    \includegraphics[width=.95\linewidth]{./figures/rgmapping.pdf}
+    \includegraphics[width=\linewidth]{./figures/rgmapping.pdf}
     \caption{An example of \rgmapping.}
     \label{fig:intro-rgmapping-example}
 \end{figure*}

@@ -320,21 +320,28 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 %\enlargethispage{1em}
 
-\begin{remark}
-    \label{rem:search-space}
-    %It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. 
-    To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $m$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $m$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
-\end{remark}
 
-\subsubsection{Comparison of Optimization Time}
-\revise{To facilitate a more intuitive comparison of the optimization speed between graph-agnostic and graph-aware approaches, we implement the optimizer named \name based on the graph-aware method and select Apache Calcite,, a widely-used optimizer employing graph-agnostic techniques. We then compare their optimization time. This comparison employs two different benchmarks (namely, LDBC-SNB and JOB) and is conducted on two datasets. Detailed descriptions of these benchmarks and datasets will be provided in \refsec{evaluation}. 
-Please note that the codes of \name and Calcite are both written in Java, and VolcanoPlanner of Calcite with default rules is leveraged.
-If optimization for a query is not finished in 10 minutes, the process is early stopped and the time cost of such optimization is recorded as 10 minutes.
-The results are shown in Fig.~\ref{fig:exp-optimization}}.
+\subsubsection{Comparison of Search Space and Optimization Time}
+\revise{We have demonstrated theoretically that the search space of graph-aware optimizations is exponentially smaller than that of graph-agnostic optimizations. To further illustrate this, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
+\revise{Additionally, we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our RelGO, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Using the queries in our experiment (details in \refsec{evaluation}), we demonstrated that RelGO surpasses Calcite by orders of magnitude. Notably, we did not consider any heuristics for either Calcite or RelGO, providing a fair comparison and a clear demonstration of the reduced search space.
+Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. The results, shown in \reffig{exp-optimization}, demonstrate the superiority of \name, which outperforms Calcite exponentially in query optimization speed. For instance, when querying IC[5-1] on LDBC30, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can optimize all queries within 10 minutes, whereas some queries with Calcite exceed the 10-minute limit, highlighting the significance of optimization efficiency.}
 
 \begin{figure}[ht]
     \centering
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \begin{subfigure}[b]{.45\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
+        \end{subfigure}
+        \caption{Search Space Comparison.}
+        \label{fig:exp-search-space}
+    \end{subfigure}
     \begin{subfigure}[b]{0.8\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
@@ -347,11 +354,10 @@ The results are shown in Fig.~\ref{fig:exp-optimization}}.
         \caption{Optimization Time Cost on IMDB.}
         \label{fig:exp-optimization-job}
     \end{subfigure}
-    \caption{Experiments on the time cost of optimization.}
+    \caption{Experiments on the search space and time cost of optimization.}
     \label{fig:exp-optimization}
 \end{figure}
 
-The experimental results demonstrate the superiority of \name, which outperforms Calcite exponentially in query optimization speed. For instance, when querying IC[5-1] on $LDBC30$, the optimization time using \name is more than $10^4$ times faster compared to Calcite. Additionally, \name can optimize all queries within 10 minutes, whereas some queries with Calcite exceed the 10-minute limit, which highlights the significance of optimization efficiency.
 
 
 %To verify the correctness of \refthm{compare-search-space}, we conduct corresponding experiments to test the size of the search space (i.e., the number of all possible physical plans or the number of decomposition trees) and the time required to traverse the entire search space when using the graph-agnostic method and the graph-aware Method.
@@ -378,19 +384,7 @@ The experimental results demonstrate the superiority of \name, which outperforms
 In the graph view, given a vertex $v$, it is efficient to obtain its adjacent edges and vertices (i.e., neighbors). However, in the relational view, such adjacency relationships between vertices and edges are not directly stored in relations but must be computed via the \EVjoin operations (\refeq{ev-join}). While there are multiple ways to construct the graph view in the literature~\cite{gart,GRFusion}, we refer to the method introduced in GrainDB~\cite{graindb}, which is free from materializing the graph. This approach avoids the extra storage cost associated with graph materialization and ensures compatibility with the relational context,
 Specifically, GrainDB introduces an indexing technique called pre-defined join to improve the performance of join operations. As the pre-defined join essentially materializes the adjacency relationships, we treat it as a \emph{graph index} in this work.
 
-\begin{figure}[t]
-    \centering
-    \begin{subfigure}[b]{.45\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space.pdf}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.45\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
-    \end{subfigure}
-    \caption{Search Space Comparison.}
-    \label{fig:exp-search-space}
-\end{figure}
+
 \begin{figure}[t]
     \centering
     \includegraphics[width=.72\linewidth]{./figures/graph-index-likes.pdf}
