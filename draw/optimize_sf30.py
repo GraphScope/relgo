@@ -26,13 +26,13 @@ y_calcite = [902, 2030, 10351, 389, 2600, 17023, 25926, 600000, 600000, 12700, 5
 
 y_ours = [13, 16, 20, 7, 46, 51, 21, 17, 19, 16, 19, 13, 15, 1, 7, 42, 23, 48]
 
-plt.figure(figsize=(10, 4))
+plt.figure(figsize=(15, 4))
 
 plt.plot(xaxis, y_calcite, 's-', color='r', label='Calcite')
 plt.plot(xaxis, y_ours, 'o-', color = 'g', label='RelGo')
 
 
-plt.xticks(xaxis, xlabel, fontsize=26, rotation=-45)
+plt.xticks(xaxis, xlabel, fontsize=32, rotation=-45)
 plt.yticks(fontsize=26)
 
 plt.margins(0.08)

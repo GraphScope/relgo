@@ -83,8 +83,8 @@ plt.bar(
     label="Kùzu",
 )
 
-plt.xticks(xaxis_final, xlabel, fontsize=26)
-plt.yticks(fontsize=26)
+plt.xticks(xaxis_final, xlabel, fontsize=28, rotation=0)
+plt.yticks(fontsize=28)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
 plt.xlabel("Queries of JOB[*]", fontsize=28)
@@ -167,8 +167,8 @@ plt.bar(
     label="Kùzu",
 )
 
-plt.xticks(xaxis_final, xlabel, fontsize=26)
-plt.yticks(fontsize=26)
+plt.xticks(xaxis_final, xlabel, fontsize=28, rotation=0)
+plt.yticks(fontsize=28)
 plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
 plt.xlabel("Queries of JOB[*]", fontsize=28)
