@@ -39,7 +39,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 5))
+plt.figure(figsize=(15, 6))
 
 plt.bar(
     xaxis,
@@ -99,6 +99,7 @@ plt.grid(linestyle="--", axis="y")
 
 plt.xlabel("Queries of IC[*]", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
+plt.ylim(top=100)
 
 plt.tight_layout()
 # plt.show()

@@ -26,7 +26,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 5))
+plt.figure(figsize=(15, 5.5))
 y_ours = y_ours_complete[:17]
 y_kuzu = y_kuzu_complete[:17]
 y_umbra = y_umbra_complete[:17]
@@ -90,6 +90,8 @@ plt.grid(linestyle="--", axis="y")
 plt.xlabel("Queries of JOB[*]", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 
+plt.ylim(top=100)
+
 plt.tight_layout()
 # plt.show()
 plt.savefig("../paper/figures/exp/e2e_job_part1.pdf", bbox_inches="tight")
@@ -110,7 +112,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 5))
+plt.figure(figsize=(15, 5.5))
 y_ours = y_ours_complete[17:]
 y_kuzu = y_kuzu_complete[17:]
 y_umbra = y_umbra_complete[17:]
@@ -173,6 +175,8 @@ plt.yscale("log")
 plt.grid(linestyle="--", axis="y")
 plt.xlabel("Queries of JOB[*]", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
+
+plt.ylim(top=100)
 
 plt.tight_layout()
 # plt.show()
