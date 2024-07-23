@@ -91,8 +91,8 @@ plt.bar(
     label="Kùzu",
 )
 
-plt.xticks(xaxis_final, xlabel, fontsize=26)
-plt.yticks(fontsize=26)
+plt.xticks(xaxis_final, xlabel, fontsize=28, rotation=-60)
+plt.yticks(fontsize=28)
 plt.yscale("log")
 
 plt.grid(linestyle="--", axis="y")

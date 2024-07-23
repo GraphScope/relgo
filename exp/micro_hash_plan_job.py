@@ -23,7 +23,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 4))
+plt.figure(figsize=(15, 5))
 
 
 plt.bar(

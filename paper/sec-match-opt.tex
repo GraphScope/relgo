@@ -302,6 +302,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     The graph-aware transformation yields a search space that is exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
+\iffalse
 \begin{proof}
     % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     %\begin{equation*}
@@ -317,7 +318,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
         Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
 \end{proof}
-
+\fi
 %\enlargethispage{1em}
 
 
@@ -342,13 +343,13 @@ Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calc
         \caption{Search Space Comparison.}
         \label{fig:exp-search-space}
     \end{subfigure}
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
         \caption{Optimization Time Cost on $G_{sf30}$.}
         \label{fig:exp-optimization-sf30}
     \end{subfigure}
-    \begin{subfigure}[b]{0.8\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_job.pdf}
         \caption{Optimization Time Cost on IMDB.}

@@ -91,8 +91,8 @@ plt.bar(
     label="Kùzu",
 )
 
-plt.xticks(xaxis_final, xlabel, fontsize=26)
-plt.yticks(fontsize=26)
+plt.xticks(xaxis_final, xlabel, fontsize=28, rotation=-60)
+plt.yticks(fontsize=28)
 plt.yscale("log")
 
 plt.grid(linestyle="--", axis="y")
@@ -101,7 +101,7 @@ plt.xlabel("Queries of IC[*]", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 
 plt.legend(
-    loc="upper center", fontsize=26, ncol=5, bbox_to_anchor=(0.5, 1.32), columnspacing=2
+    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.32), columnspacing=2
 )
 
 plt.tight_layout()
