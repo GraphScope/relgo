@@ -64,7 +64,7 @@ When a graph index is available, there are three physical implementations of $\g
 \item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
 
-\revise{In the absence of a graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
+\revise{In the absence of graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
 The cost of \hashjoin~ is simply the product of the cardinalities of the two relations being joined}.
 
 %when we are dealing
@@ -84,8 +84,8 @@ The cost of \hashjoin~ is simply the product of the cardinalities of the two rel
 
 
 \subsubsection{The Relational Optimization}
-Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators. 
-\revise{After years of research and exploration, relational optimization has become a mature field, yielding numerous significant results \cite{Chaudhuri98,Haffnerjoinorder}. Since relational optimization is not the focus of this paper and various relational optimizers can be seamlessly plugged into \name for this purpose, we will only discuss how relational and graph optimizers are utilized concurrently within \name}.
+Once the graph optimizer has computed the optimal execution plan for $\matching(\pattern)$, the next step is to integrate this plan with the remaining relational operators in the \spjm query. The relational optimization is responsible for optimizing these remaining operators, which are all relational operators.
+\revise{Relational optimization has evolved into a well-established field, producing numerous significant results \cite{Chaudhuri98, Haffnerjoinorder}. Since existing relational optimization techniques can be seamlessly integrated into \name, we will focus on how graph optimization techniques can be applied to enhance relational queries.}
 %Any existing relational optimizer can be used for this purpose.
 
 %It's important to note that before $\matching(\pattern)$ can be integrated with the remaining relational component of the query, a specialized projection operator $\gproject$ must be applied to the matched results to flatten the graph relation into a relation, making it compatible with the relational operators. To facilitate this integration, we introduce a new physical operator called \scangraphtable, as shown in \reffig{framework-workflow}(c), which encapsulates the $\gproject$ operator and the optimal execution plan for $\matching(\pattern)$.
@@ -95,9 +95,7 @@ The \scangraphtable~ operator acts as a bridge between the graph and relational 
 
 \subsubsection{Heuristic Optimization Rules}
 In real-life use cases, heuristic rules may involve non-trivial interactions between the relational and graph components of an \spjm query. We explore two representative rules, \filterrule~ and \joinfuserule, which can be applied at different stages of the optimization process to improve query performance.
-\revise{Note that \filterrule is a global optimization rule relevant to both graph optimization and relational optimization., while \joinfuserule is a local optimization rule specifically for graph optimization.
-The effectiveness of these two rules is validated in \refsec{experiment-opt}. In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule that avoids the final join for aggregate operations and \subtaskremoverule that converts some where conditions to anti joins and semi joins.
-}
+\revise{Note that \filterrule is a global optimization rule relevant to both graph and relational optimization, as it involves pushing relational filter conditions into the $\matching$ operator as graph operations. In contrast, \joinfuserule is a local optimization rule specifically designed for graph optimization. The effectiveness of these two rules is validated in \refsec{experiment-opt}. Our \name framework is designed to be generic, allowing different optimization rules to be easily integrated. In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule, which avoids the final join for aggregate operations, and \subtaskremoverule, which converts some WHERE conditions to anti-joins and semi-joins} {\color{red} Robin: an extra rule can be explained with sufficient details}.
 
 
 \stitle{\filterrule.} To elaborate the rule, we extend the definition of a pattern $(\pattern, \constraints)$, introducing constraints within $\constraints$. For example, constraints can specify predicate $d$ such as $\id(v_1) = p_1$ for a vertex $v_1$, or $e_1.date > \text{"2024-03-31"}$ for an edge $e_1$. With the constraints defined, any matching result of $\pattern$ must have the corresponding vertices and edges adhering to the predicates.

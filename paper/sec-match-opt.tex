@@ -323,10 +323,12 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 
 \subsubsection{Comparison of Search Space and Optimization Time}
-\revise{We have demonstrated theoretically that the search space of graph-aware optimizations is exponentially smaller than that of graph-agnostic optimizations. To further illustrate this, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
+\revise{We have demonstrated theoretically that the search space of graph-aware transformation is exponentially smaller than that of graph-agnostic. To further illustrate this, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
-\revise{Additionally, we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our RelGO, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Using the queries in our experiment (details in \refsec{evaluation}), we demonstrated that RelGO surpasses Calcite by orders of magnitude. Notably, we did not consider any heuristics for either Calcite or RelGO, providing a fair comparison and a clear demonstration of the reduced search space.
-Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. The results, shown in \reffig{exp-optimization}, demonstrate the superiority of \name, which outperforms Calcite exponentially in query optimization speed. For instance, when querying IC[5-1] on LDBC30, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can optimize all queries within 10 minutes, whereas some queries with Calcite exceed the 10-minute limit, highlighting the significance of optimization efficiency.}
+
+\revise{Additionally, we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
+The optimization time was evaluated using the queries in our experiment (details in \refsec{evaluation}).
+If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. The results, shown in \reffig{exp-optimization-sf30} and \reffig{exp-optimization-job}, demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying IC[5-1], the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can complete optimizing almost all queries within 10-100 milliseconds, with a maximum time cost of 210 milliseconds, while Calcite often exceeds the 10-minute limit, especially for JOB queries.}
 
 \begin{figure}[ht]
     \centering
@@ -346,13 +348,13 @@ Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calc
     \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
-        \caption{Optimization Time Cost on $G_{sf30}$.}
+        \caption{Optimization Time Cost on LDBC Queries.}
         \label{fig:exp-optimization-sf30}
     \end{subfigure}
     \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_job.pdf}
-        \caption{Optimization Time Cost on IMDB.}
+        \caption{Optimization Time Cost on JOB Queries.}
         \label{fig:exp-optimization-job}
     \end{subfigure}
     \caption{Experiments on the search space and time cost of optimization.}
@@ -454,7 +456,7 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
 When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join.
-\revise{Unlike HUGE \cite{huge}, \expandintersect~ is implemented on a relational database}.
+\revise{Unlike HUGE~\cite{huge}, which has a graph storage that naturally supports \expandintersect, we have implemented this operator directly on a relational database}.
 Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
