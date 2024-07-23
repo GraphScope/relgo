@@ -126,37 +126,36 @@ Dear Reviewers and Meta Reviewer,
 %	LETTER CONTENT
 %----------------------------------------------------------------------------------------
 
-We have modified our submission ``Towards a Converged Relational-Graph Optimization Framework'' according to the comments and advice from reviewers and the meta reviewer.
+Firstly, we would like to thank the reviewers and the meta reviewer for their insight and valuable comments which enable us to greatly improve the quality of our manuscript. We have carefully taken your comments into consideration in preparing this revision.
+Below we summarize the major changes in each section in this revision.
 
-We summarize the major modifications in this revision version as follows:
 
-
-In Section 1, we mainly make the following modifications:
+In Section 1, we have mainly made the following modifications:
 \begin{enumerate}
-	\item We have make the query example on Page 1 (in the original manuscript) a figure float. (R3-M1)
+	\item We have made the query example on Page 1 (in the original manuscript) a figure float. (R3-M1)
 	\item We have removed \rgmapping from the contributions of this paper. (R2-i.6, R3-O1.1)
 \end{enumerate}
 
-In Section 2, we make the modifications as follows:
+In Section 2, we have mainly made the following modifications:
 \begin{enumerate}
 	\item We move Table 1 earlier to make the notations in this section easier to understand. (R3-M1)
 	\item We have simplified the contents about the definition of \rgmapping. (R2-i.6, R3-O1.1, R3-M1, R3-C1, M-C7)
-	\item We add a new figure, i.e., Figure 2 in this revision, to illustrate the relationships between vertex relations and edge relations in E-R terms. (R3-O1.1)
-	\item We have enlarged the font sizes in Figure 3 (Figure 1 in the original manuscript) from 28pt to 32pt. (R1-D1)
+	\item We have added an ER diagram for the Person, Knows, Likes, and Message tables to Figure 2 (Figure 1 in the original paper), and have included corresponding descriptions in the main text to explain the relationships between vertex relations and edge relations in E-R terms. (R3-O1.1)
+	\item We have enlarged the font sizes in Figure 2 (Figure 1 in the original manuscript) from 28pt to 32pt. (R1-D1)
 \end{enumerate}
 
 In Section 3, we have mainly made the following modifications:
 \begin{enumerate}
-	\item We have enlarged the font sizes in Figure 4 (Figure 2 in the original manuscript) from 24pt to 28pt. (R1-D1)
-	\item We add more contents in Figure to show what is given up when using the tree decomposition approach in \name. (R2-ii.1, M-C4)
+	\item We have enlarged the font sizes in Figure 3 (Figure 2 in the original manuscript) from 24pt to 28pt. (R1-D1)
+	\item We add more contents in Figure 3 to show what is given up when using the tree decomposition approach in \name. (R2-ii.1, M-C4)
 	\item We add several sentences to discuss the differences between tree decomposition applied in this paper and the techniques used by EmptyHeaded and CLFTJ. (R2-i.1, M-C2)
-	\item We add a new subsection (i.e., Section 3.1.4) to compare the optimization of \name and Calcite and add a new figure, i.e.~Figure 5, to show the experimental results. (R2-S1, R2-ii.1, M-C6)
+	\item We add a new subsection (i.e., Section 3.1.4) to compare the optimization of \name and Calcite and add two new figures, i.e.~Figure 4(b) and Figure 4(c), to show the experimental results. (R2-S1, R2-ii.1, M-C6)
 	\item We add a sentence to emphasize that the intersection evaluation using worst-case optimal join is implementaed on relational tables. (R2-i.5)
 \end{enumerate}
 
 In Section 4, we have made the following modifications:
 \begin{enumerate}
-	\item We have enlarged the font sizes in Figure 8 (Figure 5 in the original manuscript) from 28pt to 32pt. (R1-D1)
+	\item We have enlarged the font sizes in Figure 6 (Figure 5 in the original manuscript) from 28pt to 32pt. (R1-D1)
 	\item We add a new paragraph to explain why HASH\_JOIN is used for the entire plan in the absence of a graph index. (R3-O2.5)
 	\item We explain why we limit the extensive depth, methods, and literature on relational query optimization. (R3-O4.1, R3-C3)
 	\item We add several sentences to explain that \filterrule is a global optimization while \fusionrule is a local optimization rule. Besides, we briefly describe two more optimization rules we applied in \name. (R2-i.3)
@@ -170,11 +169,11 @@ In Section 5, we have made the following modifications:
 	\item We have add some explanations about the procedures for data loading and graph index construction in thie revision. (R3-O2.2)
 	\item We add the description about the versions of DuckDB used in the experiments. (R2-iii.2)
 	\item We have fixed the typo in this revision and modified the size of the RAM to 256GB.
-	\item We enlarge the font sizes in Figures 9--13 (Figures 6--10 in the original manuscript) from 20/22pt to 26/28pt. (R1-D1)
-	\item We have redrawn Figure 13 (Figure 10 in the original manuscript), normalized all runtimes to that of DuckDb, and plot speedups achieved by \name and the baselines. (R1-M2)
+	\item We enlarge the font sizes in Figures 7--11 (Figures 6--10 in the original manuscript) from 20/22pt to 26/28pt. (R1-D1)
+	\item We have redrawn Figure 11 (Figure 10 in the original manuscript), normalized all runtimes to that of DuckDb, and plot speedups achieved by \name and the baselines. (R1-M2)
 	\item We add two paragraphs to discuss how to extend \name to deal with queries wihout explicit PGQ component. Besides, we explain about the potential tradeoffs between global and local optimizations (R2-i.3, M-C6, R3-O3.1, R3-C3)
-	\item We add a new section, i.e., Section 5.4 (Case Study), and a new figure (i.e., Figure 15) to demonstrate why plans generated by \name are better than those generated by the baselines. (R1-O2, M-C4)
-	\item We provide the query statement for a representative SQL/PGQ query (i.e. JOB[17]) in Figure 14 in Section 5.4. (R3-O2.1, M-C4)
+	\item We add a new section, i.e., Section 5.4 (Case Study), and a new figure (i.e., Figure 13) to demonstrate why plans generated by \name are better than those generated by the baselines. (R1-O2, M-C4)
+	\item We provide the query statement for a representative SQL/PGQ query (i.e. JOB[17]) in Figure 12 in Section 5.4. (R3-O2.1, M-C4)
 \end{enumerate}
 
 In Section 6, we have made the following modifications:
