@@ -147,7 +147,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{./figures/decomposition-example.pdf}
-    \caption{Example of decomposition trees and the corresponding logical plans. \revise{Note that sub-pattern $u_{p_1}\rightarrow u_m \leftarrow u_{p_2}$ can serve as a leaf node, but it cannot be an intermediate node}.}
+    \caption{Example of decomposition trees and the corresponding logical plans. \revise{Note that sub-pattern $\pattern_2$ can be a leaf node, but it cannot be an intermediate node}.}
     \label{fig:match-decomposition}
 \end{figure}
 
@@ -178,7 +178,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
-After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed. 
+After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed.
 In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach is exponentially more efficient in this regard.
 %In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{Haffnerjoinorder,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
@@ -307,9 +307,9 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     %\begin{equation*}
     %    $\frac{\Omega(4^{m+n-1})}{O(4^{n-1})} $ $= \Omega(4^m)$.
     %\end{equation*}
-    
-        Let $\matching(\pattern)$ be a matching operator, where $\pattern$ has $n$ vertices and $m$ edges. According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among the $n$ vertex relations and $m$ edge relations. The search space of the graph-agnostic method is then equivalent to the number of possible join orders for this sequence of joins, with each join order corresponding to a logical plan. We denote the set of possible logical plans for the graph-agnostic method by $\mathbb{PL}_r$. 
-    
+
+        Let $\matching(\pattern)$ be a matching operator, where $\pattern$ has $n$ vertices and $m$ edges. According to \reflem{spjm-to-spj}, the graph-agnostic method must produce a sequence of joins among the $n$ vertex relations and $m$ edge relations. The search space of the graph-agnostic method is then equivalent to the number of possible join orders for this sequence of joins, with each join order corresponding to a logical plan. We denote the set of possible logical plans for the graph-agnostic method by $\mathbb{PL}_r$.
+
         On the other hand, the graph-aware approach decomposes $\pattern$, and its search space is equal to the number of possible decomposition trees. Consider the \mmcs in a decomposition tree. We know that an \mmc must be either a single-vertex pattern $\pattern_u$ or a complete star $\pattern(u'; V_s)$. We transform the decomposition tree as follows: we replace each \mmc with a vertex relation, such that $\pattern_u$ becomes $\relation{\lab(u)}$ and $\pattern(u'; V_s)$ becomes $\relation{\lab(u')}$. We ignore the intermediate patterns in this transformation. The resulting set of transformed decomposition trees is denoted by $\mathbb{PL}_g$. Note that after this transformation, the size of $|\mathbb{PL}_g|$ is equivalent to the search space of the graph-aware approach.
 
 
@@ -322,12 +322,12 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 \begin{remark}
     \label{rem:search-space}
-    %It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary. 
+    %It is worth noting that the search space after applying the graph-aware transformation, as given in \reflem{complexity-of-graph-aware}, does not depend on $m$, the number of edges in the pattern. This is mainly due to the constraints imposed on the decomposition tree, which require each intermediate pattern to be an induced sub-pattern. Consequently, given any subset of vertices, enumerating edges among these vertices is not necessary.
     To further verify the findings in \refthm{compare-search-space}, we conducted a micro-benchmark experiment using a path graph with $m$ edges. We programmed an enumerator to explore the search space of both the graph-agnostic and graph-aware approaches while varying $m$. The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches.
 \end{remark}
 
 \subsubsection{Comparison of Optimization Time}
-\revise{To facilitate a more intuitive comparison of the optimization speed between graph-agnostic and graph-aware approaches, we implement the optimizer named \name based on the graph-aware method and select Apache Calcite,, a widely-used optimizer employing graph-agnostic techniques. We then compare their optimization time. This comparison employs two different benchmarks (namely, LDBC-SNB and JOB) and is conducted on two datasets. Detailed descriptions of these benchmarks and datasets will be provided in \refsec{evaluation}. 
+\revise{To facilitate a more intuitive comparison of the optimization speed between graph-agnostic and graph-aware approaches, we implement the optimizer named \name based on the graph-aware method and select Apache Calcite,, a widely-used optimizer employing graph-agnostic techniques. We then compare their optimization time. This comparison employs two different benchmarks (namely, LDBC-SNB and JOB) and is conducted on two datasets. Detailed descriptions of these benchmarks and datasets will be provided in \refsec{evaluation}.
 Please note that the codes of \name and Calcite are both written in Java, and VolcanoPlanner of Calcite with default rules is leveraged.
 If optimization for a query is not finished in 10 minutes, the process is early stopped and the time cost of such optimization is recorded as 10 minutes.
 The results are shown in Fig.~\ref{fig:exp-optimization}}.
@@ -458,7 +458,7 @@ In real-life scenarios, a vertex may be adjacent to multiple types of edges. For
 
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 
-When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join. 
+When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join.
 \revise{Unlike HUGE \cite{huge}, \expandintersect~ is implemented on a relational database}.
 Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
