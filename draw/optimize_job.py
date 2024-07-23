@@ -34,8 +34,10 @@ plt.ylabel("Opt. Time (ms)", fontsize=26)
 
 plt.yscale('log')
 
-plt.legend(loc="lower right", fontsize=18)
+plt.legend(loc="lower right", fontsize=18, ncol=2, columnspacing=1)
 plt.tight_layout()
 # plt.show()
+
+plt.ylim(bottom=0.05)
 
 plt.savefig('../paper/figures/exp/optimization_job.pdf', bbox_inches='tight')
