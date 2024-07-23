@@ -146,7 +146,7 @@ For the relational-graph interplay optimizations, we incorporate heuristic rules
 For more nuanced optimization, we rely on the VolcanoPlanner, the cost-based planner in Calcite, to optimize the \lstinline{ScanGraphTableRelNode}.
 We devised a top-down search algorithm that assesses the most efficient physical plan based on a cost model outlined in \refsec{graph-optimizer}, combined with high-order statistics from \glogue for more accurate cost estimation.
 \revise{
-    While low-order statistics primarily focus on the cardinalities of relational tables representing vertices and edges, high-order statistics also include the frequencies of sub-patterns with at least three vertices, which aids in more accurate cost estimation. It is important to note that \name remains functional with only low-order statistics, but the efficiency of the generated plan may decrease due to less accurate cost estimation.
+    While low-order statistics primarily focus on the cardinalities of relational tables, high-order statistics also include the frequencies of sub-patterns (can be seen as the joined results of multiple tables of vertices and edges), which aids in more accurate cost estimation. It is important to note that \name remains functional with only low-order statistics, but the efficiency of the generated plan may decrease due to less accurate cost estimation.
 }
 
 For the remaining relational operators in the query, we leverage Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques.
