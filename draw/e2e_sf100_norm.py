@@ -26,24 +26,24 @@ xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
 data_per_row = 18
 
-with open('e2e_sf100.txt', 'r') as f:
+with open("e2e_sf100.txt", "r") as f:
     lines = f.readlines()
-    y_duckdb = [float(x) for x in lines[0].split(',')]
-    y_graindb = [float(x) for x in lines[1].split(',')]
-    y_umbra = [float(x) for x in lines[2].split(',')]
-    y_kuzu = [float(x) for x in lines[3].split(',')]
-    y_ours = [float(x) for x in lines[4].split(',')]
+    y_duckdb = [float(x) for x in lines[0].split(",")]
+    y_graindb = [float(x) for x in lines[1].split(",")]
+    y_umbra = [float(x) for x in lines[2].split(",")]
+    y_kuzu = [float(x) for x in lines[3].split(",")]
+    y_ours = [float(x) for x in lines[4].split(",")]
 
 total_width, n = 0.7, 5
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 6))
+plt.figure(figsize=(15, 6.5))
 
 plt.bar(
     xaxis,
-    [b/a for a, b in zip(y_ours, y_duckdb)],
+    [b / a for a, b in zip(y_ours, y_duckdb)],
     color="lightgreen",
     edgecolor="k",
     width=width,
@@ -53,7 +53,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width,
-    [b/a for a, b in zip(y_umbra, y_duckdb)],
+    [b / a for a, b in zip(y_umbra, y_duckdb)],
     color="black",
     edgecolor="k",
     width=width,
@@ -63,7 +63,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 2,
-    [b/a for a, b in zip(y_graindb, y_duckdb)],
+    [b / a for a, b in zip(y_graindb, y_duckdb)],
     color="salmon",
     edgecolor="k",
     width=width,
@@ -73,7 +73,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 3,
-    [b/a for a, b in zip(y_duckdb, y_duckdb)],
+    [b / a for a, b in zip(y_duckdb, y_duckdb)],
     color="lightskyblue",
     edgecolor="k",
     width=width,
@@ -83,7 +83,7 @@ plt.bar(
 
 plt.bar(
     xaxis + width * 4,
-    [b/a if a != 0 else 0 for a, b in zip(y_kuzu, y_duckdb)],
+    [b / a if a != 0 else 0 for a, b in zip(y_kuzu, y_duckdb)],
     color="gold",
     edgecolor="k",
     width=width,
@@ -100,6 +100,10 @@ plt.grid(linestyle="--", axis="y")
 plt.xlabel(r"Queries of IC$_*$", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 plt.ylim(top=100)
+
+plt.legend(
+    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.2), columnspacing=1
+)
 
 plt.tight_layout()
 # plt.show()
