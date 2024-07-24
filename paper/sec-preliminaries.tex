@@ -97,7 +97,7 @@ The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\linewidth]{./figures/rgmapping.pdf}
+    \includegraphics[width=0.95\linewidth]{./figures/rgmapping.pdf}
     \caption{An example of \rgmapping.}
     \label{fig:intro-rgmapping-example}
 \end{figure*}
@@ -137,15 +137,16 @@ CREATE PROPERTY GRAPH G1
     \end{lstlisting}
     \fi
     The described \rgmapping involves assigning tuples from vertex relations, such as $\relation{Person}$ and $\relation{Message}$, to graph vertices. For instance, the vertex $v_{p_1}$ is associated with the tuple $\tau_{p_1}$ in $\relation{Person}$, and thus assigned the label ``Person'' and the name attribute ``Tom''. Similarly, edge relations $\relation{Likes}$ and $\relation{Knows}$ correspond to graph edges.
-    \revise{The ER diagram of the relations are also shown in Fig.~\ref{fig:intro-rgmapping-example}(a). Regarding $\relation{Likes}$
+    \revise{The ER diagram of the relations are shown in Fig.~\ref{fig:intro-rgmapping-example}(a). Regarding $\relation{Likes}$
     that is mapped to graph edges, two total functions can be identified using the primary-foreign key relationships, namely, $\lambda_{\text{Likes}}^s: \relation{\text{Likes}} \to \relation{\text{Person}}$ and $\lambda_{\text{Likes}}^t: \relation{\text{Likes}} \to \relation{\text{Message}}$.}
-    Let's consider the edge $e_{l_1}$. This edge originates from the tuple $\tau_{l_1}$ in the $\relation{Likes}$ relation. The source vertex $v_{p_1}$ of $e_{l_1}$ is linked to the tuple $\tau_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the condition ``$\tau_{l_1}.pid = \tau_{p_1}.\text{person\_id}$''. Similarly, the target vertex $v_{m_1}$ is associated with the tuple $\tau_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following the condition ``$\tau_{l_1}.mid = \tau_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
+    Let's consider the edge $e_{l_1}$. It originates from the tuple $\tau_{l_1}$ in the $\relation{Likes}$ relation. Its source vertex $v_{p_1}$ is linked to the tuple $\tau_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the condition ``$\tau_{l_1}.pid = \tau_{p_1}.\text{person\_id}$''. Similarly, its target vertex $v_{m_1}$ is associated with the tuple $\tau_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following the condition ``$\tau_{l_1}.mid = \tau_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
 \end{example}
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
 
 %\enlargethispage{1em}
 
+\vspace*{-3mm}
 \subsection{Matching Operator}
 \label{sec:matching-operator}
 Consider a property graph \(G(V_G, E_G)\), alongside a \emph{connected} pattern graph, represented as \(\pattern(V_\pattern, E_\pattern)\). Here, \(\pattern\) is a property graph that does not possess attributes, and
@@ -171,7 +172,7 @@ It is essential to recognize that any property graph \(G\) can be conceptualized
 \begin{example}
     \label{ex:matching}
     Let \(G\) denote the property graph derived from the relations via \rgmapping in \refex{rgmapping}.
-    Given a pattern graph \(\pattern\) shown in \reffig{intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G\) that are homomorphic to \(\pattern\), which are represented as a graph relation \(GR^\pattern = \matching(GR^{G}, \pattern)\), wherein each tuple corresponds to one of the matched subgraph.
+    Given a pattern graph \(\pattern\) in \reffig{intro-rgmapping-example}(b), the results of graph pattern matching are subgraphs of \(G\) that are homomorphic to \(\pattern\), represented as a graph relation \(GR^\pattern = \matching(GR^{G}, \pattern)\), each tuple corresponds to one matched subgraph.
 \end{example}
 
 This definition ensures that the matching operator is inherently closed regarding graph relations,
@@ -180,6 +181,7 @@ In this paper, we only handle cases where $G$ represents the entire property gra
 
 %\enlargethispage{1em}
 
+\vspace*{-1mm}
 \subsection{Problem Definition}
 \label{sec:problem-definition}
 
