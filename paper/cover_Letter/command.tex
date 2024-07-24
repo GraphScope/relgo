@@ -1,0 +1,136 @@
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+  \rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+\newcommand{\kw}[1]{{\ensuremath {\mathsf{#1}}}\xspace}
+\newcommand{\kws}[1]{\textsf{\scriptsize{#1}}\xspace}
+\newcommand{\bkw}[1]{{\ensuremath {\mathsf{\textbf{#1}}}}\xspace}
+
+\newcommand{\kwnospace}[1]{{\ensuremath {\mathsf{#1}}}}
+
+%=============defined for notations======
+\newcommand{\name}{\kw{RelGo}}
+\newcommand{\hyname}{\kw{RelGoHy}}
+\newcommand{\relgohash}{\kw{RelGoHash}}
+\newcommand{\relgomj}{\kw{RelGoNoEI}}
+\newcommand{\relgonofi}{\kw{RelGoNoRule}}
+
+\newcommand{\attr}{\kw{attr}}
+\newcommand{\sch}{\kw{sch}}
+\newcommand{\Dom}{\kw{Dom}}
+\newcommand{\meta}{\kw{meta}}
+\newcommand{\vars}{\kw{vars}}
+\newcommand{\vlabel}{\mathcal{L}}
+\newcommand{\elabel}{\mathcal{T}}
+\newcommand{\lab}{\mathcal{\ell}}
+\newcommand{\type}{\kw{Type}}
+\newcommand{\labx}{\kwnospace{label}}
+\newcommand{\id}{\kw{id}}
+\newcommand{\idx}{\kwnospace{id}}
+\newcommand{\shortest}{\kw{min}}
+\newcommand{\simple}{\kw{simple}}
+\newcommand{\pred}{\kw{pred}}
+\newcommand{\vpred}{\kw{vpred}}
+\newcommand{\epred}{\kw{epred}}
+\newcommand{\getV}{\kw{getV}}
+\newcommand{\getE}{\kw{getE}}
+\newcommand{\short}{\kw{short}}
+\newcommand{\In}{\downarrow}
+\newcommand{\Out}{\uparrow}
+\newcommand{\Both}{\updownarrow}
+\newcommand{\InE}{\swarrow}
+\newcommand{\OutE}{\nearrow}
+\newcommand{\BothE}{\neswarrow}
+\newcommand{\NotIn}{\bar{\In}}
+\newcommand{\NotOut}{\bar{\Out}}
+\newcommand{\NotBoth}{\bar{\Both}}
+\newcommand{\vecExpandIn}{\vec{\In}}
+\newcommand{\vecExpandOut}{\vec{\Out}}
+\newcommand{\vecExpandBoth}{\vec{\Both}}
+\newcommand{\glogue}{\kw{GLogue}}
+\newcommand{\glogs}{\kw{GLogS}}
+\newcommand{\allDistinct}{\not\equiv}
+\newcommand{\params}{\kw{params}}
+\newcommand{\code}{\texttt}
+\newcommand{\apply}{\mathcal{A}}
+\newcommand{\segapply}{\mathcal{SA}}
+
+% enclose given text with a single quote in the math mode
+\newcommand{\sq}[1]{`#1\mrq}
+\newcommand{\either}{\kw{Either}}
+\newcommand{\todo}[1]{\textcolor{red}{$\Rightarrow$#1}}
+\newcommand{\modify}[1]{\textcolor{black}{#1}}
+
+% physical operators
+\newcommand{\kk}[1]{\texttt{#1}}
+\newcommand{\scan}{{\kk{SCAN}}}
+\newcommand{\expandedge}{{\kk{EXPAND}\_\kk{EDGE}}}
+\newcommand{\getvertex}{{\kk{GET}\_\kk{VERTEX}}}
+\newcommand{\expandvertex}{{\kk{EXPAND}}}
+\newcommand{\expand}{{\kk{EXPAND}}}
+\newcommand{\expandx}[2]{\kk{EXPAND}(\kk{#1}, \kk{#2})}
+\newcommand{\expandintersect}{\kk{EXPAND}\_\kk{INTERSECT}}
+\newcommand{\expandintersectx}[2]{\kk{EXPAND}\_\kk{INTERSECT}(\kk{#1}, \kk{#2})}
+\newcommand{\intersect}{\kk{INTERSECT}}
+\newcommand{\project}{\kk{PROJECT}}
+\newcommand{\select}{\kk{SELECT}}
+\newcommand{\scangraphtable}{{\kk{SCAN}\_\kk{GRAPH}\_\kk{TABLE}}}
+\newcommand{\hashjoin}{{\kk{HASH}\_\kk{JOIN}}}
+
+
+
+\newcommand{\filterrule}{\kw{FilterIntoMatchRule}}
+\newcommand{\fusionrule}{\kw{ExpandGetVFusionRule}}
+\newcommand{\degreerule}{\kw{DegreeFusionRule}}
+\newcommand{\subtaskremoverule}{\kw{SubTaskRemoveRule}}
+\newcommand{\trimrule}{\kw{FieldTrimRule}}
+\newcommand{\intersectrule}{\kw{SetPullUpRule}}
+\newcommand{\expandintersectrule}{\kw{ExtendIntersectRule}}
+\newcommand{\joinfuserule}{\kw{TrimAndFuseRule}}
+
+\newcommand{\rgmapping}{\kw{RGMapping}}
+\newcommand{\pattern}{\mathcal{P}}
+\newcommand{\matching}{\mathcal{M}}
+\newcommand{\cost}{\kw{Cost}}
+\newcommand{\searchgraph}{\mathbb{G}}
+\newcommand{\decompnum}{\mathcal{H}}
+\newcommand{\decompnumsq}[1]{\mathcal{H}^{#1}}
+\newcommand{\spj}{\kw{SPJ}}
+\newcommand{\spjm}{\kw{SPJM}}
+\newcommand{\mmc}{\kw{MMC}}
+\newcommand{\mmcs}{\kw{MMCs}}
+\newcommand{\EVjoin}{\kw{EVJoin}}
+\newcommand{\adj}{{\ensuremath \mathcal{N}}}
+\newcommand{\relation}[1]{{\ensuremath R_{#1}}}
+\newcommand{\relationx}[2]{{\ensuremath R^{#1}_{#2}}}
+\newcommand{\grelation}[1]{{\ensuremath R^g_{#1}}}
+\newcommand{\gproject}{\ensuremath \widehat{\pi}_{A*}}
+\newcommand{\gjoin}{\ensuremath \widehat{\Join}}
+\newcommand{\evjoin}{\ensuremath \Join_{\epsilon\nu}}
+\newcommand{\rowid}{\kw{rid}}
+\newcommand{\constraints}{\ensuremath \Psi}
+
+
+\newcommand{\ot}{\kw{OT}}
+
+\long\def\comment#1{}
+
+\newcommand{\stitle}[1]{\noindent{\underline{ #1}}}
+
+% =============defined for reference======
+\newcommand{\reffig}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\refsec}[1]{Sec.~\ref{sec:#1}}
+\newcommand{\reftable}[1]{Table~\ref{tab:#1}}
+\newcommand{\refalg}[1]{Alg.~\ref{alg:#1}}
+\newcommand{\refeq}[1]{Eq.~\ref{eq:#1}}
+\newcommand{\refdef}[1]{Def.~\ref{def:#1}}
+\newcommand{\refthm}[1]{Theorem~\ref{thm:#1}}
+\newcommand{\reflem}[1]{Lemma~\ref{lem:#1}}
+\newcommand{\refrem}[1]{Remark~\ref{rem:#1}}
+\newcommand{\refcoro}[1]{Corollary~\ref{coro:#1}}
+\newcommand{\refex}[1]{Example~\ref{ex:#1}}
+\newcommand{\refppt}[1]{Property~\ref{ppt:#1}}
+\newcommand{\revisewy}[1]{\textcolor{black}{#1}}

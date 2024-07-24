@@ -1,0 +1,301 @@
+%%
+%% This is file `sample-sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,proceedings,bibtex,sigconf')
+%%
+%% IMPORTANT NOTICE:
+%%
+%% For the copyright see the source file.
+%%
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf.tex.
+%%
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%%
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf,nonacm]{acmart}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pifont}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{enumitem}
+\settopmatter{printacmref=false}
+\setcopyright{none}
+
+\setlist[itemize]{leftmargin=0.5cm}
+\setlist[enumerate]{leftmargin=0.5cm}
+
+\definecolor{eclipseBlue}{RGB}{42,0.0,255}
+\definecolor{eclipseGreen}{RGB}{63,127,95}
+\definecolor{eclipsePurple}{RGB}{127,0,85}
+
+\newcommand{\revise}[1]{\noindent\textcolor{blue}{#1}}
+
+\lstdefinelanguage{pgq}
+{
+  % list of keywords
+  morekeywords={
+    NODE,
+    EDGE,
+    TYPE,
+    IMPORTS,
+    OPTIONAL,
+    STRICT,
+    LOOSE,
+    OPEN,
+    CLOSED,
+    ABSTRACT,
+    CREATE,
+    GRAPH,
+    FOR,
+    WITHIN,
+    MATCH,
+    WHERE,
+    NOT,
+    OR,
+    AND,
+    EXISTS,
+    RETURN,
+    IN,
+    IS,
+    NULL,
+    ORDER,
+    BY,
+    INSERT,
+    SET,
+    REMOVE,
+    DROP,
+    DELETE,
+    FINISH,
+    COLUMNS,
+    GRAPH_TABLE,
+    SELECT,
+    DETACH,
+    STRING,
+    VARCHAR,
+    BOOLEAN,
+    BOOL,
+    SIGNED,
+    INTEGER,
+    INT,
+    FLOAT,
+    GRAPH,
+    TYPE,
+    ALTER,
+    ROLLBACK,
+    COMMIT,
+    TRANSACTION,
+    START,
+    SESSION,
+    USE,
+    GROUP,
+    VALUE,
+    COUNT,
+    CALL,
+    ANY,
+    IMPLIES,
+    SCHEMA,
+    AT,
+    AS,
+    FROM,
+    GRAPH\_TABLE,
+    INTERSECT,
+    \$,
+    KEY,
+    TABLES,
+    TABLE,
+    SOURCE,
+    DESTINATION,
+    REFERENCE,
+    PROPERTY,
+    PROPERTIES,
+    VERTEX,
+    JOIN,
+    ON
+  },
+  sensitive=false, % keywords are not case-sensitive
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+\lstset{
+  language={pgq},
+  basicstyle=\lst@ifdisplaystyle\fontsize{8}{10.2}\fi\ttfamily, % Global Code Style
+  extendedchars=true, % Allows 256 instead of 128 ASCII characters
+  tabsize=2, % number of spaces indented when discovering a tab
+  columns=fullflexible, % fixed to make all characters equal width (but adds too much whitespace!)
+%  keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
+  showstringspaces=false, % lets spaces in strings appear as real spaces
+%  breaklines=true, % wrap lines if they don't fit
+%  numbers=left, % show line numbers at the left
+%  numberstyle=\tiny\ttfamily, % style of the line numbers
+  commentstyle=\color{eclipseGreen}, % style of comments
+  keywordstyle=\color{eclipsePurple}, % style of keywords
+  stringstyle=\color{eclipseBlue}, % style of strings
+  escapeinside={(*}{*)}, % escape symbols
+  aboveskip=5pt,
+  belowskip=2pt,
+  morestring=[b]',
+  morestring=[b]",
+  frame=tb
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+%% The following content must be adapted for the final version
+% paper-specific
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+\setlength{\textfloatsep}{5pt plus 1.0pt minus 2.0pt}
+\setlength{\intextsep}{5pt plus 1.0pt minus 2.0pt}
+\setlength{\dbltextfloatsep}{5pt plus 1.0pt minus 2.0pt}
+\setlength{\abovecaptionskip}{0.1cm}
+%\setlength{\intextsep}{10pt plus 1.0pt minus 2.0pt}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+%\setcopyright{acmlicensed}
+
+%\acmDOI{XXXXXXX.XXXXXXX}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+%\acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%  conference title from your rights confirmation emai}{June 03--05,
+%  2018}{Woodstock, NY}
+%%
+%%  Uncomment \acmBooktitle if the title of the proceedings is different
+%%  from ``Proceedings of ...''!
+%%
+%%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%%  June 03--05, 2018, Woodstock, NY}
+%\acmISBN{978-1-4503-XXXX-X/18/06}
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+
+%%
+%% end of the preamble, start of the body of the document source.
+
+\input{../command}
+\setcopyright{none}
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\pagestyle{plain}
+
+
+\begin{document}
+\title{Cover Letter of the Revised Paper \\ ``Towards a Converged Relational-Graph Optimization Framework''}
+
+\author{Anonymous Authors}
+%%
+%% The "author" command and its associated commands are used to define the authors and their affiliations.
+%\author{Ben Trovato}
+%\affiliation{%
+%  \institution{Institute for Clarity in Documentation}
+%  \streetaddress{P.O. Box 1212}
+%  \city{Dublin}
+%  \state{Ireland}
+%  \postcode{43017-6221}
+%}
+%\email{trovato@corporation.com}
+
+
+\settopmatter{printacmref=false}
+
+
+\keywords{}
+
+\maketitle
+
+\input{cover_letter}
+
+
+\end{document}
+\endinput

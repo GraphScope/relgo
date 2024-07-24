@@ -62,7 +62,7 @@ We have made the following contributions in this paper:
 %\item We introduce the concept of \rgmapping (\emph{Relational-to-Graph Mapping}), which serves as the foundation for mapping relational data models to property graph models as specified by SQL/PGQ. Based on this concept, we define a new query skeleton called \spjm to better analyze the relational-graph hybrid queries. \hfill(\refsec{preliminaries})
 
 \item We construct the theory for transforming any \spjm query into an \spj query. Such a graph-agnostic approach enables existing relational databases to handle \spjm queries without low-level modifications. We also formally prove that the search space
-of the graph-agnostic approach is exponentially larger than our solution. \hfill(\refsec{optimizing-matching-operator})
+of the graph-agnostic approach can be exponentially larger than our solution. \hfill(\refsec{optimizing-matching-operator})
 
 \item We introduce \name, a converged optimization framework that leverages the strengths of both relational and graph query optimization techniques to optimize \spjm queries. \name adapts state-of-the-art graph optimization techniques to the relational context, and implements graph-based physical operations based on graph index for efficient query execution. \hfill(\refsec{optimizations})
 

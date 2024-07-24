@@ -182,7 +182,7 @@ Besides, a matching operator located on the left subtree of the join operator is
 \subsubsection{The Search Space: Graph-agnostic vs Graph-aware}
 \label{sec:compare-search-space}
 After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed.
-In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach is exponentially more efficient in this regard.
+In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach can be exponentially more efficient in this regard.
 %In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
 %Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{Haffnerjoinorder,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
 
@@ -302,7 +302,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 \begin{theorem}
     \label{thm:compare-search-space}
-    The graph-aware transformation yields a search space that is exponentially smaller than that of the graph-agnostic transformation,
+    The graph-aware transformation yields a search space that can be exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
 \iffalse
@@ -326,7 +326,7 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 
 \subsubsection{Comparison of Search Space and Optimization Time}
-\revise{We have demonstrated theoretically that the search space of graph-aware transformation is exponentially smaller than that of graph-agnostic. To further illustrate this, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
+\revise{We have demonstrated theoretically that the search space of graph-aware transformation can be exponentially smaller than that of graph-agnostic. To further illustrate this, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
 
 \revise{Additionally, we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
