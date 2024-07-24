@@ -24,7 +24,7 @@ method for solving the matching operator. We then delve into the converged workf
 
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
-The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\reflem{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GrainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks discussed in \refrem{graph-agnostic-vs-graph-aware}.
+The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\reflem{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GRainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks discussed in \refrem{graph-agnostic-vs-graph-aware}.
 %that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
 \subsection{The Converged Approach}
@@ -153,13 +153,13 @@ For the remaining relational operators in the query, we leverage Calcite's built
 Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
 
 We have developed the backend of the \name framework using C++, on top of DuckDB as the underlying relational execution engine, to demonstrate the optimization capabilities that \name can bring.
-We integrated graph index support in GrainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GrainDB~\cite{graindb}.
-%Note we choose DuckDB instead of GrainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GrainDB.
-%However, we did bring in optimization features similar to those found in GrainDB to ensure that \name can take full advantage of the graph indices.
-With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the predefined join in GrainDB.
+We integrated graph index support in GRainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GRainDB~\cite{graindb}.
+%Note we choose DuckDB instead of GRainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GRainDB.
+%However, we did bring in optimization features similar to those found in GRainDB to ensure that \name can take full advantage of the graph indices.
+With graph index, the \expand, \expandedge~ and \getvertex~ operators can be optimized by directly using the predefined join in GRainDB.
 Note that we craft a new join on DuckDB called \emph{EI-Join} for the support of \expandintersect.
 Without graph index, the \hashjoin~ operator is used throughout the entire plan.
-To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GrainDB-compatible executable operators.
+To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GRainDB-compatible executable operators.
 %For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
 %Moreover, for the \intersect~ operator, we crafted a new worst-case-optimal join implementation, which achieves better performance compared to the traditional multiple join that is not worst-case optimal in DuckDB.
 This runtime module essentially bridges the gap between the optimized plans produced by the \name framework and DuckDB's execution engine, thereby validating \name's practicality and its potential to improve the performance of \spjm queries on an established relational database system.
@@ -178,7 +178,7 @@ We have crafted a top-down search algorithm that calculates the most efficient p
 For the relational part, Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques, is leveraged to fine-tune the rest of the relational operators in the query.
 The Converged Optimizer generates its output as a unified plan formatted with Google Protocol Buffers (protobuf)\cite{protobuf}. This serialization format is both platform-independent and highly interoperable, facilitating the easy conversion of the unified plan into executable query plans tailored for the destination database system.
 }
-%To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GrainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
+%To showcase the capabilities of the \name framework, we devised a Plan Converter that employs code generation techniques. This Plan Converter is adept at transforming the unified plan, produced by the Converged Optimizer, into executable code compatible with GRainDB, a relational database system that incorporates support for graph indices. This step is crucial in demonstrating the practical applicability and effectiveness of the \name framework in optimizing \spjm queries on a real-world relational database system.
 
 \comment{
 To optimize SPJM queries, we propose the converged graph relational optimization framework named relgo.

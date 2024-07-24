@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 queries = ["IC[1-3]", "IC[2]", "IC[4]", "IC[7]"]
 # methods = ["RelGo", "Calcite", "GrainDB"]
-methods = ["RelGo", "GrainDB"]
+methods = ["RelGo", "GRainDB"]
 
 compile_times = np.array(
     [

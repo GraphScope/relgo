@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 queries = ['JOB[1]', 'JOB[2]', 'JOB[3]', 'JOB[4]']
-methods = ['RelGo', 'GrainDB']
+methods = ['RelGo', 'GRainDB']
 
 compile_times = np.array([
     [19, 13, 14, 14], # compilation time of RelGo

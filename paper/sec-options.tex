@@ -367,13 +367,13 @@ For this type of method, graph structure is utilized in the process of optimizin
 Specifically, with graph indices, the connectivity between vertices and edges can be obtained efficiently.
 Therefore, new physical implementations of joins can be constructed to leverage the benefits of graph indices.
 
-The optimizer in GrainDB is a representative of this type.
-GrainDB builds RID indices on DuckDB \cite{duckdb}, and proposes two new join methods, i.e., sip-join and merge-sip-join.
+The optimizer in GRainDB is a representative of this type.
+GRainDB builds RID indices on DuckDB \cite{duckdb}, and proposes two new join methods, i.e., sip-join and merge-sip-join.
 In detail, sip-join gets adjacent edges of vertices or gets adjacent vertices of edges based on the RID indices, while merge-sip-join obtains the neighbors of vertices.
-Given a SPJM query, it is first transformed to the equal SPJ query, and then GrainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
-Next, GrainDB replaces some hash-joins in the plan with sip-joins and merge-sip-joins to leverage graph indices.
+Given a SPJM query, it is first transformed to the equal SPJ query, and then GRainDB optimizes the query with the relational optimizer of DuckDB to obtain the optimal execution plan.
+Next, GRainDB replaces some hash-joins in the plan with sip-joins and merge-sip-joins to leverage graph indices.
 
-It indicates that the cost-based optimization in GrainDB only finds the optimal execution plan before the graph indices are awared.
+It indicates that the cost-based optimization in GRainDB only finds the optimal execution plan before the graph indices are awared.
 Therefore, the plan can be suboptimal after replacement.
 Moreover, some efficient replacement cannot be applied w.r.t.~the obtained execution plan due to the order of joining tables representing vertices and edges.
 

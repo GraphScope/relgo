@@ -26,8 +26,8 @@ This improvement is achieved because for each tuple within a relation, the indic
 As a result, it eliminates the necessity to iterate through every tuple of the counterpart relation, thereby enhancing the efficiency of the join process.
 As this index structure mimics the adjacency relationship between vertices and edges, it is called a graph index.
 
-Join operators that leverage graph indices are called predefined joins by GrainDB \cite{graindb}.
-Specifically, an example of the graph index instantiated in GrainDB is shown in \reffig{graph-index}.
+Join operators that leverage graph indices are called predefined joins by GRainDB \cite{graindb}.
+Specifically, an example of the graph index instantiated in GRainDB is shown in \reffig{graph-index}.
 In detail, the graph index is built on edges labeled ``Likes'' in property graph $G_1$ of \reffig{intro-rgmapping-example}(a) and records the adjacency relationships of the vertices labeled ``Person'' and the edges labeled ``Likes''.
 That is, according to the \rgmapping, for each tuple $t_p$ in $\relation{Person}$, the tuples in $\relation{Likes}$ that can be joined with $t_p$ can be directly obtained with the graph index and vice versa.
 

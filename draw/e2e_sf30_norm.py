@@ -68,7 +68,7 @@ plt.bar(
     edgecolor="k",
     width=width,
     # hatch="\\",
-    label="GrainDB",
+    label="GRainDB",
 )
 
 plt.bar(

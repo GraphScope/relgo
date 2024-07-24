@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 queries = ['IC[1-3]', 'IC[2]', 'IC[4]', 'IC[7]']
-methods = ['RelGo', 'Calcite', 'GrainDB']
+methods = ['RelGo', 'Calcite', 'GRainDB']
 
 compile_times = np.array([
     [55, 11, 55, 19], # compilation time of RelGo

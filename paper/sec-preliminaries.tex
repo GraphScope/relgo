@@ -238,7 +238,7 @@ Specifically, for $Rel$ methods, the matching operator is implemented with only 
 Therefore, $\widetilde{R}_i$ can be optimized with the relational optimizer.
 For $Rel^+$ methods, in the process of optimization, the matching operator is implemented with relational joins.
 Thus, the relational optimizer is also utilized to optimize $\widetilde{R_i}$.
-However, after that, relational joins are replaced with joins that leverage graph indices (named graph joins) if possible such as sip join in GrainDB.
+However, after that, relational joins are replaced with joins that leverage graph indices (named graph joins) if possible such as sip join in GRainDB.
 For $Rel+G$ methods, graph joins are considered in implementing the matching operator.
 Then, operators inside of $\widetilde{R}_i$ are optimized by the graph optimizer, while the operators out of $\widetilde{R}_i$ are optimized by the relational optimizer.
 Besides, the optimizations cannot be simultaneously related to operators within and outside of $\widetilde{R}_i$.
