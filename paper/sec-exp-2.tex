@@ -1,4 +1,5 @@
 \begin{table}[ht]
+    \small
     \centering
     \begin{tabular}{c|c|c|c|c|c}
     \hline
@@ -41,7 +42,7 @@ The details of the dataset statistics are summarized in Table \ref{table:experim
 We manually implement the queries using SQL/PGQ, which are presented in the artifact~\cite{artifact}.
 %In addition, we adhered to the same procedures for data loading and graph index construction as those described in~\cite{graindb}.
 Furthermore, we perform the \rgmapping process in a manner that allows the construction of the same graph index on the LDBC and JOB datasets used in GRainDB's experiments~\cite{graindb}.
-\revise{Specifically, we store the data in DuckDB and construct both the EV-index and VE-index on potential edge relations, following the procedures described in GRainDB~\cite{graindb}. These indices are built on foreign keys and tables that depict many-to-many relationships}.
+\revise{Specifically, the EV-index and VE-index on potential edge relations are constructed built on foreign keys and tables that depict many-to-many relationships}.
 %The \rgmapping{s} are defined to ensure the effectiveness of the graph index defined in graindb.
 
 
@@ -250,14 +251,15 @@ The results of this experiment indicate that the \expandintersect~ operator with
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\linewidth]{./figures/exp/hash_plan_job.pdf}
+    \includegraphics[width=.9\linewidth]{./figures/exp/hash_plan_job.pdf}
+    \vspace{-0.5em}
     \caption{Experiments on join order efficiency}
     \label{fig:exp-hash-plan}
 \end{figure}
 
 \noindent\textbf{Efficiency of Join Order.}
 %After the assessment of advanced strategies within \name, we integrate all these strategies (and so as in the following experiments) to conduct a performance comparison between \name, GRainDB, and DuckDB with a focus on the join order efficiency.
-In this experiment, we compared \name with GRainDB and DuckDB, focusing on the efficiency of the join order. For this purpose, we introduced a variant of \name called \relgohash, which optimizes the plan in a converged manner like \name but deliberately bypasses the use of graph index. We selected 10 queries from the JOB benchmark and showed the performance results in \reffig{exp-hash-plan}.
+We compared \name with GRainDB and DuckDB, focusing on the efficiency of the join order. For this purpose, we introduced a variant of \name called \relgohash, which optimizes the plan in a converged manner like \name but deliberately bypasses the use of graph index. We selected 10 queries from the JOB benchmark and showed the performance results in \reffig{exp-hash-plan}.
 The results demonstrate that \name outperforms GRainDB on all the queries, accelerating the execution time by factors ranging from \revise{$1.4\times$} to $7.5\times$, with an average speedup of \revise{$4.14\times$}. Additionally, the plans optimized with \relgohash are at least as good as those optimized by DuckDB, achieving an average speedup of \revise{$1.6\times$}. The effectiveness of \name and \relgohash stems from their use of advanced graph-aware optimization techniques in optimizing the matching operator, resulting in good join order and thus robust performance regardless of the presence or absence of graph index.
 It is worth noting that \name does not always generate plans with the absolute best join orders, as it relies on the estimated cost of the plans. However, its optimized plans generally remain competitive in most cases, thanks to its integration of \glogue that use high-order statistics for cost estimation.
 
@@ -317,12 +319,12 @@ It is worth noting that \name does not always generate plans with the absolute b
 \label{sec:experiment-e2e}
 
 We conducted comprehensive experiments on the LDBC and JOB benchmarks to comprehensively evaluate the performance of \name compared to \revise{the baselines, i.e., DuckDB, GRainDB, Umbra, and K\`uzu}. 
-\revise{Since the results on LDBC10 and LDBC30 are comparable to those on LDBC100, they are omitted. Complete results are provided in the full version}.
-The experimental results, presented in \reffig{exp-e2e}, demonstrate that execution plans optimized by \name consistently \revise{outperform those optimized by the baselines on both benchmarks}.
+\revise{The results on LDBC10 and LDBC30 are omitted because they are comparable to those on LDBC100. Complete results are provided in the full version}.
+The experimental results, shown in \reffig{exp-e2e}, demonstrate that execution plans optimized by \name consistently \revise{outperform those optimized by the baselines on both benchmarks}.
 
 \subsubsection{Comparison with DuckDB and GRainDB}
 
-Firstly, we compare the performance of \name with DuckDB and GRainDB.
+Firstly, we compared the performance of \name with DuckDB and GRainDB.
 Specifically, for the LDBC benchmark, the execution time of the plans optimized by \name is about \revise{21.9$\times$ and 5.4$\times$} faster on average than those generated by DuckDB and GRainDB on $LDBC100$.
 It is important to note that \name is especially effective for queries containing cycles, which can benefit more from graph optimizations. For example, in query $\text{IC}_{7}$, which contains a cycle, \name outperforms DuckDB and GRainDB by \revise{76.3$\times$ and 22.0$\times$}, respectively.
 Conversely, the JOB benchmark, established for assessing join optimizations in relational databases, lacks any cyclic-pattern queries. Despite this, \name still achieves better performance compared to DuckDB and GRainDB, with an average speedup of 8.2$\times$ and 4.0$\times$, respectively.
@@ -334,12 +336,12 @@ Third, \name considers optimization opportunities across both graph and relation
 
 
 \subsubsection{Comparsion with Umbra}
-We \revise{compare the performance of \name and Umbra according to the experimental results presented in \reffig{exp-e2e}.
+We \revise{compared the performance of \name and Umbra according to the experimental results presented in \reffig{exp-e2e}.
 In detail, the plans optimized by \name are about \revise{49.9$\times$} faster on average than those generated by Umbra on $LDBC100$.
-On JOB benchmark, which is a traditional relational workload, the plans generated by \name are, on average, 1.7$\times$ more efficient than those given by Umbra.} \revise{Several factors contribute to the results: (1) Umbra, due to its lack of a graph perspective, might generate query plans that encounter challenges in utilizing graph indexes effectively, similar to GRainDB; (2) Although Umbra's optimizer supports generating worst-case optimal plans that include multiway joins, none of Umbra's optimized plans for the tested queries in our experiments contained multiway joins. In contrast, \name excels at identifying opportunities to effectively utilize graph indices and adheres to worst-case optimality.
+On JOB benchmark, the plans generated by \name are on average 1.7$\times$ more efficient than those given by Umbra.} \revise{Several factors contribute to the results: (1) Umbra, due to its lack of a graph perspective, might generate query plans that encounter challenges in utilizing graph indexes effectively, similar to GRainDB; (2) Although Umbra's optimizer supports generating worst-case optimal plans that include multiway joins, none of Umbra's optimized plans for the tested queries in our experiments contained multiway joins. In contrast, \name excels at identifying opportunities to effectively utilize graph indices and adheres to worst-case optimality.
 }
 
-Notably, \revise{there are instances where Umbra generates better execution plans compared to  \name. For example, when querying JOB[30] on IMDB, the execution time of the plan generated by \name is approximately 1.2$\times$ slower than that of Umbra. A potential reason for this is that \name has not yet considered the distributions of attribute values. For example, when the predicate ``t.production\_year > 2000'' is present, knowing the distribution of the attribute ``production\_year'' can help better estimate the results after filtering by the predicate. Consequently, Umbra can sometimes estimate cardinalities more accurately when such predicates exist. Addressing this will be an important future work. }
+Notably, \revise{there are instances where Umbra generates better execution plans compared to  \name. For example, when querying $\text{JOB}_{30}$ on IMDB, the execution time of the plan generated by \name is approximately 1.2$\times$ slower than that of Umbra. A potential reason for this is that \name has not yet considered the distributions of attribute values. For example, when the predicate ``t.production\_year > 2000'' is present, knowing the distribution of the attribute ``production\_year'' can help better estimate the results after filtering by the predicate. Consequently, Umbra can sometimes estimate cardinalities more accurately when such predicates exist. Addressing this will be an important future work. }
 
 \comment{
 The following reasons primarily contribute to this improvement:
@@ -352,7 +354,7 @@ We consider this as our further work}.
 
 
 \subsubsection{Comparison with K\`uzu}
-Finally, \revise{we compare \name with the GDBMS, K\`uzu. The experimental results in \reffig{exp-e2e} show that \name is approximately \revise{188.7$\times$} faster on average than K`uzu on $LDBC100$. Additionally, \name achieves an average speedup of 136.1$\times$ compared to K`uzu on the JOB benchmark. It's surprising that \name, when using DuckDB as the execution engine, can even outperform GDBMS like K\`uzu. Actually, K\`uzu is also developed based on DuckDB. We speculate that K\`uzu
+Finally, \revise{we compared \name with the GDBMS, K\`uzu. The experimental results in \reffig{exp-e2e} show that \name is approximately \revise{188.7$\times$} faster on average than K`uzu on $LDBC100$. Additionally, \name achieves an average speedup of 136.1$\times$ compared to K`uzu on the JOB benchmark. It's surprising that \name, when using DuckDB as the execution engine, can even outperform GDBMS like K\`uzu. Actually, K\`uzu is also developed based on DuckDB. We speculated that K\`uzu
 may not fully exploit graph-specific optimizations as \name does.}
 
 
@@ -368,41 +370,16 @@ may not fully exploit graph-specific optimizations as \name does.}
 % \todo{update this, with the new TrimFusionRule:} Thirdly, \name is more adept at identifying opportunities to effectively utilize graph indices to get neighbors of vertices, since it optimizes graph queries from the graph perspective.
 % Conversely, GRainDB occasionally partitions the process into separate stages, first retrieving adjacent edges and subsequently obtaining the corresponding endpoints.
 
-\begin{figure}[ht]
+\begin{figure*}[ht]
     \centering
-    \includegraphics[width=\linewidth]{./figures/job17a-query.pdf}
-    \caption{$\text{JOB}_{17}$ query.}
-    \label{fig:job17-query}
-\end{figure}
-
-
-\begin{figure}[ht]
-    \centering
-    \begin{subfigure}[b]{.4\linewidth}
-        \centering
-        \includegraphics[width=.9\linewidth]{./figures/job17a-plan-gopt.pdf}
-        \caption{Query Plan of \name.}
-        \label{fig:job17a-plan-relgo}
-    \end{subfigure}
-    \begin{subfigure}[b]{.5\linewidth}
-        \centering
-        \includegraphics[width=.9\linewidth]{./figures/job17a-plan-graindb.pdf}
-        \caption{Query Plan of GRainDB.}
-        \label{fig:job17a-plan-graindb}
-    \end{subfigure}
-    \begin{subfigure}[b]{\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{./figures/job17a-plan-umbra.pdf}
-        \caption{Query Plan of Umbra}
-        \label{fig:job17a-plan-umbra}
-    \end{subfigure}
-    \caption{\revise{Query plans of $\text{JOB}_{17}$ generated by \name, GRainDB, and Umbra. JOIN operators are all implemented as predefined joins.}}
+    \includegraphics[width=.95\linewidth]{./figures/job17a-plan.pdf}
+    \caption{\revise{Query plans of $\text{JOB}_{17}$ generated by \name, GRainDB and Umbra. JOINs are implemented as predefined joins if possible.}}
     \label{fig:job17a-query-plans}
-\end{figure}
+\end{figure*}
 
 
 \subsection{Case Study}
-\revise{To further illustrate why the plans generated by \name are superior to those produced by the baseline optimizers, we conduct a case study using the JOB[17] query as an example, shown in \reffig{job17-query}. The optimized query plans by \name, GRainDB, and Umbra for this query are presented in \reffig{job17a-query-plans}.
+\revise{To further illustrate why the plans generated by \name are superior to those produced by the baseline optimizers, we conducted a case study using the $\text{JOB}_{17}$ query as an example, shown in \reffig{job17a-query-plans}(a). The optimized query plans by \name, GRainDB, and Umbra for this query are presented in \reffig{job17a-query-plans}(b)--(d).
 As shown in \reffig{exp-e2e-job}, the plan optimized by \name is 4.3$\times$ and 1.8$\times$ than those optimized by GRainDB and Umbra, respectively}.
 
 A \revise{key difference between the plan of \name and those of GRainDB and Umbra is that \name can consistently follow the graph query semantics by continuously expanding from a starting vertex to its neighbors, leveraging the graph index. For example, \name's plan begins with scanning $\relation{\text{KEYWORD}}$, then expands to its neighbors $\relation{\text{TITLE}}$, followed by $\relation{\text{COMPANY\_NAME}}$, and finally $\relation{\text{NAME}}$. Throughout this execution path, the graph index (both EV-index and VE-index) introduced in \refsec{graph-index} is fully utilized to efficiently retrieve neighboring vertices. In contrast, GRainDB and Umbra, as relational optimizers, may not always adhere to this semantics. For instance, in GRainDB's plan, after joining (VE-index applied) $\relation{\text{KEYWORD}}$ with $\relation{\text{MOVIE\_KEYWORD}}$, the plan misses the opportunity to immediately join $\relation{\text{TITLE}}$, thus failing to use the EV-index constructed between $\relation{\text{MOVIE\_KEYWORD}}$ and $\relation{\text{TITLE}}$ right away. A similar situation occurs in Umbra's plan.}

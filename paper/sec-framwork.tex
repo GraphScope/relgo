@@ -41,7 +41,7 @@ In addition to the core workflow, we further explore heuristic rules that highli
 
 \subsubsection{The Graph Optimization}
 \label{sec:graph-optimizer}
-In this work, we adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
+We adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
 \stitle{\glogue~Construction.} \glogs is built upon a data structure called \glogue, which is essentially a graph $\searchgraph_{\pattern}(V, E)$. In this graph, each vertex represents a pattern $\pattern'$ consisting of up to $k$ vertices (typically, $k=3$) that has non-empty matched instances in the original graph. There is an edge from $\pattern''$ to $\pattern'$, if there is a decomposition tree where $\pattern''$ is a child node of $\pattern'$.
 
@@ -101,7 +101,7 @@ In real-life use cases, heuristic rules may involve non-trivial interactions bet
 
 %\enlargethispage{1em}
 
-Often while writing queries, users may not specify constraints on the pattern but rather use the selection operator after the matching results have been projected into the relational relation, which can be described as:
+While writing queries, users may not specify constraints on the pattern but rather use the selection operator after matching results have been projected into the relational relation, described as:
 \[
 \sigma_{d'_{v_a}} (\widehat{\pi}_{v.a \rightarrow \text{v\_a}, \ldots} \matching(\pattern))
 \]
@@ -135,12 +135,15 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 %\enlargethispage{1em}
 
 Note \revise{that \filterrule is a global optimization rule 
-because pushing the predicate into the matching operator does not always result in a better plan. For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is} 
+because pushing the predicate into the matching operator does not always result in a better plan, and it is necessary to specifically determine whether to push down the predicate}.
+\iffalse
+For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is} 
 \begin{lstlisting}
     (v1:Person)-[:Knows]->(v2:Person)-[:Knows]->(v3:Person),
 \end{lstlisting}
 \revise{with the return values being the names of $v_1$, $v_2$, and $v_3$, and an additional constraint on $v_2$'s place\_id specified outside the matching operator. 
 If the predicate is pushed, then the first expansion to $v_2$ in the generated plan would require fetching all necessary properties. When the predicate's filtering capability is weak, this leads to additional overhead. However, if the predicate is not pushed, properties can be deferred, being retrieved only at the end of the plan. Therefore, it is necessary to specifically determine whether to push down the predicate}.
+\fi
 \revise{Besides, \joinfuserule is a local optimization rule specifically designed for graph optimization. The effectiveness of these two rules is validated in \refsec{experiment-opt}. Our \name framework is designed to be generic, allowing different optimization rules to be easily integrated}. %In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule, which avoids the final join for aggregate operations, and \subtaskremoverule, which converts some WHERE conditions to anti-joins and semi-joins} {\color{red} Robin: an extra rule can be explained with sufficient details}.
 
 

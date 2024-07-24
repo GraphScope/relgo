@@ -79,7 +79,7 @@ plt.grid(linestyle="--", axis="y")
 
 plt.legend(
     loc="upper center",
-    fontsize=24,
+    fontsize=26,
     ncol=4,
     columnspacing=1.5,
     bbox_to_anchor=(0.5, 1.04),
