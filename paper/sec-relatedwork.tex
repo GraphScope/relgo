@@ -17,8 +17,9 @@
 \stitle{Query Optimization for Relational Databases.} 
 %Join order optimization was a traditional and crucial topic for query optimization in relational databases. 
 %The order in which joins were conducted could influence the execution time significantly and had attained substantial accomplishments. 
-Various studies of query optimization for relational databases were proposed to find the optimal join order.
-Ibaraki et al.~\cite{IbarakiK84} proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
+Various studies of query optimization for relational databases were proposed to find the optimal join order \cite{IbarakiK84,optimize-nested-vldb-1986,Haffnerjoinorder,data-dependency-join}.
+For example, 
+%Ibaraki et al.~\cite{IbarakiK84} proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
 %Ibaraki et al.\cite{IbarakiK84} proposed that there were usually fewer than ten tables involved in a typical query, and dealt with joins using nested-loops join. Specifically, they proved the NP-complexity of the join order optimization problem and designed an efficient algorithm with a time complexity of $O(n^2logn)$ to optimize tree queries.
 %Then, Krishnamurthy et al.\cite{optimize-nested-vldb-1986} optimized the algorithm and proposed an algorithm with a time complexity of $O(N^2)$ by reusing the computation results.
 %Besides, the authors emphasized that since finding the optimal join order was a complex problem, it was more important to avoid the worst plan.

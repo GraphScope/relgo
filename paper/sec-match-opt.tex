@@ -80,7 +80,7 @@ Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching 
 Assume that when $m = k-1$, $\gproject(\matching(\pattern_{k-1}))$ can be converted to a sequence of relational operators, resulting in $R_{k-1}$. When $m = k$, we consider $\pattern_{k}$ of $k$ edges constructed from $\pattern_{k-1}$ by adding edge $e_k = (u_{s_k}, u_{t_k})$. For $\pattern_{k}$ to be connected, it must share at least one common vertex $V_o$ with $\pattern_{k-1}$. According to \refeq{join-pattern}, we have:
 \[ \matching(\pattern_{k}) =  \matching(\pattern_{e_k}) \gjoin_{V_o} \matching(\pattern_{k-1}), \]
 where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and $V_o$ is the common vertex shared by $\pattern_{k-1}$ and $\pattern_{e_k}$. Applying $\gproject$ to the above equation, we get:
-\vspace*{-2mm}
+\vspace*{-1mm}
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
@@ -209,6 +209,7 @@ Besides, a matching operator located on the left subtree of the join operator is
     \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
+        \vspace{-2em}
         \caption{Optimization Time Cost on LDBC Queries.}
         \label{fig:exp-optimization-sf30}
     \end{subfigure}
@@ -218,7 +219,7 @@ Besides, a matching operator located on the left subtree of the join operator is
     %    \caption{Optimization Time Cost on JOB Queries.}
     %    \label{fig:exp-optimization-job}
     %\end{subfigure}
-    \caption{Experiments on the search space and time cost of optimization.}
+    \caption{\revise{Compare the search space and optimization time}.}
     \label{fig:exp-optimization}
 \end{figure}
 
@@ -411,7 +412,7 @@ Specifically, GRainDB introduces an indexing technique called pre-defined join t
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=.72\linewidth]{./figures/graph-index-likes.pdf}
+    \includegraphics[width=\linewidth]{./figures/graph-index-likes.pdf}
     \caption{The graph index constructed among relations $\relation{\text{Person}}$, $\relation{\text{Likes}}$
     and $\relation{\text{Message}}$ in \reffig{intro-rgmapping-example}(a).}
     \label{fig:graph-index}
@@ -471,7 +472,7 @@ When graph indexes exist, the implementation is handled by the physical operator
 By combining the results of \expandedge~ and \getvertex, the tuple of $(\tau, \adj^E(v_s), \adj(v_s))$ is rendered. For example, in \reffig{graph-index}(b), if we apply \expandedge~ and \getvertex~ to a tuple $\tau$ from $v_{p_2}$, the result $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$ is returned.
 Furthermore, to obtain $\matching(\pattern')$, we flatten the adjacent edges and vertices and pair them up. In the case of $(\tau, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}])$, two tuples $(\tau, e_{l_2}, v_{m_1})$ and $(\tau, e_{l_3}, v_{m_2})$ are generated.
 
-In real-life scenarios, a vertex may be adjacent to multiple types of edges. For example, in \reffig{intro-rgmapping-example}, a \kk{Person} vertex can be connected to both \kk{Likes} and \kk{Knows} edges. To handle such cases, we can record edge's ID instead of just the row ID of the tuple. Given that the edge's ID is a combination of its label and the tuple's row ID, the adjacent edges of a specific label can be easily obtained from the VE-Index.
+In practice, a vertex may be adjacent to multiple types of edges. For example, in \reffig{intro-rgmapping-example}, a \kk{Person} vertex can be connected to both \kk{Likes} and \kk{Knows} edges. To handle such cases, we can record edge's ID instead of just the row ID of the tuple. Given that the edge's ID is a combination of its label and the tuple's row ID, the adjacent edges of a specific label can be easily obtained from the VE-Index.
 
 \stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_s, E_s} \matching(\pattern(u;V_s))$}, where pattern $\pattern(u;V_s)$ is a complete $k$-star with $V_s = \{u_1, \ldots, u_k\}$. %In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;V_s)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $V_s = \{u_1, \ldots, u_k\}$.
 
@@ -508,8 +509,8 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     Consider the tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example. First, the \expandedge~ and \getvertex~ operators are applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, resulting in
     \begin{equation*}
         \begin{split}
-    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]), \text{and} \\
-    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}]).
+    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]) \text{ and } 
+    (v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}]).
         \end{split}
     \end{equation*}
     Next, the intersection process is conducted. Since $\adj(v_{p_1}) \cap \adj(v_{p_2}) = [v_{m_1}]$, the edges in both sets that have $v_{m_1}$ as the target vertex are retained, resulting in $(v_{p_1}, e_{k_1}, v_{p_2}, [(e_{l_1}, e_{l_2}, v_{m_1})])$. Finally, the tuple is flattened to $(v_{p_1}, e_{k_1}, v_{p_2}, e_{l_1}, e_{l_2}, v_{m_1})$.

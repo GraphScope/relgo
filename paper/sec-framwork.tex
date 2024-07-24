@@ -134,8 +134,7 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 
 %\enlargethispage{1em}
 
-Note \revise{that \filterrule is a global optimization rule 
-because pushing the predicate into the matching operator does not always result in a better plan, and it is necessary to specifically determine whether to push down the predicate}.
+Note \revise{that \filterrule is a global optimization rule because pushing the predicate into the matching operator does not always yield a better plan and requires careful evaluation}.
 \iffalse
 For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is} 
 \begin{lstlisting}
@@ -148,7 +147,9 @@ If the predicate is pushed, then the first expansion to $v_2$ in the generated p
 
 
 \subsection{System Implementation}
-We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite}, a widely used open-source framework for data management, to utilize its robust relational query optimization infrastructure.
+We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite} 
+%, a widely used open-source framework for data management, 
+to utilize its robust relational query optimization infrastructure.
 %The frontend of \name is responsible for parsing the input \spjm query, constructing the logical plan, and invoking the graph and relational optimizers to generate the optimal physical plan.
 Firstly, we enhanced Calcite's SQL parser to recognize SQL/PGQ extensions, specifically to parse the \lstinline{GRAPH_TABLE} clause.
 We created a new \lstinline{ScanGraphTableRelNode} that inherits from Calcite's core \lstinline{RelNode} class, translating the \lstinline{GRAPH_TABLE} clause into this newly defined operator within the logical plan.
@@ -161,9 +162,10 @@ We devised a top-down search algorithm that assesses the most efficient physical
 }
 
 For the remaining relational operators in the query, we leverage Calcite's built-in optimizer, which already includes comprehensive relational optimization techniques.
-Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
+Lastly, the converged optimizer outputs an optimized and platform-independent plan formatted with Google Protocol Buffers (protobuf) \cite{protobuf}, ensuring the adaptability of \name's output to various backend database systems.
+%. This ensures the adaptability of the \name framework's output to a variety of backend database systems.
 
-We have developed the backend of the \name framework using C++, on top of DuckDB as the underlying relational execution engine, to demonstrate the optimization capabilities that \name can bring.
+We developed the \name framework's backend in C++ using DuckDB as the relational execution engine to showcase its optimization capabilities.
 We integrated graph index support in GRainDB~\cite{graindb}. %, by building graph indices for predefined joins, as well as optimized sip join and merge sip join implementations (\todo{what is this}), leveraging the graph indices to speed up the execution, following the designs used in GRainDB~\cite{graindb}.
 %Note we choose DuckDB instead of GRainDB directly as the backend, because DuckDB is more mature and incorporates advanced optimization techniques that are not yet available in GRainDB.
 %However, we did bring in optimization features similar to those found in GRainDB to ensure that \name can take full advantage of the graph indices.
@@ -173,7 +175,9 @@ Without graph index, the \hashjoin~ operator is used throughout the entire plan.
 To execute the optimized plans within DuckDB, we introduced a runtime module that translates the optimized physical plan into a sequence of DuckDB/GRainDB-compatible executable operators.
 %For instance, the \expand~ operator is materialized using the merge sip join implementation, which significantly benefits from graph indices for processing efficiency.
 %Moreover, for the \intersect~ operator, we crafted a new worst-case-optimal join implementation, which achieves better performance compared to the traditional multiple join that is not worst-case optimal in DuckDB.
-This runtime module essentially bridges the gap between the optimized plans produced by the \name framework and DuckDB's execution engine, thereby validating \name's practicality and its potential to improve the performance of \spjm queries on an established relational database system.
+This runtime module essentially bridges the gap between the optimized plans produced by \name and DuckDB's execution engine, thereby validating \name's practicality and potential performance improvements for \spjm queries on an established relational database system.
+
+
 
 % The \name system consists of three main components: the Metadata Provider, the Converged Optimizer, and the Plan Converter.
 % The Metadata Provider maintains the metadata of the database, such as the schema information, the graph index information, and the statistics of the data.

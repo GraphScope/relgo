@@ -15,7 +15,7 @@ In comparison, such a scenario could be succinctly addressed using graph query l
     Consider the four relational tables in the database: \kk{Person(id, name, place\_id)}, \kk{Message(id, content, date)}, \kk{Like(p\_id, m\_id, date)}, and \kk{Place(id, name)}. Using SQL/PGQ, a property graph $G$ is articulated as a \lstinline{GRAPH_TABLE}, established on the basis of the first three tables. In this mapping, rows from \kw{Person} and \kw{Message} are interpreted as vertices with labels ``Person'' and ``Message'' respectively, while rows from Like represent edges with the label ``Likes''. \revise{This mapping process will be elaborated as \rgmapping in \refsec{data-model}}. An SQL/PGQ query to discover the friends of a person named ``Tom'' and the place they live in, where ``Tom'' and friends share an affinity for the same message, can be formulated as shown in \reffig{intro-query}.
     \begin{figure}
         \centering
-        \includegraphics[width=.7\linewidth]{./figures/intro-query.pdf}
+        \includegraphics[width=.65\linewidth]{./figures/intro-query.pdf}
         \vspace*{-1mm}
         \caption{An example of SQL/PGQ query.}
         \label{fig:intro-query}
