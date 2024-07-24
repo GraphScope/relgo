@@ -3,7 +3,7 @@ import numpy as np
 
 # matplotlib.rcParams.update({'font.size': 22})
 
-xlabel = ["QC[1]", "QC[2]", "QC[3]"]
+xlabel = [r"QC$_1$", r"QC$_2$", r"QC$_3$"]
 
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))

@@ -29,7 +29,7 @@ plt.yticks(fontsize=26)
 
 plt.margins(0.08)
 
-plt.xlabel("Queries of JOB[*]", fontsize=28)
+plt.xlabel(r"Queries of JOB$_*$", fontsize=28)
 plt.ylabel("Opt. Time (ms)", fontsize=26)
 
 plt.yscale('log')

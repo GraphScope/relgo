@@ -70,7 +70,7 @@ plt.ylim((20, 9000))
 
 plt.margins(0.08)
 
-plt.xlabel("Queries of JOB[*]", fontsize=32)
+plt.xlabel(r"Queries of JOB$_*$", fontsize=32)
 plt.ylabel("Time Cost (ms)", fontsize=32)
 
 plt.yscale("log")

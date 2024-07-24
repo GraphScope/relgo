@@ -97,7 +97,7 @@ plt.yscale("log")
 
 plt.grid(linestyle="--", axis="y")
 
-plt.xlabel("Queries of IC[*]", fontsize=28)
+plt.xlabel(r"Queries of IC$_*$", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 plt.ylim(0.01, 100)
 

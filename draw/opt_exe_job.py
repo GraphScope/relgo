@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-queries = ["JOB[1]", "JOB[2]", "JOB[3]", "JOB[4]"]
+queries = [r"JOB$_1$", r"JOB$_2$", r"JOB$_3$", r"JOB$_4$"]
 methods = ["RelGo", "GRainDB"]
 
 compile_times = np.array(

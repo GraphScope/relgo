@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-queries = ["IC[1-3]", "IC[2]", "IC[4]", "IC[7]"]
+queries = [r"IC$_{1-3}$", r"IC$_2$", r"IC$_4$", r"IC$_7$"]
 # methods = ["RelGo", "Calcite", "GrainDB"]
 methods = ["RelGo", "GRainDB"]
 

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-xlabel = ["QR[1]", "QR[2]", "QR[3]", "QR[4]"]
+xlabel = [r"QR$_1$", r"QR$_2$", r"QR$_3$", r"QR$_4$"]
 
 xaxis = np.arange(len(xlabel))
 xaxis_final = np.arange(len(xlabel))
