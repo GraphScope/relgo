@@ -379,7 +379,7 @@ Notably, we did not consider aggressive pruning rules as used in commercialized 
 The optimization time was evaluated using the queries in our experiment (details in \refsec{evaluation}).
 %If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes.
 Optimizations that do not complete within 10 minutes are recorded as taking 10 minutes.
-Since Calcite often exceeds the 10-minute limit on JOB queries, we only report the results on LDBC queries.
+Since Calcite often exceeds the 10-minute limit on JOB queries\cite{full-version}, we only report the results on LDBC queries.
 The results in \reffig{exp-optimization-sf30} indicate that \name can complete optimizing almost all queries within 10-100 milliseconds.
 Besides, the results demonstrate \name's significant superiority over Calcite in query optimization speed.
 % Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed.

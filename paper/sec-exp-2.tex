@@ -44,7 +44,7 @@
 \stitle{JOB.} The Join Order Benchmark (JOB)~\cite{job_snb} on Internet Movie Database (IMDB) is adopted. We select the variants marked with ``a'' of all JOB queries, referred to as $\text{JOB}_{1\ldots 33}$, without loss of generality. These queries are primarily designed to test join order optimization, with each query containing an average of $8$ joins.
 
 The \revise{largest dataset (i.e., $LDBC100$) contains 282 million tuples in vertex relations and 938 million tuples in edge relations.
-More detailed statistics of the datasets are available in the full version.}
+More detailed statistics of the datasets are available in the full version\cite{full-version}.}
 We manually implement the queries using SQL/PGQ, which are presented in the artifact~\cite{artifact}.
 %In addition, we adhered to the same procedures for data loading and graph index construction as those described in~\cite{graindb}.
 Furthermore, we perform the \rgmapping process in a manner that allows the construction of the same graph index on the LDBC and JOB datasets used in GRainDB's experiments~\cite{graindb}.
@@ -340,7 +340,7 @@ It is worth noting that \name does not always generate the absolute best join or
 We conducted comprehensive experiments on the LDBC and JOB benchmarks to comprehensively evaluate the performance of \name compared to \revise{DuckDB, GRainDB, Umbra, and K\`uzu}.
 \revise{
 The experimental results are shown in \reffig{exp-e2e}.
-The results on LDBC10 and LDBC30 are omitted because they are comparable to those on LDBC100. Complete results are provided in the full version}.
+The results on LDBC10 and LDBC30 are omitted because they are comparable to those on LDBC100. Complete results are provided in the full version\cite{full-version}}.
 %The experimental results, shown in \reffig{exp-e2e}, demonstrate that execution plans optimized by \name consistently \revise{outperform those optimized by the baselines on both benchmarks}.
 
 \subsubsection{Comparison with DuckDB and GRainDB}
