@@ -47,17 +47,18 @@ min_ratio = -1
 zero_num = 0
 
 for i in range(start, end):
-    duckdb_ratio_sum += (y_duckdb_sf30[i]) / (y_ours_sf30[i])
-    graindb_ratio_sum += (y_graindb_sf30[i]) / (y_ours_sf30[i])
-    umbra_ratio_sum += (y_umbra_sf30[i]) / (y_ours_sf30[i])
-    kuzu_ratio_sum += (y_kuzu_sf30[i] / y_ours_sf30[i])
+    duckdb_ratio_sum += (y_duckdb_job[i]) / (y_ours_job[i])
+    graindb_ratio_sum += (y_graindb_job[i]) / (y_ours_job[i])
+    umbra_ratio_sum += (y_umbra_job[i]) / (y_ours_job[i])
+    kuzu_ratio_sum += (y_kuzu_job[i] / y_ours_job[i])
 
-    if y_kuzu_sf10[i] / y_ours_sf30[i] == 0:
+    if y_kuzu_job[i] / y_ours_job[i] == 0:
         zero_num += 1
     
 
-print(max_ratio)
-print(min_ratio)
+# print(max_ratio)
+# print(min_ratio)
+print("JOB: ")
 print("Kuzu: ", kuzu_ratio_sum / (end - start - zero_num))
 print("DuckDB: ", duckdb_ratio_sum / (end - start))
 print("GrainDB: ", graindb_ratio_sum / (end - start))
