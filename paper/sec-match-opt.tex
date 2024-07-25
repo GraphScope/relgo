@@ -203,13 +203,14 @@ Besides, a matching operator located on the left subtree of the join operator is
             \centering
             \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
         \end{subfigure}
+        \vspace{-.5em}
         \caption{Search Space Comparison.}
         \label{fig:exp-search-space}
     \end{subfigure}
     \begin{subfigure}[b]{\linewidth}
         \centering
-        \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
-        \vspace{-2em}
+        \includegraphics[width=.9\linewidth]{./figures/exp/optimization_sf30.pdf}
+        \vspace{-.9em}
         \caption{Optimization Time Cost on LDBC Queries.}
         \label{fig:exp-optimization-sf30}
     \end{subfigure}
@@ -379,8 +380,10 @@ The optimization time was evaluated using the queries in our experiment (details
 %If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. 
 Optimizations that do not complete within 10 minutes are recorded as taking 10 minutes.
 Since Calcite often exceeds the 10-minute limit on JOB queries, we only report the results on LDBC queries.
-The results, shown in \reffig{exp-optimization-sf30}, indicate that \name can complete optimizing almost all queries within 10-100 milliseconds.
-Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite.}
+The results in \reffig{exp-optimization-sf30} indicate that \name can complete optimizing almost all queries within 10-100 milliseconds.
+Besides, the results demonstrate \name's significant superiority over Calcite in query optimization speed.
+% Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. 
+For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite.}
 
 %The results, shown in \reffig{exp-optimization-sf30} and \reffig{exp-optimization-job}, demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can complete optimizing almost all queries within 10-100 milliseconds, with a maximum time cost of 210 milliseconds, while Calcite often exceeds the 10-minute limit, especially for JOB queries.}
 
@@ -455,7 +458,7 @@ We delve into the physical implementation of the execution plan provided by the 
 
 %\enlargethispage{1em}
 
-The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID and label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
+The implementation of $\matching(\pattern_u)$ is straightforward: scanning the corresponding vertex relation $\relation{\lab(u)}$ and encoding each tuple as a graph vertex object that contains its ID, label (mandatory) and necessary attributes. The row ID of the tuple in the relation can be directly used as the ID. To ensure globally uniqueness, the name of the relation can be incorporated as a prefix of the ID. Advanced encoding techniques are necessary for production use, but they are beyond the scope of this paper.
 
 The plan is then constructed in a bottom-up manner. As shown in \reffig{match-decomposition}, there are three fundamental cases to consider when implementing the plan.
 
@@ -478,10 +481,11 @@ In practice, a vertex may be adjacent to multiple types of edges. For example, i
 \stitle{Case III: Solving $\matching(\pattern') = \matching(\pattern'_l) \gjoin_{V_s, E_s} \matching(\pattern(u;V_s))$}, where pattern $\pattern(u;V_s)$ is a complete $k$-star with $V_s = \{u_1, \ldots, u_k\}$. %In this case, $\pattern'_l$ is a sub-pattern, and $\pattern(u;V_s)$ is a complete $k$-star pattern with a root vertex $u$ and leaf vertices $V_s = \{u_1, \ldots, u_k\}$.
 
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
-
 When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join.
 \revise{Unlike HUGE~\cite{huge}, which has a graph storage that naturally supports \expandintersect, we have implemented this operator directly on a relational database}.
-Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
+Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. 
+Vertices matching the root vertex $u$ of the star must be common neighbors of all the leaf vertices.
+%The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
 Consequently, for the tuple $\tau$, the physical \expandintersect~ operator performs the following steps:
 
