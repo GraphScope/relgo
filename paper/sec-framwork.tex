@@ -66,8 +66,7 @@ When a graph index is available, there are three physical implementations of $\g
 \item  If $\pattern'_r$ is any arbitrary pattern, $\gjoin$ is implemented as a \hashjoin. The cost is calculated as the product of the cardinalities of the two relations being joined, i.e., $\cost(\gjoin) = |\matching(\pattern'_l)| \times |\matching(\pattern'_r)|$.
 \end{itemize}
 
-\revise{In the absence of graph index, \hashjoin~ is used for the entire plan of the matching operator, because the joins connecting vertices and their adjacent edges are always far from cross product.
-The cost of \hashjoin~ is simply the product of the cardinalities of the two relations being joined}.
+\revise{In the absence of a graph index, \hashjoin~ is used for the entire plan of the matching operator for simplicity, and its cost is computed as the product of the cardinalities of the two relations being joined. Although other physical join implementations, such as nested loop join, may be more effective if the join condition is not selective, considering these alternatives is planned for future work.}
 
 %when we are dealing
 %with the matching operators, the joins obtained by decompostion
@@ -139,19 +138,19 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 Note \revise{that \filterrule is a global optimization rule because pushing the predicate into the matching operator does not always yield a better plan and requires careful evaluation.
 However, since it is generally effective, we implement it as a local optimization in \name for better optimization performance}.
 \iffalse
-For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is} 
+For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is}
 \begin{lstlisting}
     (v1:Person)-[:Knows]->(v2:Person)-[:Knows]->(v3:Person),
 \end{lstlisting}
-\revise{with the return values being the names of $v_1$, $v_2$, and $v_3$, and an additional constraint on $v_2$'s place\_id specified outside the matching operator. 
+\revise{with the return values being the names of $v_1$, $v_2$, and $v_3$, and an additional constraint on $v_2$'s place\_id specified outside the matching operator.
 If the predicate is pushed, then the first expansion to $v_2$ in the generated plan would require fetching all necessary properties. When the predicate's filtering capability is weak, this leads to additional overhead. However, if the predicate is not pushed, properties can be deferred, being retrieved only at the end of the plan. Therefore, it is necessary to specifically determine whether to push down the predicate}.
 \fi
 \revise{Besides, \joinfuserule is a local optimization rule specifically designed for graph optimization. The effectiveness of these two rules is validated in \refsec{experiment-opt}. Our \name framework is designed to be generic, allowing different optimization rules to be easily integrated}. %In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule, which avoids the final join for aggregate operations, and \subtaskremoverule, which converts some WHERE conditions to anti-joins and semi-joins} {\color{red} Robin: an extra rule can be explained with sufficient details}.
 
 \vspace*{-2mm}
 \subsection{System Implementation}
-We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite} 
-%, a widely used open-source framework for data management, 
+We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite}
+%, a widely used open-source framework for data management,
 to utilize its robust relational query optimization infrastructure.
 %The frontend of \name is responsible for parsing the input \spjm query, constructing the logical plan, and invoking the graph and relational optimizers to generate the optimal physical plan.
 Firstly, we enhanced Calcite's SQL parser to recognize SQL/PGQ extensions, specifically to parse the \lstinline{GRAPH_TABLE} clause.
