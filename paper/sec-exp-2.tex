@@ -1,4 +1,3 @@
-\iffalse
 \begin{table}[t]
     \small
     \centering
@@ -19,9 +18,8 @@
     \revise{Note that for the $IMDB$ datasets used in the graph database K\`uzu, we have manually designated the tables representing vertices and edges in the graph.}}
     \label{table:experiment-datasets}
 \end{table}
-\fi
 
-\vspace*{-3mm}
+
 \section{Evaluation}
 \label{sec:evaluation}
 % The experimental results are presented and analyzed in this section.
@@ -43,7 +41,7 @@
 
 \stitle{JOB.} The Join Order Benchmark (JOB)~\cite{job_snb} on Internet Movie Database (IMDB) is adopted. We select the variants marked with ``a'' of all JOB queries, referred to as $\text{JOB}_{1\ldots 33}$, without loss of generality. These queries are primarily designed to test join order optimization, with each query containing an average of $8$ joins.
 
-The \revise{largest dataset (i.e., $LDBC100$) contains 282 million tuples in vertex relations and 938 million tuples in edge relations}.
+
 We manually implement the queries using SQL/PGQ, which are presented in the artifact~\cite{artifact}.
 %In addition, we adhered to the same procedures for data loading and graph index construction as those described in~\cite{graindb}.
 Furthermore, we perform the \rgmapping process in a manner that allows the construction of the same graph index on the LDBC and JOB datasets used in GRainDB's experiments~\cite{graindb}.
