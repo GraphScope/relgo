@@ -2,7 +2,7 @@
 \section{Optimizing Matching Operator}
 \label{sec:optimizing-matching-operator}
 In this section, we focus on handling the matching operator, %(more precisely, the graph component),
-which plays a distinct role within the \spjm queries. %compared to the \spj queries. 
+which plays a distinct role within the \spjm queries. %compared to the \spj queries.
 We discuss two main perspectives of optimizing
 the matching operator: logical transformation and physical implementation. Logical transformation is
 responsible for transforming a matching operator into a logically equivalent representation,
@@ -370,19 +370,19 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
 \vspace*{-2mm}
 \subsubsection{Comparison of Search Space and Optimization Time}
-\revise{%We have demonstrated theoretically that the search space of graph-aware transformation can be exponentially smaller than that of graph-agnostic. 
+\revise{%We have demonstrated theoretically that the search space of graph-aware transformation can be exponentially smaller than that of graph-agnostic.
 To further illustrate \refthm{compare-search-space}, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
 
-Additionally, \revise{we compared the optimizer’s query optimization time. In our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are in Java, utilizing the VolcanoPlanner of Calcite with default rules. 
-%Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
+Additionally, \revise{we compared the optimizer's query optimization time. In our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are in Java, utilizing the VolcanoPlanner of Calcite with default rules.
+Notably, we did not consider greedy pruning rules as used in commercialized database like DuckDB~\cite{duckdb} for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
 The optimization time was evaluated using the queries in our experiment (details in \refsec{evaluation}).
-%If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. 
+%If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes.
 Optimizations that do not complete within 10 minutes are recorded as taking 10 minutes.
 Since Calcite often exceeds the 10-minute limit on JOB queries, we only report the results on LDBC queries.
 The results in \reffig{exp-optimization-sf30} indicate that \name can complete optimizing almost all queries within 10-100 milliseconds.
 Besides, the results demonstrate \name's significant superiority over Calcite in query optimization speed.
-% Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. 
+% Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed.
 For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite.}
 
 %The results, shown in \reffig{exp-optimization-sf30} and \reffig{exp-optimization-job}, demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can complete optimizing almost all queries within 10-100 milliseconds, with a maximum time cost of 210 milliseconds, while Calcite often exceeds the 10-minute limit, especially for JOB queries.}
@@ -483,7 +483,7 @@ In practice, a vertex may be adjacent to multiple types of edges. For example, i
 When there is no graph index, solving Case III involves continuously joining $|V_s|$ single-edge patterns.
 When graph indexes are available, the \expandintersect~ operator can be used to efficiently compute the join.
 \revise{Unlike HUGE~\cite{huge}, which has a graph storage that naturally supports \expandintersect, we have implemented this operator directly on a relational database}.
-Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$. 
+Given a tuple $\tau \in \matching(\pattern'_l)$, let $\{v_1, \ldots, v_k\}$ be the vertices in $\tau$ that match the leaf vertices $\{u_1, \ldots, u_k\}$ in the complete star $\pattern(u;V_s)$.
 Vertices matching the root vertex $u$ of the star must be common neighbors of all the leaf vertices.
 %The vertices that can match the root vertex $u$ of the star must be the common neighbors of all the leaf vertices.
 
@@ -514,7 +514,7 @@ Similar to Case II, we flatten the common edges and vertices and pair them up to
     Consider the tuple $(v_{p_1}, e_{k_1}, v_{p_2})$ from $\matching(\pattern_1)$ as an example. First, the \expandedge~ and \getvertex~ operators are applied to obtain the adjacent edges and neighbors of $v_{p_1}$ and $v_{p_2}$, resulting in
     \begin{equation*}
         \begin{split}
-    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]) \text{ and } 
+    &(v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_1}], [v_{m_1}]) \text{ and }
     (v_{p_1}, e_{k_1}, v_{p_2}, [e_{l_2}, e_{l_3}], [v_{m_1}, v_{m_2}]).
         \end{split}
     \end{equation*}
