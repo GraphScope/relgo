@@ -5,13 +5,13 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 \section{Major Modifications in this Revision}
 \label{sec:modifications}
 
-\textbf{In Section 1, we mainly make the following modifications}:
+\stitle{Section 1}
 \begin{itemize}
 	\item We have made the query example on Page 1 (in the original manuscript) a figure float. (R3-M1)
 	\item We have removed \rgmapping from the contributions of this paper. (R2-i.6, R3-O1.1)
 \end{itemize}
 
-\textbf{In Section 2, we mainly make the following modifications}:
+\stitle{Section 2}
 \begin{itemize}
 	\item We move Table 1 earlier to make the notations in this section easier to understand. (R3-M1)
 	\item We have refined and simplified the definition of \rgmapping. (R2-i.6, R3-O1.1, R3-M1, R3-C1, M-C7)
@@ -19,7 +19,7 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 	\item We have enlarged the font sizes in Figure 2 (Figure 1 in the original manuscript) from 28pt to 32pt. (R1-D1)
 \end{itemize}
 
-\textbf{In Section 3, we mainly make the following modifications}:
+\stitle{Section 3}
 \begin{itemize}
 	\item We have enlarged the font sizes in Figure 3 (Figure 2 in the original manuscript) from 24pt to 28pt. (R1-D1)
 	\item We add more contents in Figure 3 to show what is given up when using the tree decomposition approach in \name. (R2-ii.1, M-C4)
@@ -28,7 +28,7 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 	\item We add a explanation to emphasize that the intersection evaluation using worst-case optimal join is implementaed on relational tables. (R2-i.5)
 \end{itemize}
 
-\textbf{In Section 4, we make the following modifications}:
+\stitle{Section 4}
 \begin{itemize}
 	\item We have enlarged the font sizes in Figure 6 (Figure 5 in the original manuscript) from 28pt to 32pt. (R1-D1)
 	\item We add a new paragraph to explain why HASH\_JOIN is used for the entire plan in the absence of a graph index. (R3-O2.5)
@@ -37,10 +37,10 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 	\item We introduce the higher-order graph statistics in more detail. (R1-O1, M-C5)
 \end{itemize}
 
-\textbf{In Section 5, we make the following modifications}:
+\stitle{Section 5}:
 \begin{itemize}
-	\item We add two new baselines, i.e., Umbra and K\`uzu, add description about them, and conduct compreshensive experiments on them. The experimental results are shown in Figure 11 and Section 5.3, and the results are analyzed in the newly added subsections (i.e., Section 5.3.2 and Section 5.3.3). (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1, M-C3). 
-	\item We conduct new compreshensive experiments on a larger instance, i.e., LDBC100 to make the conclusions more convincing. The experimental results are shown in Figure 11(a). (R3-O2.6, R3-C3)
+	\item We add two new baselines, i.e., Umbra and K\`uzu, add description about them, and conduct compreshensive experiments on them. The experimental results are shown in Figure 11 and Section 5.3, and the results are analyzed in the newly added subsections (i.e., Section 5.3.2 and Section 5.3.3). (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1, M-C3).
+	\item We conduct new comprehensive experiments on a larger instance, i.e., LDBC100 to make the conclusions more convincing. The experimental results are shown in Figure 11(a). (R3-O2.6, R3-C3)
 	\item We add an explanation about the method to construct the graph index in Section 5.1. (R3-O2.2)
 	\item We add the description about the versions of DuckDB used in the experiments. (R2-iii.2)
 	\item We have fixed the typo in this revision and modified the size of the RAM to 256GB. (R1-M1)
@@ -50,15 +50,16 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 	\item We provide the query statement for a representative SQL/PGQ query (i.e. $JOB_{17}$) in Figure 12(a). (R3-O2.1, M-C4)
 \end{itemize}
 
-\textbf{In Section 6, we make the following modifications}:
+\stitle{Section 6}
 \begin{itemize}
 	\item We add several sentences to introduce the related work mentioned by Reviewer \#2 and add the related citations. (R2-C2, M-C2)
 	\item We explain the relationships between DuckPGQ and DuckDB and add a sentence to emphasize the difference between DuckPGQ and \name. (R2-i.2)
 \end{itemize}
 
-\textbf{In Section 7}, we add a paragraph to discuss how to extend \name to deal with queries wihout explicit PGQ component. (R3-O3.1, R3-C3)
+\stitle{Section 7}
+We add a paragraph to discuss how to extend \name to deal with queries without explicit PGQ component. (R3-O3.1, R3-C3)
 
-Please note in our experiments, K\`uzu is slower than \name on both the LDBC and JOB benchmarks, even slower than DuckDB. We have raised an issue on their GitHub to inquire about this problem \footnote{https://github.com/kuzudb/kuzu/issues/3865}, but as of now, they have not responded. Therefore, we just reported our experimental results in the manuscript.
+%Please note in our experiments, K\`uzu is slower than \name on both the LDBC and JOB benchmarks, even slower than DuckDB. We have raised an issue on their GitHub to inquire about this problem \footnote{https://github.com/kuzudb/kuzu/issues/3865}, but as of now, they have not responded. Therefore, we just reported our experimental results in the manuscript.
 
 \section{Detailed Response to the Feedbacks}
 \label{sec:response}
@@ -76,12 +77,12 @@ Thank you for your suggestion! We add detailed descriptions about the higher-ord
 \textbf{O2. It is not clear to me what are typical shapes of the plans that lead to such speedups. It would be nice to include representative examples of more efficient plans.}
 
 \textbf{\textit{Response: }}
-We add a case study in Section 5.4, present and compare the plans optimized by \name, GRainDB and Umbra. 
-The plans are shown in a newly added figure (i.e., Figure 12). 
+We add a case study in Section 5.4, present and compare the plans optimized by \name, GRainDB and Umbra.
+The plans are shown in a newly added figure (i.e., Figure 12).
 Besides, we analyze the reason for the efficiency of the plans generated by \name.
 
 
-\textbf{D1. Many aspects of the presentation of figures can be improved: 
+\textbf{D1. Many aspects of the presentation of figures can be improved:
 (1) Workflow illustrations on figures 1,2 and 5 have tiny graphs
 (2) Figures 6--10 showing experimental results use tiny fonts.}
 
@@ -108,7 +109,7 @@ We have redrawn Figure 11 (Figure 10 in the original manuscript), normalized all
 \textbf{\textit{Response: }}
 Thanks for your suggestion! We add a new subsection (i.e., Section 3.1.4) to compare the optimization time of \name and Calcite on LDBC queries.
 In detail, we add a new figure, i.e. Figure 4(b), to show the experimental results.
-The results illustrate that it is important to reduce the time of query optimization in practical applications. 
+The results illustrate that it is important to reduce the time of query optimization in practical applications.
 
 
 
@@ -165,8 +166,8 @@ It is unclear what is given up when using the tree decomposition approach propos
 \textbf{\textit{Response: }}
 We add a new subsection (i.e., Section 3.1.4) to compare the optimization time of \name and Calcite on LDBC queries.
 In detail, we add a new figure, i.e. Figure 4(b), to show the experimental results.
-The results illustrate that it is important to reduce the time of query optimization in practical applications. 
-imization in practical applications. 
+The results illustrate that it is important to reduce the time of query optimization in practical applications.
+imization in practical applications.
 
 Moreover, we add more contents to Figure 3 to show what is given up when using the tree decomposition approach in \name.
 
@@ -224,7 +225,7 @@ O1.2 There is no guaranteed bijection here. The relational model does not use ob
 
 \textbf{\textit{Response: }}
 We add a new sentence about the mapping in Section 2.1, i.e., ``These total functions are typically established through primary-foreign key relationships, which are best illustrated in an Entity-Relationship (ER) diagram''.
-Besides, we add an ER diagram in Figure 2 corresponding to example provided in Example 2, to help understand the primary-foreign key relationships between relations. 
+Besides, we add an ER diagram in Figure 2 corresponding to example provided in Example 2, to help understand the primary-foreign key relationships between relations.
 
 
 \textbf{O2.1 No concrete insight is offered into the test queries, nor concrete examples. }
@@ -241,7 +242,7 @@ O2.2 Not everyone will be familiar with [21]. The paper needs to be self-contain
 \textbf{\textit{Response: }}
 We add an explanation about the method to construct the graph index in Section 5.1.
 
-\textbf{ 
+\textbf{
 O2.3 I recommend that at least an additional relational engine be included, perhaps PostgreSQL, in the comparisons. The authors extended a front-end to DuckDB to handle SQL/PGQ queries, although I do not understand why. Instead, having pairs in the test suite of SQL and SQL/PGO that are semantically equivalent but manually composed I believe would be fairer. And these could be used, say, for PostgreSQL without needing to reinstrument it.}
 
 \textbf{\textit{Response: }}
@@ -254,9 +255,9 @@ The experimental results are analyzed in the newly added subsections (i.e., Sect
 
 
 \textbf{
-O2.4 A concrete example of a "converged" query plan would be exceedingly helpful.} 
+O2.4 A concrete example of a "converged" query plan would be exceedingly helpful.}
 
-\textbf{\textit{Response: }} 
+\textbf{\textit{Response: }}
 The response to this comment is similar to that of O2.1.
 Please note that the plan generated by \name shown in Figure 12(b) us an example of a converged query plan.
 
@@ -275,8 +276,8 @@ In this revision, we have conducted comprehensive experiments on a much larger d
 The experimental results are shown in Figure 11(a) and analyzed in Section 5.3.
 
 
-\textbf{O3.1 SQL/PGQ goes against the declarative ideal of "state what you want, not how to do it." 
-Could RelGo be extended to additionally rewrite SQL/PGQ queries, and SQL queries with no explicit PGO component in some cases, to consider "SPJR" query plans? 
+\textbf{O3.1 SQL/PGQ goes against the declarative ideal of "state what you want, not how to do it."
+Could RelGo be extended to additionally rewrite SQL/PGQ queries, and SQL queries with no explicit PGO component in some cases, to consider "SPJR" query plans?
 Providing the discussion and a roadmap for doing so would greatly strengthen the contributions.}
 
 \textbf{\textit{Response: }}
@@ -286,14 +287,14 @@ It is an interesting idea and we add a new paragraph dicussing about this in Sec
 
 \textbf{\textit{Response: }}
 We add some explanations in Section 4.2.2 about why we do not talk much about relational query optimization.
-Besides, we state that we focus on how to enhance relational queries with graph optimization techniques. 
+Besides, we state that we focus on how to enhance relational queries with graph optimization techniques.
 
 
 \textbf{M1. I would recommend moving Table 1 earlier; and also simplifying the needed notation. I think the query example on page 1 would be better as a figure float. }
 
 \textbf{\textit{Response: }}
 In this revision, we mention Table 1 at the beginning of Section 2.
-Besides, we have simplified the definition of \rgmapping in Section 2.1 and made the query example on Page 1 a figure float. 
+Besides, we have simplified the definition of \rgmapping in Section 2.1 and made the query example on Page 1 a figure float.
 
 
 \textbf{
@@ -326,7 +327,7 @@ We have modified this revision according to O3 \& O4, our detailed revisions can
 C1. Comparison with prior work in particular Umbra emerged as an important consideration among other required improvements listed below.}
 
 \textbf{\textit{Response: }}
-Thanks for your suggestion! 
+Thanks for your suggestion!
 In this revision, we have added two new baselines, i.e., Umbra and K\`uzu.
 Specifically, we add descriptions about them in Section 5.1 and conduct compreshensive experiments on them.
 The experimental results are shown in Section 5.3 and Figure 11.
@@ -376,13 +377,13 @@ We add detailed descriptions about the higher-order graph statistics and explain
 \textbf{
 C6. c. Be much clearer in discussion about the tradeoffs being made here between local and global optimization. And that involved in restricting to a smaller search space. Show that the optimization time is relevant in practice.}
 
-\textbf{\textit{Response: }} 
+\textbf{\textit{Response: }}
 In this revision, we add a new paragraph in Section 4.2.3 to explain that \filterrule is a global optimization while \fusionrule is a local optimization rule.
 However, because \filterrule is generally effective, we implement it as a local optimization for better optimization performance.
 
 Besides, we add a new subsection (i.e., Section 3.1.4) to compare the optimization time of \name and Calcite on LDBC queries.
 In detail, we add a new figure, i.e. Figure 4(b), to show the experimental results.
-The results illustrate that it is important to reduce the time of query optimization in practical applications. 
+The results illustrate that it is important to reduce the time of query optimization in practical applications.
 
 
 \textbf{
