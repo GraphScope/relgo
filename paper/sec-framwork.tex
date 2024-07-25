@@ -21,13 +21,13 @@ method for solving the matching operator. We then delve into the converged workf
 \end{figure*}
 
 
-\vspace*{-2mm}
+\vspace*{-3mm}
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
 The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\reflem{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GRainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks discussed in \refrem{graph-agnostic-vs-graph-aware}.
 %that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
-\vspace*{-2mm}
+\vspace*{-3mm}
 \subsection{The Converged Approach}
 \label{sec:converged}
 As illustrated in \reffig{framework-workflow}, the core workflow of the \name framework consists of two components: \emph{graph optimization} and \emph{relational optimization}. The graph optimization is responsible for handling the graph component in an \spjm query, leveraging graph optimization techniques to determine the optimal decomposition tree of the matching operator. On the other hand, the relational optimization takes over to optimize the relational component in the query.
@@ -40,13 +40,14 @@ In addition to the core workflow, we further explore heuristic rules that highli
 
 %\enlargethispage{1em}
 
+\vspace*{-1mm}
 \subsubsection{The Graph Optimization}
 \label{sec:graph-optimizer}
 We adopt the graph optimization techniques developed in \glogs~\cite{GLogS}. However, it is crucial to note that \glogs~ was originally designed for native graph data, whereas our framework deals with relational data, which necessitates a careful adaptation of \glogs's techniques to the relational setting.
 
 \stitle{\glogue~Construction.} \glogs is built upon a data structure called \glogue, which is essentially a graph $\searchgraph_{\pattern}(V, E)$. In this graph, each vertex represents a pattern $\pattern'$ consisting of up to $k$ vertices (typically, $k=3$) that has non-empty matched instances in the original graph. There is an edge from $\pattern''$ to $\pattern'$, if there is a decomposition tree where $\pattern''$ is a child node of $\pattern'$.
 
- Each vertex $\pattern'$ in the \glogue maintains $|\matching(\pattern')|$, denoting the cardinality of the pattern. To reduce computation costs, \glogs employs a sparsification technique that constructs a smaller subgraph $G'$. The cardinality of the pattern can then be estimated using $|\matching_{G'}(\pattern')|$, computed based on the subgraph $G'$. In our work, we adapt this sparsification technique to construct the \glogue. To do so, we sample a subset of vertex and edge relations during the \rgmapping process. Once the subset of relations is obtained, they can serve as the input tables to the techniques presented in~\cite{gart} for constructing the sparsified graph $G'$.
+ Each vertex $\pattern'$ in \glogue maintains $|\matching(\pattern')|$, denoting the cardinality of the pattern. To reduce computation costs, \glogs employs a sparsification technique to construct a subgraph $G'$. The pattern cardinality can then be estimated using $|\matching_{G'}(\pattern')|$ based on subgraph $G'$. In our work, we adapt this sparsification technique to construct \glogue. We sample a subset of vertex and edge relations in the \rgmapping process. Once the subset of relations is obtained, they can serve as the input tables to the techniques presented in~\cite{gart} for constructing the sparsified graph $G'$.
 
  %\enlargethispage{1em}
 
