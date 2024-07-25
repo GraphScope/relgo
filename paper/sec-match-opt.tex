@@ -1,4 +1,3 @@
-\vspace*{-1mm}
 \section{Optimizing Matching Operator}
 \label{sec:optimizing-matching-operator}
 In this section, we focus on handling the matching operator, %(more precisely, the graph component),
@@ -9,7 +8,7 @@ responsible for transforming a matching operator into a logically equivalent rep
 while physical implementation focuses on how the matching operator can be efficiently executed.
 
 %\enlargethispage{1em}
-\vspace*{-2mm}
+
 \subsection{Logical Transformation}
 \label{sec:handling-match-operator}
 We commence with an intuitive, graph-agnostic transformation before
@@ -34,7 +33,6 @@ Note that \refeq{join-pattern} is also applicable to alternative semantics, incl
 
 %\enlargethispage{1em}
 
-\vspace*{-1mm}
 \subsubsection{Graph-agnostic Transformation}
 \label{sec:intuitive-method}
 If the matching operator can be transformed into purely relational operations, the \spjm query becomes a
@@ -64,11 +62,9 @@ We have the following lemma.%\footnote{Omitted proofs can be found in the supple
 
 
 \begin{lemma}
-    \vspace*{-3mm}
     \label{lem:spjm-to-spj}
     Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
-\vspace*{-4mm}
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -80,7 +76,6 @@ Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching 
 Assume that when $m = k-1$, $\gproject(\matching(\pattern_{k-1}))$ can be converted to a sequence of relational operators, resulting in $R_{k-1}$. When $m = k$, we consider $\pattern_{k}$ of $k$ edges constructed from $\pattern_{k-1}$ by adding edge $e_k = (u_{s_k}, u_{t_k})$. For $\pattern_{k}$ to be connected, it must share at least one common vertex $V_o$ with $\pattern_{k-1}$. According to \refeq{join-pattern}, we have:
 \[ \matching(\pattern_{k}) =  \matching(\pattern_{e_k}) \gjoin_{V_o} \matching(\pattern_{k-1}), \]
 where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and $V_o$ is the common vertex shared by $\pattern_{k-1}$ and $\pattern_{e_k}$. Applying $\gproject$ to the above equation, we get:
-\vspace*{-1mm}
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
@@ -106,7 +101,6 @@ We thus conclude the proof.
   \label{ex:spjm-to-spj}
   Given pattern graph $\pattern$ in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
   Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_1}, u_{m})$, and $e_3 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
-  \vspace*{-1mm}
   \begin{equation*}
     \begin{split}
     R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relation{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
@@ -203,14 +197,12 @@ Besides, a matching operator located on the left subtree of the join operator is
             \centering
             \includegraphics[width=\linewidth]{./figures/exp/compare_search_space_ratio.pdf}
         \end{subfigure}
-        \vspace{-.5em}
         \caption{Search Space Comparison.}
         \label{fig:exp-search-space}
     \end{subfigure}
     \begin{subfigure}[b]{\linewidth}
         \centering
-        \includegraphics[width=.9\linewidth]{./figures/exp/optimization_sf30.pdf}
-        \vspace{-.9em}
+        \includegraphics[width=\linewidth]{./figures/exp/optimization_sf30.pdf}
         \caption{Optimization Time Cost on LDBC Queries.}
         \label{fig:exp-optimization-sf30}
     \end{subfigure}
@@ -349,7 +341,6 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     The search space in graph-aware transformation can be exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
-\iffalse
 \begin{proof}
     % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
     %\begin{equation*}
@@ -365,27 +356,17 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 
         Therefore, the cardinality of $\mathbb{PL}_r$ is at least $2^{m}$ times that of $\mathbb{PL}_g$, which concludes the proof.
 \end{proof}
-\fi
+
 %\enlargethispage{1em}
 
-\vspace*{-2mm}
 \subsubsection{Comparison of Search Space and Optimization Time}
 \revise{%We have demonstrated theoretically that the search space of graph-aware transformation can be exponentially smaller than that of graph-agnostic. 
 To further illustrate \refthm{compare-search-space}, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
 
-Additionally, \revise{we compared the optimizer’s query optimization time. In our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are in Java, utilizing the VolcanoPlanner of Calcite with default rules. 
-%Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
+Additionally, we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
 The optimization time was evaluated using the queries in our experiment (details in \refsec{evaluation}).
-%If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. 
-Optimizations that do not complete within 10 minutes are recorded as taking 10 minutes.
-Since Calcite often exceeds the 10-minute limit on JOB queries, we only report the results on LDBC queries.
-The results in \reffig{exp-optimization-sf30} indicate that \name can complete optimizing almost all queries within 10-100 milliseconds.
-Besides, the results demonstrate \name's significant superiority over Calcite in query optimization speed.
-% Besides, the results demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. 
-For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite.}
-
-%The results, shown in \reffig{exp-optimization-sf30} and \reffig{exp-optimization-job}, demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can complete optimizing almost all queries within 10-100 milliseconds, with a maximum time cost of 210 milliseconds, while Calcite often exceeds the 10-minute limit, especially for JOB queries.}
+If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. The results, shown in \reffig{exp-optimization-sf30} and \reffig{exp-optimization-job}, demonstrate the superiority of \name, which outperforms Calcite signifcantly in query optimization speed. For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name is more than \( 10^4 \) times faster compared to Calcite. Additionally, \name can complete optimizing almost all queries within 10-100 milliseconds, with a maximum time cost of 210 milliseconds, while Calcite often exceeds the 10-minute limit, especially for JOB queries.
 
 
 
@@ -406,7 +387,6 @@ For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name
 %\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
 %Specifically, the results also demonstrate that the search space of the graph-agnostic method increase exponentially faster than that of the graph-aware method, which corroborates the correctness of \refthm{compare-search-space}.
 
-\vspace*{-2mm}
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
@@ -451,7 +431,7 @@ The construction of VE-index on $R_{v_t}$ is analogous.
 %Even if certain rules are installed to prevent such separation, the resulting plan may still be suboptimal. This is because the plan for solving the matching operator reflects a naive method of edge-based join plan~\cite{lai2019distributed}, which is not worst-case optimal. \todo{add a few experiment findings}
 %\modify{Specifically, experimental results in \reffig{exp-expand-intersect} indicate that the performance of a worst-case-optimal plan can be improved by about 1.3$\times$.}
 
-\vspace*{-3mm}
+
 \subsubsection{The Graph-Aware Execution Plan}
 \label{sec:join-matching-operator}
 We delve into the physical implementation of the execution plan provided by the graph-aware method for solving $\matching(\pattern)$. The entry point of the plan is always matching a single-vertex pattern $\pattern_u$, which is one of the leaf nodes in the decomposition tree.
