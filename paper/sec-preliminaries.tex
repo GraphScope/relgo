@@ -77,8 +77,8 @@ The relations $R_{q_i}$ that are mapped to edges in the graph are referred to as
 
 \begin{example}
     \label{ex:rgmapping}
-    An \rgmapping can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.
-    Given the relations, an \rgmapping is defined with the statement shown in Fig.~\ref{fig:intro-rgmapping-example}(a).
+    \revise{In Fig.~\ref{fig:intro-rgmapping-example}(a), we have illustrated some relational tables and their corresponding ER diagram.
+    An \rgmapping can be defined following the grammar of SQL/PGQ with \lstinline{CREATE PROPERTY GRAPH} statements.}
     \iffalse
     \begin{equation*}
         \begin{split}
@@ -109,10 +109,10 @@ CREATE PROPERTY GRAPH G1
     )
     \end{lstlisting}
     \fi
-    The described \rgmapping involves assigning tuples from vertex relations, such as $\relation{Person}$ and $\relation{Message}$, to graph vertices. For instance, the vertex $v_{p_1}$ is associated with the tuple $\tau_{p_1}$ in $\relation{Person}$, and thus assigned the label ``Person'' and the name attribute ``Tom''. Similarly, edge relations $\relation{Likes}$ and $\relation{Knows}$ correspond to graph edges.
-    \revise{The ER diagram of the relations are shown in Fig.~\ref{fig:intro-rgmapping-example}(a). Regarding $\relation{Likes}$
-    that is mapped to graph edges, two total functions can be identified using the primary-foreign key relationships, namely, $\lambda_{\text{Likes}}^s: \relation{\text{Likes}} \to \relation{\text{Person}}$ and $\lambda_{\text{Likes}}^t: \relation{\text{Likes}} \to \relation{\text{Message}}$.}
-    Let's consider the edge $e_{l_1}$. It originates from the tuple $\tau_{l_1}$ in the $\relation{Likes}$ relation. Its source vertex $v_{p_1}$ is linked to the tuple $\tau_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the condition ``$\tau_{l_1}.pid = \tau_{p_1}.\text{person\_id}$''. Similarly, its target vertex $v_{m_1}$ is associated with the tuple $\tau_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following the condition ``$\tau_{l_1}.mid = \tau_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
+    The described \rgmapping involves assigning tuples from vertex relations (\revise{i.e. entities}), such as $\relation{Person}$ and $\relation{Message}$, to graph vertices. For instance, the vertex $v_{p_1}$ is associated with the tuple $\tau_{p_1}$ in $\relation{Person}$, and thus assigned the label ``Person'' and the name attribute ``Tom''. Similarly, edge relations (\revise{i.e. relationships}) $\relation{Likes}$ and $\relation{Knows}$ correspond to graph edges.
+    \revise{Regarding $\relation{Likes}$
+    that is mapped to graph edges, two total functions can be identified, namely $\lambda_{\text{Likes}}^s: \relation{\text{Likes}} \to \relation{\text{Person}}$ and $\lambda_{\text{Likes}}^t: \relation{\text{Likes}} \to \relation{\text{Message}}$.}
+    Let's consider the edge $e_{l_1}$. It originates from the tuple $\tau_{l_1}$ in the $\relation{Likes}$ relation. Its source vertex $v_{p_1}$ is linked to the tuple $\tau_{p_1}$ in $\relation{Person}$ via the function $\lambda_{Likes}^s$, following the \revise{primary-foreign key relationship} ``$\tau_{l_1}.pid = \tau_{p_1}.\text{person\_id}$''. Similarly, its target vertex $v_{m_1}$ is associated with the tuple $\tau_{m_1}$ in $\relation{Message}$ via the function $\lambda_{Likes}^t$, following ``$\tau_{l_1}.mid = \tau_{m_1}.\text{message\_id}$''. As a result of this mapping, the edge $e_{l_1}$ is assigned the label ``Likes'' and the attribute ``date'' with the value ``2024-03-31''.
 \end{example}
 
 %In the rest of this paper, let $\mathcal{J}_{GR} = 2^{2^{V \cup E}}$ be the domain of graph relations, $\mathcal{J}_R = 2^{2^{D}}$ be the domain of relations, and $\mathcal{J} = \mathcal{J}_{GR} \cup \mathcal{J}_R$.
