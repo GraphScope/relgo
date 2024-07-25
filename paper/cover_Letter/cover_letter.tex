@@ -222,8 +222,8 @@ Besides, we remove the notations ``zeta for vertex and edge mappings'' that neve
 O1.2 There is no guaranteed bijection here. The relational model does not use object IDs; graph data models do. The introduction of UUIDs skirts the issue, to be replaced shortly later in the paper with row-IDs. It seems rather that one would want to insist that any table manifested as an labeled edge set via GRAPH\_TABLE have foreign keys to both the node sets / entity tables it is being used to bridge. This could be conveyed more simply perhaps in E-R terms.}
 
 \textbf{\textit{Response: }}
-We add a new sentence about the mapping in Section 2.1, i.e., ``These total functions are typically established through primary-foreign key relationships, which are best illustrated in an Entity-Relationship (ER) diagram''.
-Besides, we add an ER diagram in Figure 2 corresponding to example provided in Example 2, to help understand the primary-foreign key relationships between relations.
+We rewrite the relevant description of \rgmapping and describe the connection between \rgmapping and the ER diagram in Section 2.1.
+Besides, we add an ER diagram in Figure 2 corresponding to Example 2, to help understand the connection between \rgmapping and the ER diagram.
 
 
 \textbf{O2.1 No concrete insight is offered into the test queries, nor concrete examples. }
@@ -315,7 +315,7 @@ Besides, we have added a new section (i.e., Section 5.4) to provide a case study
 C3. Addressing O3 \& O4 to some extent would strengthen the paper, I believe.}
 
 \textbf{\textit{Response: }}
-We have modified this revision according to O3 \& O4, our detailed revisions can be found in our responses to O3.1 and O4.1.
+We have revised this according to O3 and O4. Detailed changes are in our responses to O3.1 and O4.1.
 
 
 
@@ -389,5 +389,6 @@ C7. 3. Rewrite the presentation of SQL/PL. [R2-i; R3-O1]
 
 \textbf{\textit{Response: }}
 In this revision, we have simplified the definition of \rgmapping in Section 2.1 and remove the notations ``zeta for vertex and edge mappings'' that never used in this manuscript.
-Besides, we add a sentence about the total functions between edge relations and vertex relations in Section 2.1, i.e., ``These total functions are typically established through primary-foreign key relationships, which are best illustrated in an Entity-Relationship (ER) diagram''.
+Besides, we rewrite the relevant description of \rgmapping and describe the connection between \rgmapping and the ER diagram.
+We add an ER diagram in Figure 2 corresponding to Example 2, to help understand the connection between \rgmapping and the ER diagram.
 Moreover, we add an ER diagram in Figure 2 corresponding to the example provided in Example 2 to help understand the primary-foreign key relationships between relations.
