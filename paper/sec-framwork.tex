@@ -134,7 +134,8 @@ After the field trim step, if the output edges are trimmed, the \expandedge~ ope
 
 %\enlargethispage{1em}
 
-Note \revise{that \filterrule is a global optimization rule because pushing the predicate into the matching operator does not always yield a better plan and requires careful evaluation}.
+Note \revise{that \filterrule is a global optimization rule because pushing the predicate into the matching operator does not always yield a better plan and requires careful evaluation.
+However, since it is generally effective, we implement it as a local optimization in \name for better optimization performance}.
 \iffalse
 For instance, given $\matching(\pattern)$ and assuming the query represented by $\pattern$ is} 
 \begin{lstlisting}

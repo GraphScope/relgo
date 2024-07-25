@@ -107,7 +107,7 @@ of the graph-agnostic approach can be exponentially larger than our solution. \h
 
 \item We introduce \name, a converged optimization framework that leverages the strengths of both relational and graph query optimization techniques to optimize \spjm queries. \name adapts state-of-the-art graph optimization techniques to the relational context, and implements graph-based physical operations based on graph index for efficient query execution. \hfill(\refsec{optimizations})
 
-\item We develop \name~ by integrating it with the industrial relational optimization framework, Calcite~\cite{calcite}, and employing DuckDB~\cite{duckdb} for execution runtime. We conducted extensive experiments to evaluate its performance. The results on the LDBC Social Network Benchmark~\cite{ldbc_snb} indicate that \name significantly surpasses the performance of the graph-agnostic baseline, with an average speedup of \revise{$21.9\times$}, and $10\times$ even after graph index is enabled for the baseline. \hfill(\refsec{evaluation})
+\item We develop \name~ by integrating it with the industrial relational optimization framework, Calcite~\cite{calcite}, and employing DuckDB~\cite{duckdb} for execution runtime. We conducted extensive experiments to evaluate its performance. The results on the LDBC Social Network Benchmark~\cite{ldbc_snb} indicate that \name significantly surpasses the performance of the graph-agnostic baseline, with an average speedup of \revise{$21.9\times$}, and \revise{$5.4\times$} even after graph index is enabled for the baseline. \hfill(\refsec{evaluation})
 
 \end{enumerate}
 
