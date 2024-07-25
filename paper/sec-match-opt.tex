@@ -64,11 +64,9 @@ We have the following lemma.%\footnote{Omitted proofs can be found in the supple
 
 
 \begin{lemma}
-    \vspace*{-3mm}
     \label{lem:spjm-to-spj}
     Under \rgmapping, the matching operation in an \spjm query can be losslessly transformed into a sequence of relational joins involving $n$ vertex relations and $m$ edge relations.
 \end{lemma}
-\vspace*{-4mm}
 \begin{proof}
     Consider a pattern $\pattern_m$ of $m$ edges, where the $i$-th vertex is denoted as $u_i$, and the $i$-th edge is $e_i = (u_{s_i}, u_{t_i})$. %According to the $\rgmapping$, the corresponding relations of vertex $u_i$ and edge $e_i$ are denoted as $\relation{u_i}$ and $\relation{e_i}$, respectively. Furthermore, we have $\lambda_{e_i}^s$ and $\lambda_{e_i}^t$ to map tuples from $\relation{e_i}$ to $\relation{u_{s_i}}$, and from $\relation{e_i}$ to $\relation{u_{t_i}}$, respectively.
 
@@ -80,7 +78,6 @@ Next, consider $\pattern_1$ with one edge, $e_1 = (u_{s_1}, u_{t_1})$. Matching 
 Assume that when $m = k-1$, $\gproject(\matching(\pattern_{k-1}))$ can be converted to a sequence of relational operators, resulting in $R_{k-1}$. When $m = k$, we consider $\pattern_{k}$ of $k$ edges constructed from $\pattern_{k-1}$ by adding edge $e_k = (u_{s_k}, u_{t_k})$. For $\pattern_{k}$ to be connected, it must share at least one common vertex $V_o$ with $\pattern_{k-1}$. According to \refeq{join-pattern}, we have:
 \[ \matching(\pattern_{k}) =  \matching(\pattern_{e_k}) \gjoin_{V_o} \matching(\pattern_{k-1}), \]
 where $\pattern_{e_k}$ denotes a pattern that contains only the edge $e_k$, and $V_o$ is the common vertex shared by $\pattern_{k-1}$ and $\pattern_{e_k}$. Applying $\gproject$ to the above equation, we get:
-\vspace*{-1mm}
 \begin{equation*}
 \begin{split}
 R_k &= \gproject(\matching(\pattern_{k})) \\
@@ -106,7 +103,6 @@ We thus conclude the proof.
   \label{ex:spjm-to-spj}
   Given pattern graph $\pattern$ in \reffig{intro-rgmapping-example}(b), the matching operation $\matching(\pattern)$ can be converted to a sequence of join operations as follows. Without loss of generality, we start from $\pattern_0$ containing only the vertex $u_{p_1}$, and we have $\relation{0} = \relationx{1}{\text{Person}}$ (note that the superscript 1 is used to differentiate relations of the same name).
   Next, we sequentially add the edges $e_1 = (u_{p_1}, u_{p_2})$, $e_2 = (u_{p_1}, u_{m})$, and $e_3 = (u_{p_2}, u_m)$ to $\pattern_0$, resulting in the following relations:
-  \vspace*{-1mm}
   \begin{equation*}
     \begin{split}
     R'_1 &= \relationx{1}{\text{Person}} \Join_{\text{person\_id}=\text{pid1}} \relation{\text{Knows}} \Join_{\text{pid2}=\text{person\_id}} \relationx{2}{\text{Person}}, \\
@@ -227,120 +223,8 @@ Besides, a matching operator located on the left subtree of the join operator is
 
 After applying graph-agnostic transformations to the matching operator, the optimizer searches for the optimal join order. In contrast, applying graph-aware transformations leads to a search for the optimal decomposition tree. The search space for the graph-agnostic approach is clearly larger than that of the graph-aware approach, given the constraints imposed on the decomposition tree in the latter approach. However, the precise difference in search space complexity between the two approaches has not been rigorously analyzed.
 In this subsection, we analyze the gap between the two search spaces and conclude that the graph-aware approach can be exponentially more efficient in this regard.
-%In this subsection, we derive a lower bound on the search space of the graph-agnostic approach and an upper bound on the search space of the graph-aware approach to demonstrate that the latter is exponentially more efficient in terms of search space.
-%Here, we argue that the comparison of the search space is general. First, some optimizers, such as the one proposed in~\cite{Haffnerjoinorder}, involve heuristics that make it challenging to perform a rigorous analysis of their behavior. Second, the abundance of relational optimizers~\cite{Haffnerjoinorder,chenjoinorder, Haffnerjoinorder}, makes it difficult to select a single optimizer as the gold standard for comparison. Finally, the techniques employed by relational optimizers may also be applicable to their graph counterparts, potentially resulting in similar improvements in both cases.
-
-\comment{
-According to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
-which is equivalent to searching for the optimal join order among $n + m$ relations. The following lemma
-establishes a lower bound on the search space complexity for this problem:
-
-\begin{lemma}
-\label{lem:complexity-of-volcano}
-Given a join among $n + m$ relations, the search space for determining the optimal join order is at least $\Omega(4^{m+n-1})$.
-\end{lemma}
 
 
-\begin{proof}
-    We first estimate the number of possible join orders, where each join order corresponds to a logical plan of join operators. The search space refers to the number of physical plans corresponding to these logical plans. To avoid cross products, for each explored logical plan, whenever two relations are joined together, there should be join conditions between them.
-
-    Given $n + m$ relations, we construct a graph $\searchgraph = (V, E)$, where each relation corresponds to a vertex in $V$, and if there is a join condition between two relations, there is an edge between their corresponding vertices in $E$. Each possible logical plan forms a spanning tree in $\searchgraph$, and different logical plans may form the same tree. Therefore, the number of possible logical plans can be computed by obtaining all the possible logical plans corresponding to the spanning trees in $\searchgraph$.
-
-    We consider the case where there is only one spanning tree $ST$ in $\searchgraph$ with $k$ edges. When there are multiple spanning trees in $\searchgraph$, we compute the number of logical plans corresponding to one of these trees, which provides a lower bound on the total number of possible logical plans.
-
-    First, we examine the case where $ST$ is a path. Let $c_p(k)$ denote the number of logical plans corresponding to a spanning tree that is a path of length $k$. We have:
-    \begin{equation*}
-        c_p(k) = 2\sum_{i=0}^{i=k-1}c_p(i)c_p(k-1-i),
-    \end{equation*}
-    where $c_p(0) = 1$. Using the generating function, we obtain:
-    \begin{equation*}
-        c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} \geq \frac{2^k}{k+1}2^{k-1}(k+1) = \frac{4^k}{2}
-    \end{equation*}
-
-    Next, we consider a more general scenario where $ST$ is not necessarily a path. Let $c(ST)$ denote the number of logical plans corresponding to $ST$. Suppose there are $k$ edges in $ST$. We denote the longest path in the tree by $p_1$, with length $P_1 = |p_1|$. By removing edges in $p_1$ from $ST$, we obtain a new subgraph $ST_1$. We then find the longest path $p_2$ in $ST_1$ that intersects with the already removed path $p_1$, with length $P_2 = |p_2|$. We remove edges in $p_2$ from $ST_1$ to obtain subgraph $ST_2$. Since $p_1$ and $p_2$ are both paths, the number of logical plans corresponding to them are $c_p(P_1)$ and $c_p(P_2)$, respectively. If $p_1$ and $p_2$ intersect at vertex $v_i$, the operator that scans $v_i$ appears in each logical plan corresponding to $p_1$. By replacing these scanning operators with the plans corresponding to $p_2$, we obtain $c(p_1 \cup p_2)$ plans, satisfying $c(p_1 \cup p_2) \geq c_p(p_1)c_p(p_2)$ because the relations corresponding to vertices in $p_1$ and those in $p_2$ can be joined in an interleaved fashion, which is overlooked by multiplying $c_p(p_1)$ and $c_p(p_2)$.
-
-    As $ST$ is a tree, by repeatedly finding and removing paths as described above, all edges in $ST$ are eventually removed. Let $s$ be the number of paths removed. We have:
-    \begin{equation*}
-    \begin{split}
-        c(ST) & = c(p_1 \cup \cdots \cup p_s) \geq c_p(P_1) \cdots c_p(P_s) \\
-        & \geq \frac{4^{P_1 + \cdots + P_s}}{2^s} = \frac{4^{k}}{2^s} \geq 2^{k}.
-    \end{split}
-    \end{equation*}
-
-    Since there are $m + n$ vertices in $\mathbb{G}$, the number of edges in the spanning tree is $k = m + n - 1$. Thus, the number of physical plans is at least $2^{k}t^{m+n-1} \geq 2^{m+n-1}t^{m+n-1} \geq 4^{m+n-1}$, which is also the search space of the problem. This concludes the proof.
-\end{proof}
-
-
-In contrast, when the graph-aware transformation is applied, the search space is equivalent to the number of possible decomposition trees. Despite the numerous works proposed to optimize graph pattern matching~\cite{huge,GLogS,mhedhbi2019optimizing}, to the best of our knowledge, the search space of this optimization problem has not been thoroughly analyzed. The following lemma provides an upper bound on the search space complexity for the graph-aware approach:
-
-
-\begin{lemma}
-\label{lem:complexity-of-graph-aware}
-The search space for determining the optimal decomposition tree for pattern $\pattern$ is at most $O(4^{n-1})$.
-\end{lemma}
-
-
-
-\begin{proof}
-    To prove the lemma, we construct a graph $\searchgraph_\pattern(V, E)$ to facilitate the analysis, where the vertex set contains all induced sub-patterns of $\pattern$ as well as an empty graph $\pattern_{\emptyset}$.
-    We denote $V_i \subseteq V$ as the set of sub-patterns that contain exactly $i \leq n$ vertices. It is evident that $V_n = \{\pattern\}$.
-    An edge exists from a larger (a pattern is considered larger if it contains more vertices) sub-pattern $\pattern_1$ to a smaller sub-pattern $\pattern_2$ if it is possible for $\pattern_2$ to be the child of $\pattern_1$ in any decomposition tree. Each edge has a weight representing the cost of extending graphs matching $\pattern_2$ to those matching $\pattern_1$.
-    Moreover, there are edges weighted 0 from sub-patterns in $V_1$ to $\pattern_{\emptyset}$.
-    Given the graph $\searchgraph_\pattern(V, E)$, %the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\emptyset}$ in $\searchgraph_\pattern(V, E)$.
-    the search space equals the number of paths from $\pattern$ to $\pattern_{\emptyset}$.
-
-    Determining the exact number of edges in $\searchgraph_\pattern$ for an arbitrary pattern is non-trivial. However, since we are studying the upper bound, we can consider the worst-case scenario. Given a sub-pattern $\pattern'$ consisting of $1 < i \leq n$ vertices, the number of induced subgraphs of $\pattern'$ with $j$ vertices is at most $\binom{i}{j}$, which constrains the maximum number of edges to $\pattern_j \in V_j$ that $\pattern'$ can connect.
-
-    Denote the maximum number of paths from a sub-pattern with $s$ vertices (i.e., $\pattern_s \in V_s$) to $\pattern_{\emptyset}$ by $\decompnum_\pattern(s)$.
-    Please note that $\decompnum_\pattern(1) = 1$ and $\decompnum_\pattern(n)$ is an upper bound of the search space for determining the optimal decomposition tree for $\pattern$.
-    Then, we have the following inequality:
-    \begin{equation*}
-        \decompnum_{\pattern}(n) \leq \binom{n}{1}\decompnum_{\pattern}(n-1)\decompnum_{\pattern}(1) + \cdots + \binom{n}{n-1}\decompnum_{\pattern}(1)\decompnum_{\pattern}(n-1).
-    \end{equation*}
-
-    It is clear that $\decompnum_\pattern(i) \geq \decompnum_\pattern(j)$ if $i > j$.
-    Therefore, we have
-    \begin{equation*}
-        \decompnum_{\pattern}(n) \leq \decompnumsq{2}_\pattern(n-1)(\binom{n}{1} + \cdots + \binom{n}{n-1}) < \decompnumsq{2}_\pattern(n-1)2^{n}
-    \end{equation*}
-    By recursively replacing $\decompnum_\pattern(n-1), \decompnum_\pattern(n-2), \cdots, \decompnum_\pattern(2)$, we can obtain the following inequalities:
-    \begin{equation*}
-        \begin{split}
-            \decompnum_{\pattern}(n) & < (\decompnumsq{2}_\pattern(n-2)2^{n-1})^22^n = \decompnumsq{4}_\pattern(n-2)2^{n+2n-2} \\
-            & < (\decompnumsq{2}_\pattern(n-3)2^{n-2})^42^{n+2n-2} = \decompnumsq{8}_\pattern(n-3)2^{n+2n-2 + 4n-8} \\
-            & < \cdots \\
-            & < \decompnumsq{2^{n-1}}_\pattern(1)2^{(1+\cdots+2^{n-2})n - (0+ 2 + \cdots + (n-2)2^{n-2})} < 4^{n-1}
-        \end{split}
-    \end{equation*}
-
-    Therefore, the search space is at most $O(4^{n-1})$.
-    We thus conclude the proof.
-\end{proof}
-
-
-
-    \begin{proof}
-        \todo{refine the proof.}
-        Given graph $\searchgraph_\pattern(V, E)$, the problem of determining the optimal decomposition tree for the graph-aware method can be transformed to finding the shortest path from $\pattern$ to $\pattern_{\empty}$ in $\searchgraph_\pattern(V, E)$.
-        According to Dijkstra's algorithm, the time complexity of the shortest path query problem is $O(|E|)$.
-
-        As the number of edges from patterns in $V_i$ is at most
-        \begin{equation*}
-            \sum\limits_{\pattern_i}(2^i - 2) = \binom{n}{i}(2^i - 2),
-        \end{equation*}
-        the upper bound of the number of edges in $\searchgraph_\pattern$ is
-        \begin{equation*}
-            \begin{split}
-                \sum\limits_{i=2}^{i=n}\binom{n}{i}(2^i - 2) + n
-                < \sum\limits_{i=0}^{i=n}\binom{n}{i}2^i = (2+1)^n
-                 = 3^n.
-            \end{split}
-        \end{equation*}
-
-        Therefore, the time complexity is at most $O(3^n)$.
-        We thus conclude the proof.
-    \end{proof}
-}
 
 % We ultimately obtain the following theorem.
 
@@ -349,6 +233,48 @@ The search space for determining the optimal decomposition tree for pattern $\pa
     The search space in graph-aware transformation can be exponentially smaller than that of the graph-agnostic transformation,
     for optimizing the matching operator in an \spjm query.
 \end{theorem}
+\begin{proof}
+    We first compute the search space of the graph-agnostic transformation.
+    Given $n$ vertex relations and $m$ edge relations, according to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
+    which is equivalent to searching for the optimal join order among $n + m$ relations. 
+    
+    Note that we focus on path graphs in this proof, i.e., the $n$ vertex relations and $m$ edge relations construct a path.
+    Then, let $c_p(k)$ denote the number of possible join order given these $n + m$ relations. We have:
+    \begin{equation*}
+        c_p(k) = 2\sum_{i=0}^{i=k-1}c_p(i)c_p(k-1-i),
+    \end{equation*}
+    where $c_p(0) = 1$. Using the generating function, we obtain:
+    \begin{equation*}
+        c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} = \frac{2^{m + n - 1}}{m + n}\binom{2(m + n - 1)}{m + n - 1}
+    \end{equation*}
+    Since the length of the path is $k = m + n - 1$, we have 
+    \begin{equation*}
+        c_p(m + n - 1) = \frac{2^{m + n - 1}}{m + n}\binom{2(m + n - 1)}{m + n - 1}
+    \end{equation*}
+    
+    Then, for the graph-aware transformation, let $s_p(k)$ denote the number of logical plans corresponding to a path graph with length $k$ for the graph-aware approach.
+    Then, we have:
+    \begin{equation*}
+        s_p(k) = 2\sum_{i=1}^{i=k-1}s_p(i)s_p(k-i) + 2s_p(k-1),
+    \end{equation*}
+    where $s_p(0) = 1$.
+
+    Let     
+    \begin{equation*}
+        c'_p(k) = c_p(k + 1) = 2\sum_{i=0}^{i=k}c_p(i)c_p(k-i).
+    \end{equation*}
+    In accordance with the principle of mathematical induction, it is easy to prove that
+    \begin{equation*}
+        s_p(k) \leq c'_p(k).
+    \end{equation*}
+    Therefore, we have 
+    \begin{equation*}
+        \frac{c_p(m+n-1)}{s_p(n)} \geq \frac{c_p(m+n-1)}{c'_p(n)} = \frac{c_p(m+n-1)}{c_p(n + 1)} \geq O(2^{m-2})
+    \end{equation*}
+    Therefore, \label{thm:compare-search-space}
+    The search space in graph-aware transformation can be exponentially smaller than that of the graph-agnostic transformation.
+    We thus conclude the proof.
+\end{proof}
 \iffalse
 \begin{proof}
     % According to \reflem{complexity-of-volcano} and \reflem{complexity-of-graph-aware}, we have
