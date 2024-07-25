@@ -37,9 +37,9 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 	\item We introduce the higher-order graph statistics in more detail. (R1-O1, M-C5)
 \end{itemize}
 
-\stitle{Section 5}:
+\stitle{Section 5}
 \begin{itemize}
-	\item We add two new baselines, i.e., Umbra and K\`uzu, add description about them, and conduct compreshensive experiments on them. The experimental results are shown in Figure 11 and Section 5.3, and the results are analyzed in the newly added subsections (i.e., Section 5.3.2 and Section 5.3.3). (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1, M-C3).
+	\item We add two new baselines, i.e., Umbra and K\`uzu\footnote{In our experiments, K\`uzu performs even slower than native DuckDB in most cases. We have raised an issue on their GitHub to inquire about any potential issues (https://github.com/kuzudb/kuzu/issues/3865), but as of now, we have not received a response. Therefore, we have reported our experimental results as observed in the manuscript.}, add description about them, and conduct comprehensive experiments on them. The experimental results are shown in Figure 11 and Section 5.3, and the results are analyzed in the newly added subsections (i.e., Section 5.3.2 and Section 5.3.3). (R2-i.4, R2-iii.1, R2-C1, R2-C3, R3-O2.3, R3-C2, M-C1, M-C3).
 	\item We conduct new comprehensive experiments on a larger instance, i.e., LDBC100 to make the conclusions more convincing. The experimental results are shown in Figure 11(a). (R3-O2.6, R3-C3)
 	\item We add an explanation about the method to construct the graph index in Section 5.1. (R3-O2.2)
 	\item We add the description about the versions of DuckDB used in the experiments. (R2-iii.2)
@@ -59,7 +59,6 @@ Below we summarize the major changes in each section in \refsec{modifications} a
 \stitle{Section 7}
 We add a paragraph to discuss how to extend \name to deal with queries without explicit PGQ component. (R3-O3.1, R3-C3)
 
-%Please note in our experiments, K\`uzu is slower than \name on both the LDBC and JOB benchmarks, even slower than DuckDB. We have raised an issue on their GitHub to inquire about this problem \footnote{https://github.com/kuzudb/kuzu/issues/3865}, but as of now, they have not responded. Therefore, we just reported our experimental results in the manuscript.
 
 \section{Detailed Response to the Feedbacks}
 \label{sec:response}
@@ -128,8 +127,7 @@ We explain the relationships between DuckPGQ and DuckDB in Section 6 and add a s
 
 \textbf{i.3. filter push-down, called `FilterIntoMatchRule` is an artifact of separating the evaluation into a matching operator instead of a global optimization approach and is seen as necessity in my opinion and not a new optimization technique.}
 
-\textbf{\textit{Response: }} We add a new paragraph in Section 4.2.3 to state that \filterrule is a global optimization while \fusionrule is a local optimization rule.
-However, because \filterrule is generally effective, we implement it as a local optimization for better optimization performance.
+\textbf{\textit{Response: }} We add a new paragraph in Section 4.2.3 to state that \filterrule is a global optimization rule, whereas \fusionrule is a local optimization rule. However, due to its general effectiveness, we currently implement \filterrule as local (greedy) optimization.
 Due to the length limitation, the reason why \filterrule is a global optimization will be detailed in the full version of this manuscript.
 
 
@@ -378,8 +376,7 @@ We add detailed descriptions about the higher-order graph statistics and explain
 C6. c. Be much clearer in discussion about the tradeoffs being made here between local and global optimization. And that involved in restricting to a smaller search space. Show that the optimization time is relevant in practice.}
 
 \textbf{\textit{Response: }}
-In this revision, we add a new paragraph in Section 4.2.3 to explain that \filterrule is a global optimization while \fusionrule is a local optimization rule.
-However, because \filterrule is generally effective, we implement it as a local optimization for better optimization performance.
+In this revision, we add a new paragraph in Section 4.2.3 to explain that \filterrule is a global optimization rule, whereas \fusionrule is a local optimization rule. However, due to its general effectiveness, we currently implement \filterrule as local (greedy) optimization.
 
 Besides, we add a new subsection (i.e., Section 3.1.4) to compare the optimization time of \name and Calcite on LDBC queries.
 In detail, we add a new figure, i.e. Figure 4(b), to show the experimental results.
