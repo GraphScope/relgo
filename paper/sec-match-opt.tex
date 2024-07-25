@@ -368,13 +368,13 @@ The search space for determining the optimal decomposition tree for pattern $\pa
 \fi
 %\enlargethispage{1em}
 
-
+\vspace*{-2mm}
 \subsubsection{Comparison of Search Space and Optimization Time}
 \revise{%We have demonstrated theoretically that the search space of graph-aware transformation can be exponentially smaller than that of graph-agnostic. 
 To further illustrate \refthm{compare-search-space}, we used a special case of a path graph to compare the search spaces directly. We conducted a micro-benchmark experiment using a path graph with \( m \) edges, programming an enumerator to explore the search space of both graph-agnostic and graph-aware approaches while varying \( m \). The results, shown in \reffig{exp-search-space}, confirm the significant difference in search space size between the two approaches}.
 
 
-Additionally, \revise{we compared the optimizer’s query optimization time. For our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, which is implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are written in Java, utilizing the VolcanoPlanner of Calcite with default rules. 
+Additionally, \revise{we compared the optimizer’s query optimization time. In our comparison, Apache Calcite, a generic relational optimization framework, served as the optimizer for the graph-agnostic method. In contrast, our \name, implemented based on Calcite, acts as the optimizer for the graph-aware method. Both \name and Calcite are in Java, utilizing the VolcanoPlanner of Calcite with default rules. 
 %Notably, we did not consider any heuristics for either Calcite or \name, providing a fair comparison and a clear demonstration of the reduced search space.
 The optimization time was evaluated using the queries in our experiment (details in \refsec{evaluation}).
 %If the optimization for a query does not finish within 10 minutes, the process is stopped early, and the time cost of such optimization is recorded as 10 minutes. 
@@ -406,7 +406,7 @@ For instance, when querying $\text{IC}_{5-1}$, the optimization time using \name
 %\reffig{exp-compare-search-space-and-time} indicate that with the increase of the number of joined relations, the search space of the both methods increase exponentially, and it is consistent with \reflem{lem:complexity-of-volcano} and \reflem{complexity-of-graph-aware}.
 %Specifically, the results also demonstrate that the search space of the graph-agnostic method increase exponentially faster than that of the graph-aware method, which corroborates the correctness of \refthm{compare-search-space}.
 
-
+\vspace*{-2mm}
 \subsection{Physical Implementation}
 \label{sec:physical-operators}
 
@@ -432,7 +432,7 @@ As shown in \reffig{graph-index}, given the three relations $\relation{\text{Per
 
 GRainDB introduces two kinds of indexes to the relational tables to efficiently process the join: the EV-index and the VE-index. The EV-index, shown in \reffig{graph-index}(a), is constructed by appending extra columns to the table $\relation{\text{Likes}}$. The column ``\text{pid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Person}}$, denoted as $\rowid(\tau_{p})$, where $\tau_{p} \in \relation{\text{Person}}$. Similarly, the column ``\text{mid\_rowid}'' stores the row ID of the corresponding tuple in the table $\relation{\text{Message}}$, denoted as $\rowid(\tau_{m})$, where $\tau_{m} \in \relation{\text{Message}}$. These row ids help quickly route a tuple $\tau_{l} \in \relation{\text{Likes}}$ to the joinable tuples $\tau_{p}$ and $\tau_{m}$ without additional operations like hash-table lookup or sorting.
 
-The VE-index in \reffig{graph-index}(b) is created on $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of tuples $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person.
+The VE-index in \reffig{graph-index}(b) is created on $\relation{\text{Person}}$ for efficiently computing its ``liked messages''. For each tuple $\tau_{p} \in \relation{\text{Person}}$, the VE-index records the row ids of $\tau_{l} \in \relation{\text{Likes}}$ and the corresponding $\tau_{m} \in \relation{\text{Message}}$ that are joinable with $\tau_{p}$. In the graph view, treating ``Person-[Likes]->Messages'' as an edge of a property graph, the VE-index maintains the adjacent edges and vertices of each person.
 %GRainDB organizes the VE-index using the Compressed-Sparse-Row (CSR) structure that is widely used for maintain adjacency lists in graph store.
 
 We can adopt GRainDB's approach to construct the graph indexes during the \rgmapping process. Given an edge relation $R_e$ and its associated vertex relations $R_{v_s}$ and $R_{v_t}$, the EV-index can be constructed on $R_e$ for each tuple $\tau_e \in R_e$ by including $\rowid(\lambda_e^s(\tau_e))$ and $\rowid(\lambda_e^t(\tau_e))$, which are the row ids of the corresponding tuples in $R_{v_s}$ and $R_{v_t}$, respectively. Meanwhile, the VE-index can be constructed on $R_{v_s}$ for each tuple $\tau_{v_s} \in R_{v_s}$ by including the row ids of all tuples $\tau_e \in R_e$ such that $\lambda_e^s(\tau_e) = \tau_{v_s}$, along with the row ids of the corresponding tuples $\tau_{v_t} \in R_{v_t}$ such that $\lambda_e^t(\tau_e) = \tau_{v_t}$.
