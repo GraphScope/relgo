@@ -21,12 +21,13 @@ method for solving the matching operator. We then delve into the converged workf
 \end{figure*}
 
 
-
+\vspace*{-2mm}
 \subsection{Graph-Agnostic Approach}
 \label{sec:relational-only}
 The graph-agnostic approach is straightforward: it applies the graph-agnostic transformation for the matching operator in an \spjm query into a series of relational operations (\modify{\reflem{spjm-to-spj}}), effectively converting the \spjm query into an \spj query. The resulting \spj query can then be optimized by any existing relational optimizer, producing an execution plan. As an improvement, if a graph index (\refsec{graph-index}) is available, certain hash-join operators in the execution plan can be replaced by the predefined-join operator, as discussed in GRainDB~\cite{graindb}. The main advantage of this solution is its easy integration with any existing relational database. However, it suffers from two significant drawbacks discussed in \refrem{graph-agnostic-vs-graph-aware}.
 %that have been discussed in \refrem{graph-agnostic-vs-graph-aware}.
 
+\vspace*{-2mm}
 \subsection{The Converged Approach}
 \label{sec:converged}
 As illustrated in \reffig{framework-workflow}, the core workflow of the \name framework consists of two components: \emph{graph optimization} and \emph{relational optimization}. The graph optimization is responsible for handling the graph component in an \spjm query, leveraging graph optimization techniques to determine the optimal decomposition tree of the matching operator. On the other hand, the relational optimization takes over to optimize the relational component in the query.
@@ -145,7 +146,7 @@ If the predicate is pushed, then the first expansion to $v_2$ in the generated p
 \fi
 \revise{Besides, \joinfuserule is a local optimization rule specifically designed for graph optimization. The effectiveness of these two rules is validated in \refsec{experiment-opt}. Our \name framework is designed to be generic, allowing different optimization rules to be easily integrated}. %In addition to these simple yet effective rules, we have also designed several other rules, such as \degreerule, which avoids the final join for aggregate operations, and \subtaskremoverule, which converts some WHERE conditions to anti-joins and semi-joins} {\color{red} Robin: an extra rule can be explained with sufficient details}.
 
-
+\vspace*{-2mm}
 \subsection{System Implementation}
 We engineered the frontend of \name in Java and built it upon Apache Calcite~\cite{calcite} 
 %, a widely used open-source framework for data management, 
