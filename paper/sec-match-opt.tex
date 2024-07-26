@@ -236,40 +236,54 @@ In this subsection, we analyze the gap between the two search spaces and conclud
 \begin{proof}
     We first compute the search space of the graph-agnostic transformation.
     Given $n$ vertex relations and $m$ edge relations, according to \reflem{spjm-to-spj}, the graph-agnostic approach must produce a sequence of joins among $n$ vertex relations and $m$ edge relations,
-    which is equivalent to searching for the optimal join order among $n + m$ relations. 
+    which is equivalent to searching for the optimal join order among $n + m$ relations. Then, the search space equals the number of possible join orders. 
     
-    Note that we focus on path graphs in this proof, i.e., the $n$ vertex relations and $m$ edge relations construct a path.
-    Then, let $c_p(k)$ denote the number of possible join order given these $n + m$ relations. We have:
+    Note that in this proof, we focus on path graphs, meaning the $n$ vertex relations and $m$ edge relations form a path.
+    Then, let $c_p(k)$ denote the number of possible join orders for a path graph of length $k$, which means that the path graph has $k$ edges, we have:
     \begin{equation*}
-        c_p(k) = 2\sum_{i=0}^{i=k-1}c_p(i)c_p(k-1-i),
+        c_p(k) = 2\sum_{i=0}^{k-1}c_p(i)c_p(k-1-i),
     \end{equation*}
     where $c_p(0) = 1$. Using the generating function, we obtain:
     \begin{equation*}
-        c_p(k) = \frac{2^k}{k+1}\binom{2k}{k} = \frac{2^{m + n - 1}}{m + n}\binom{2(m + n - 1)}{m + n - 1}
+        c_p(k) = \frac{2^k}{k+1}\binom{2k}{k}
     \end{equation*}
     Since the length of the path is $k = m + n - 1$, we have 
     \begin{equation*}
         c_p(m + n - 1) = \frac{2^{m + n - 1}}{m + n}\binom{2(m + n - 1)}{m + n - 1}
     \end{equation*}
     
-    Then, for the graph-aware transformation, let $s_p(k)$ denote the number of logical plans corresponding to a path graph with length $k$ for the graph-aware approach.
+    Then, for the graph-aware transformation, let $s_p(k)$ denote the number of logical plans corresponding to a path graph of length $k$.
     Then, we have:
     \begin{equation*}
-        s_p(k) = 2\sum_{i=1}^{i=k-1}s_p(i)s_p(k-i) + 2s_p(k-1),
+        \begin{split}
+            s_p(k) & = 2\sum_{i=1}^{i=k-1}s_p(i)s_p(k-i) + 2s_p(k-1) \\
+            & \leq 3\sum_{i=1}^{i=k-1}s_p(i)s_p(k-i), \text{when } k \geq 2\\
+        \end{split}
     \end{equation*}
-    where $s_p(0) = 1$.
+    where $s_p(0) = 1$ and $s_p(1) = 2$.
+    
+    Let
+    \begin{equation*}
+        s'_p(k) = 3\sum_{i=1}^{k-1}s'_p(i)s'_p(k-i), k \geq 2,
+    \end{equation*}
+    and by organizing the equation, we obtain
+    \begin{equation*}
+        s''_p(k + 1) = 3\sum_{i=0}^{k}s''_p(i)s''_p(k-i), k \geq 0,
+    \end{equation*}
+    which means that $s'_p(k)$ corresponds to $s''_p(k - 1)$.
+    Note that $s''_p(0) = s'_p(1) = 2$.
 
-    Let     
-    \begin{equation*}
-        c'_p(k) = c_p(k + 1) = 2\sum_{i=0}^{i=k}c_p(i)c_p(k-i).
-    \end{equation*}
-    In accordance with the principle of mathematical induction, it is easy to prove that
-    \begin{equation*}
-        s_p(k) \leq c'_p(k).
-    \end{equation*}
     Therefore, we have 
     \begin{equation*}
-        \frac{c_p(m+n-1)}{s_p(n)} \geq \frac{c_p(m+n-1)}{c'_p(n)} = \frac{c_p(m+n-1)}{c_p(n + 1)} \geq O(2^{m-2})
+        s''_p(k) = \frac{2 * 6^k}{k+1}\binom{2k}{k}, \text{ and } 
+        s_p(k) \leq \frac{2 * 6^{k - 1}}{k}\binom{2k - 2}{k - 1},
+    \end{equation*}
+
+    Please note that the length of a pattern graph consisting of $n$ vertex relations and $m$ edge relations is $m = n - 1$.
+
+    Therefore, using Stirling's formula, we have 
+    \begin{equation*}
+        \frac{c_p(m+n-1)}{s_p(m)} = \frac{c_p(2m)}{s_p(m)} \geq O((\frac{8}{3})^m)
     \end{equation*}
     Therefore, \label{thm:compare-search-space}
     The search space in graph-aware transformation can be exponentially smaller than that of the graph-agnostic transformation.
