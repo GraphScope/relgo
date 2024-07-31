@@ -39,7 +39,7 @@ width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
 
-plt.figure(figsize=(15, 6.5))
+plt.figure(figsize=(15, 6))
 
 plt.bar(
     xaxis,
@@ -101,10 +101,10 @@ plt.xlabel(r"Queries of IC$_*$", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 plt.ylim(top=100)
 
-plt.legend(
-    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.2), columnspacing=1
-)
+# plt.legend(
+#    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.2), columnspacing=1
+# )
 
 plt.tight_layout()
 # plt.show()
-plt.savefig("../paper/figures/exp/e2e_sf100.pdf", bbox_inches="tight")
+plt.savefig("../paper/figures/exp/e2e_sf100_untitled.pdf", bbox_inches="tight")

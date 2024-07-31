@@ -217,4 +217,4 @@ RelGo系统是用Java基于Apache Calcite实现的。首先，我们在Calcite�
   <img src="e2e_job_part2.png" alt="IMDB上的实验结果" title="IMDB上的实验结果" style="zoom:20%;" />
 </p>
 
-实验结果表明，RelGo生成的plan
+实验结果表明，在LDBC100数据集上，RelGo生成的查询计划相比DuckDB、GRainDB、Umbra和Kùzu生成的查询计划，平均执行时间分别快
