@@ -391,7 +391,8 @@ We consider this as our further work}.
 
 \subsubsection{Comparison with K\`uzu}
 Finally, \revise{we compared \name with the GDBMS, K\`uzu. 
-The experimental results show that \name is about \revise{77.4$\times$}, \revise{125.9$\times$} and \revise{188.7$\times$} faster on average than K\`uzu on $LDBC10$, $LDBC30$ and $LDBC100$, respectively, and 136.1$\times$ faster on the JOB benchmark.
+The experimental results show that \name is about \revise{77.4$\times$}, \revise{125.9$\times$} and \revise{188.7$\times$} faster on average than K\`uzu on $LDBC10$, $LDBC30$ and $LDBC100$, respectively.
+Besides, \name achieves an average speedup of 136.1$\times$ compared to K\`uzu on the JOB benchmark.
 Note that the results of K\`uzu are sometimes omitted (e.g., $\text{IC}_{3-1}$ on $LDBC100$) due to OOM errors.
 It's surprising that \name, when using DuckDB as the execution engine, can even outperform GDBMS like K\`uzu. Actually, K\`uzu is also developed based on DuckDB. We speculated that K\`uzu
 may not fully exploit graph-specific optimizations as \name does.}
