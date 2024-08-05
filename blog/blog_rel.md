@@ -215,6 +215,9 @@ RelGo系统是用Java基于Apache Calcite实现的。首先，我们在Calcite�
   <img src="e2e_sf100.png" alt="LDBC100上的实验结果" title="LDBC100上的实验结果" style="zoom:20%;" />
   <img src="e2e_job_part1.png" alt="IMDB上的实验结果" title="IMDB上的实验结果" style="zoom:20%;" />
   <img src="e2e_job_part2.png" alt="IMDB上的实验结果" title="IMDB上的实验结果" style="zoom:20%;" />
+  <img src="e2e_job_title.png" alt="IMDB上的实验结果" title="IMDB上的实验结果" style="zoom:20%;" />
 </p>
 
-实验结果表明，在LDBC100数据集上，RelGo生成的查询计划相比DuckDB、GRainDB、Umbra和Kùzu生成的查询计划，平均执行时间分别快
+实验结果表明，在LDBC100数据集上，RelGo生成的查询计划相比DuckDB、GRainDB、Umbra和Kùzu生成的查询计划，平均执行时间分别快21.9倍、5.4倍、49.9倍和188.7倍。这表明在优化图相关查询时，RelGo相比基准方法有相当明显的优势。
+
+JOB benchmark主要被用作在关系数据库上测试join相关优化的性能，其查询中不包含环结构。在JOB benchmark上，RelGo生成的查询计划相比DuckDB、GRainDB、Umbra和Kùzu生成的查询计划，平均执行时间分别快8.2倍、4.0倍、1.7倍和136.1倍。这进一步验证了RelGo能生成更高效的查询计划。
