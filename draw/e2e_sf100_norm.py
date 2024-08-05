@@ -54,7 +54,7 @@ plt.bar(
 plt.bar(
     xaxis + width,
     [b / a for a, b in zip(y_umbra, y_duckdb)],
-    color="black",
+    color="salmon",
     edgecolor="k",
     width=width,
     # hatch="/",
@@ -64,7 +64,7 @@ plt.bar(
 plt.bar(
     xaxis + width * 2,
     [b / a for a, b in zip(y_graindb, y_duckdb)],
-    color="salmon",
+    color="lightskyblue",
     edgecolor="k",
     width=width,
     # hatch="\\",
@@ -91,7 +91,7 @@ plt.bar(
     label="Kùzu",
 )
 
-plt.axhline(y=1, color="b", linestyle="--")
+plt.axhline(y=1, color="black", linestyle="--")
 plt.text(
     18.5,
     1.0,
