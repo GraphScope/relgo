@@ -34,7 +34,7 @@ with open("e2e_sf100.txt", "r") as f:
     y_kuzu = [float(x) for x in lines[3].split(",")]
     y_ours = [float(x) for x in lines[4].split(",")]
 
-total_width, n = 0.7, 5
+total_width, n = 0.7, 4
 width = total_width / n
 
 xaxis = xaxis - (total_width - width) / 2
@@ -54,7 +54,7 @@ plt.bar(
 plt.bar(
     xaxis + width,
     [b / a for a, b in zip(y_umbra, y_duckdb)],
-    color="black",
+    color="salmon",
     edgecolor="k",
     width=width,
     # hatch="/",
@@ -64,31 +64,42 @@ plt.bar(
 plt.bar(
     xaxis + width * 2,
     [b / a for a, b in zip(y_graindb, y_duckdb)],
-    color="salmon",
+    color="lightskyblue",
     edgecolor="k",
     width=width,
     # hatch="\\",
     label="GRainDB",
 )
 
-plt.bar(
-    xaxis + width * 3,
-    [b / a for a, b in zip(y_duckdb, y_duckdb)],
-    color="lightskyblue",
-    edgecolor="k",
-    width=width,
-    # hatch="\\",
-    label="DuckDB",
-)
+# plt.bar(
+#    xaxis + width * 3,
+#    [b / a for a, b in zip(y_duckdb, y_duckdb)],
+#    color="lightskyblue",
+#    edgecolor="k",
+#    width=width,
+# hatch="\\",
+#    label="DuckDB",
+# )
 
 plt.bar(
-    xaxis + width * 4,
+    xaxis + width * 3,
     [b / a if a != 0 else 0 for a, b in zip(y_kuzu, y_duckdb)],
     color="gold",
     edgecolor="k",
     width=width,
     # hatch="/",
     label="Kùzu",
+)
+
+plt.axhline(y=1, color="black", linestyle="--")
+plt.text(
+    18.5,
+    1.0,
+    "DuckDB",
+    horizontalalignment="center",
+    verticalalignment="center",
+    fontsize=28,
+    rotation=-90,
 )
 
 plt.xticks(xaxis_final, xlabel, fontsize=28, rotation=-60)
@@ -101,9 +112,9 @@ plt.xlabel(r"Queries of IC$_*$", fontsize=28)
 plt.ylabel("Speedup vs. DuckDB", fontsize=26)
 plt.ylim(top=100)
 
-plt.legend(
-    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.2), columnspacing=1
-)
+# plt.legend(
+#    loc="upper center", fontsize=24, ncol=5, bbox_to_anchor=(0.5, 1.2), columnspacing=1
+# )
 
 plt.tight_layout()
 # plt.show()
